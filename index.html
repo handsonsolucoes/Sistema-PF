@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Hands On — Consultoria Financeira</title>
-<title>Voar — Consultoria Financeira</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -460,7 +459,15 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
                 <button class="btn bp bsm" onclick="openLancModal()">+ Lançamento</button>
               </div>
             </div>
-            <table class="tbl"><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Conta</th><th style="text-align:right">Valor</th><th></th></tr></thead>
+            <table class="tbl"><thead><tr>
+              <th onclick="sortLanc('data')" style="cursor:pointer;user-select:none;" id="thData">Data <span id="shData"></span></th>
+              <th onclick="sortLanc('desc')" style="cursor:pointer;user-select:none;" id="thDesc">Descrição <span id="shDesc"></span></th>
+              <th onclick="sortLanc('cat')" style="cursor:pointer;user-select:none;" id="thCat">Categoria <span id="shCat"></span></th>
+              <th onclick="sortLanc('tipo')" style="cursor:pointer;user-select:none;" id="thTipo">Tipo <span id="shTipo"></span></th>
+              <th onclick="sortLanc('conta')" style="cursor:pointer;user-select:none;" id="thConta">Conta <span id="shConta"></span></th>
+              <th onclick="sortLanc('valor')" style="cursor:pointer;user-select:none;text-align:right;" id="thValor">Valor <span id="shValor"></span></th>
+              <th style="text-align:right;width:80px;"></th>
+            </tr></thead>
             <tbody id="lancTb"></tbody></table>
           </div>
         </div>
@@ -477,55 +484,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
     <div class="pg" id="page-gestao">
       <div class="ph"><div><div class="pt">Gestão Anual</div><div class="psub" id="gSub">Visão consolidada do ano</div></div></div>
 
-      <!-- CONTROLS -->
-      <div class="dash-controls" style="flex-wrap:wrap;gap:12px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span class="ctrl-label">Visualização</span>
-          <div class="toggle-pill" id="gOrcPill">
-            <button class="active" onclick="toggleGOrc(false)">Realizado</button>
-            <button onclick="toggleGOrc(true)">Orçado × Real</button>
-          </div>
-        </div>
-        <div class="ctrl-sep"></div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span class="ctrl-label">Análise</span>
-          <div class="toggle-pill" id="gPctPill">
-            <button class="active" onclick="toggleGPct(false)">R$</button>
-            <button onclick="toggleGPct(true)">% Receita</button>
-          </div>
-        </div>
-        <div class="ctrl-sep"></div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span class="ctrl-label">Tendência</span>
-          <div class="toggle-pill" id="gTrendPill">
-            <button class="active" onclick="toggleGTrend(false)">Off</button>
-            <button onclick="toggleGTrend(true)">On</button>
-          </div>
-        </div>
-        <div class="ctrl-sep"></div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span class="ctrl-label">Mês</span>
-          <select id="gFilterM" onchange="rGestao()" style="background:var(--s2);border:1px solid var(--brd);color:var(--tx);padding:5px 9px;border-radius:var(--rs);font-size:12px;outline:none;cursor:pointer;">
-            <option value="-1">Todos</option>
-          </select>
-        </div>
-        <div class="ctrl-sep"></div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span class="ctrl-label">Categoria</span>
-          <select id="gFilterCat" onchange="rGestao()" style="background:var(--s2);border:1px solid var(--brd);color:var(--tx);padding:5px 9px;border-radius:var(--rs);font-size:12px;outline:none;cursor:pointer;max-width:140px;">
-            <option value="">Todas</option>
-          </select>
-        </div>
-        <div class="ctrl-sep"></div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span class="ctrl-label">Ordenar</span>
-          <select id="gSortBy" onchange="rGestao()" style="background:var(--s2);border:1px solid var(--brd);color:var(--tx);padding:5px 9px;border-radius:var(--rs);font-size:12px;outline:none;cursor:pointer;">
-            <option value="valor">↓ Valor</option>
-            <option value="nome">A–Z Nome</option>
-            <option value="pct">% Impacto</option>
-          </select>
-        </div>
-      </div>
+
+
 
       <!-- KPI CARDS -->
       <div class="kpi-grid" id="gKpis"></div>
@@ -542,10 +502,17 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
         </div>
       </div>
 
-      <!-- ORC x REAL GRID -->
-      <div class="sec" id="gOrcSection" style="display:none;margin-bottom:14px;">
-        <div class="sh"><span class="st">Orçado × Realizado — Detalhe Mensal</span></div>
-        <div class="orc-month-row" id="gOrcGrid" style="margin-top:8px;"></div>
+      <!-- ORC x REAL TABLE —— always visible ——  -->
+      <div class="sec" id="gOrcSection" style="margin-bottom:14px;">
+        <div class="sh">
+          <span class="st">Orçado × Realizado — Detalhe Mensal</span>
+          <div class="toggle-pill" id="gOrcViewPill">
+            <button class="active" onclick="setGOrcView('brl')">R$</button>
+            <button onclick="setGOrcView('pct')">% da Receita</button>
+          </div>
+        </div>
+        <div id="gOrcTable" style="overflow-x:auto;margin-top:10px;"></div>
+
       </div>
 
       <!-- SINGLE TABLE WITH TOGGLE -->
@@ -557,6 +524,10 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
             <button onclick="setGTable('Entrada')">Receitas</button>
             <button onclick="setGTable('Rendimento')">Rendimentos</button>
           </div>
+            <div class="toggle-pill" id="gDetViewPill" style="margin-left:8px;">
+              <button class="active" onclick="setGDetView('brl')">R$</button>
+              <button onclick="setGDetView('pct')">% Receita</button>
+            </div>
         </div>
         <div id="gTabMain" style="overflow-x:auto;margin-top:10px;"></div>
       </div>
@@ -600,12 +571,12 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
           </div>
 
           <!-- Chart -->
-          <div class="dash-chart-box">
+          <div class="dash-chart-box" id="fChartBox">
             <div class="dash-chart-title" style="margin-bottom:16px;">
               <span>Independência Financeira</span>
               <span style="font-size:10px;color:var(--mu);">taxa: <span id="fRateLabel">8% a.a.</span></span>
             </div>
-            <canvas id="fChart" height="220"></canvas>
+            <canvas id="fChart" style="display:block;width:100%;"></canvas>
             <div style="display:flex;gap:18px;margin-top:12px;flex-wrap:wrap;">
               <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mu);"><span style="width:10px;height:10px;border-radius:2px;background:rgba(16,185,129,.7);display:inline-block;"></span>Patrimônio Projetado</div>
               <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mu);"><span style="width:10px;height:10px;border-radius:2px;background:rgba(59,130,246,.5);display:inline-block;"></span>Capital Investido</div>
@@ -615,7 +586,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
         </div>
 
         <!-- RIGHT: Sliders -->
-        <div class="dash-chart-box" style="display:flex;flex-direction:column;gap:18px;">
+        <div class="dash-chart-box" id="fParamsPanel" style="display:flex;flex-direction:column;gap:18px;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--brd);">
             <span style="font-family:var(--fh);font-size:13px;font-weight:700;color:var(--tx);">Parâmetros</span>
             <button onclick="openModal('fConfigModal')" style="display:flex;align-items:center;gap:5px;background:transparent;border:1px solid var(--brd2);border-radius:6px;color:var(--gold);font-size:11px;padding:4px 10px;cursor:pointer;transition:all .2s;">⚙ Configurações</button>
@@ -978,7 +949,31 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
     </div>
     <div class="div"></div>
     <p style="font-size:12px;color:var(--mu);margin-bottom:12px">Orçamento por categoria de saída:</p>
-    <div id="orcCatInputs" style="max-height:240px;overflow-y:auto;padding-right:5px"></div>
+      <!-- TOTALIZADOR -->
+      <div id="orcTotalBar" style="background:var(--s2);border:1px solid var(--brd);border-radius:var(--rs);padding:12px 16px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);font-weight:600;">Distribuição do Orçamento</span>
+          <span id="orcTotalPct" style="font-size:11px;font-weight:700;color:var(--mu);">0%</span>
+        </div>
+        <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:10px;">
+          <div id="orcTotalFill" style="height:100%;border-radius:3px;background:var(--green);transition:width .3s,background .3s;width:0%;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div style="text-align:center;padding:8px;background:var(--s1);border-radius:var(--rs);">
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--mu);margin-bottom:3px;">Disponível</div>
+            <div id="orcTotalDisp" style="font-family:var(--fh);font-size:14px;font-weight:700;color:var(--green);">R$ 0</div>
+          </div>
+          <div style="text-align:center;padding:8px;background:var(--s1);border-radius:var(--rs);">
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--mu);margin-bottom:3px;">Distribuído</div>
+            <div id="orcTotalDist" style="font-family:var(--fh);font-size:14px;font-weight:700;color:var(--gold);">R$ 0</div>
+          </div>
+          <div style="text-align:center;padding:8px;background:var(--s1);border-radius:var(--rs);">
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--mu);margin-bottom:3px;">Restante</div>
+            <div id="orcTotalRest" style="font-family:var(--fh);font-size:14px;font-weight:700;color:var(--tx);">R$ 0</div>
+          </div>
+        </div>
+      </div>
+      <div id="orcCatInputs"></div>
     <div class="ma"><button class="btn bgh" onclick="closeModal('mOrc')">Cancelar</button><button class="btn bp" onclick="saveOrcamento()">Salvar</button></div>
   </div>
 </div>
@@ -1427,10 +1422,15 @@ function rOrc(user) {
      +'<td style="font-size:12px">'+fmt(o)+'</td>'
      +'<td style="color:var(--red);font-size:12px">'+fmt(g)+'</td>'
      +'<td style="color:'+dCol+';font-weight:600;font-size:12px">'+fmt(disp2)+'</td>'
-     +'<td><div style="display:flex;align-items:center;gap:7px">'
-     +'<div class="orc-bar-wrap"><div class="orc-bar-red" style="width:'+pctGasto+'%"></div></div>'
-     +'<span style="font-size:11px;color:'+col+';min-width:36px">'+pctDisp.toFixed(0)+'%</span>'
-     +'</div></td>'
+     +'<td style="width:120px;padding:8px 14px;">'
+     +'<div style="position:relative;height:8px;border-radius:4px;background:var(--green);overflow:hidden;">'
+     +'<div style="position:absolute;right:0;top:0;bottom:0;width:'+pctGasto+'%;background:var(--red);border-radius:0 4px 4px 0;transition:width .3s;"></div>'
+     +'</div>'
+     +'<div style="display:flex;justify-content:space-between;margin-top:3px;">'
+     
+     +'<span style="font-size:9px;color:'+(pctGasto>90?'var(--red)':'var(--mu)')+'">'+pctGasto.toFixed(0)+'%</span>'
+     +'</div>'
+     +'</td>'
      +'</tr>';
   });
   tblEl.innerHTML = '<table class="tbl"><thead><tr><th>Categoria</th><th>Orçado</th><th>Gasto</th><th>Disponível</th><th style="min-width:180px">Status</th></tr></thead><tbody>'+rows+'</tbody></table>';
@@ -1451,7 +1451,15 @@ function rLanc(user) {
     tb.innerHTML = '<tr><td colspan="7"><div class="empty" style="padding:20px 0"><div class="ei">📂</div><p>Nenhum lançamento em '+MN[OM]+'</p></div></td></tr>';
     return;
   }
-  fl.sort(function(a,b){ return new Date(b.data) - new Date(a.data); });
+  fl.sort(function(a,b) {
+    var va, vb;
+    if (LANC_SORT_COL === 'data')  { va=new Date(a.data); vb=new Date(b.data); }
+    else if (LANC_SORT_COL === 'valor') { va=a.valor; vb=b.valor; }
+    else { va=(a[LANC_SORT_COL]||'').toLowerCase(); vb=(b[LANC_SORT_COL]||'').toLowerCase(); }
+    if (va < vb) return LANC_SORT_ASC ? -1 : 1;
+    if (va > vb) return LANC_SORT_ASC ? 1  : -1;
+    return 0;
+  });
   var rows = '';
   fl.forEach(function(l) {
     var isT = l.tipo==='Transferência';
@@ -1652,6 +1660,7 @@ function calcInv() {
   } else {
     var val = parseFloat(document.getElementById('orcInvVal').value)||0;
     document.getElementById('orcInvCalc').value = renda>0 ? ((val/renda*100).toFixed(1)+'%') : '—';
+  updateOrcTotal();
   }
 }
 function openOrcModal() {
@@ -1668,6 +1677,7 @@ function openOrcModal() {
   document.getElementById('invPctGrp').style.display = mode==='pct' ? 'flex' : 'none';
   document.getElementById('invValGrp').style.display = mode==='val' ? 'flex' : 'none';
   calcInv();
+  updateOrcTotal();
   var cats = user.catSaida||[];
   var catInputs = document.getElementById('orcCatInputs');
   if (catInputs) {
@@ -1675,9 +1685,10 @@ function openOrcModal() {
       var html = '';
       cats.forEach(function(c) {
         var val = orc.cats&&orc.cats[c] ? orc.cats[c] : 0;
-        html += '<div class="ir c2" style="margin-bottom:8px"><div class="ig"><label>'+getCatIcon(user,c)+' '+c+'</label><input type="number" id="orc_'+eKey(c)+'" step="0.01" value="'+val+'"></div></div>';
+        html += '<div class="ir c2" style="margin-bottom:8px"><div class="ig"><label>'+getCatIcon(user,c)+' '+c+'</label><input type="number" id="orc_'+eKey(c)+'" value="'+val+'" min="0" step="100" oninput="updateOrcTotal()" style="text-align:right;"></div><div class="ig" style="display:flex;align-items:flex-end;padding-bottom:9px;"><span id="orcb_'+eKey(c)+'" style="font-size:10px;color:var(--mu);"></span></div></div>';
       });
       catInputs.innerHTML = html;
+      updateOrcTotal();
     } else {
       catInputs.innerHTML = '<p style="font-size:13px;color:var(--mu)">Nenhuma categoria de saída cadastrada.</p>';
     }
@@ -1790,11 +1801,27 @@ function rGestao() {
     if (rendData.some(function(v){return v>0;})) {
       datasets.push({label:'Rendimentos',data:rendData,backgroundColor:'rgba(139,92,246,.7)',borderRadius:4});
     }
-    if (GA_ORC) {
-      var orcData = months.map(function(m){
-        return user.orcamento&&user.orcamento[m] ? user.orcamento[m].renda||0 : 0;
+    // Orçado: sempre como linha pontilhada
+    var orcData = months.map(function(m){
+      var o = user.orcamento&&user.orcamento[m];
+      if (!o) return null;
+      var inv = o.invMode==='pct' ? (o.renda||0)*(o.invPct||0)/100 : (o.invVal||0);
+      return Math.max(0, (o.renda||0) - inv);
+    });
+    if (orcData.some(function(v){return v!=null&&v>0;})) {
+      datasets.push({
+        label:'Renda Orçada',
+        data:orcData,
+        type:'line',
+        borderColor:'rgba(245,158,11,.85)',
+        backgroundColor:'transparent',
+        borderWidth:2,
+        borderDash:[6,4],
+        pointRadius:0,
+        tension:0.3,
+        fill:false,
+        order:0
       });
-      datasets.push({label:'Renda Orçada',data:orcData,backgroundColor:'rgba(245,158,11,.25)',borderColor:'rgba(245,158,11,.8)',borderWidth:2,borderRadius:4,type:'bar'});
     }
     gMainChart = new Chart(mc.getContext('2d'), {
       type:'bar',
@@ -1844,28 +1871,7 @@ function rGestao() {
     }
   }
 
-  // ── Orc × Real Month Grid ──
-  var orcSec = document.getElementById('gOrcSection');
-  if (orcSec) orcSec.style.display = GA_ORC ? '' : 'none';
-  var orcGrid = document.getElementById('gOrcGrid');
-  if (orcGrid && GA_ORC) {
-    var gridHtml = '';
-    months.forEach(function(m){
-      var realDesp = despArr[m];
-      var orc = user.orcamento&&user.orcamento[m] ? user.orcamento[m] : null;
-      var orcDesp = orc&&orc.cats ? Object.values(orc.cats).reduce(function(s,v){return s+(v||0);},0) : 0;
-      var orcRenda = orc ? orc.renda||0 : 0;
-      var pct = orcDesp>0 ? Math.min(100,realDesp/orcDesp*100) : 0;
-      var col = pct>90?'var(--red)':pct>65?'var(--warn)':'var(--green)';
-      gridHtml += '<div class="orc-m-cell">';
-      gridHtml += '<div class="orc-m-name">'+MS[m]+'</div>';
-      gridHtml += '<div class="orc-m-real" style="color:'+col+'">'+fmt(realDesp)+'</div>';
-      gridHtml += '<div class="orc-m-orc">orç: '+fmt(orcDesp)+'</div>';
-      gridHtml += '<div class="orc-m-bar"><div class="orc-m-fill" style="width:'+pct+'%;background:'+col+'"></div></div>';
-      gridHtml += '</div>';
-    });
-    orcGrid.innerHTML = gridHtml || '<div class="empty" style="padding:10px"><p>Configure orçamento para ver comparativo</p></div>';
-  }
+
 
   // ── Single Table ──
   function buildTableG(cats, tipo) {
@@ -1877,14 +1883,14 @@ function rGestao() {
     }).filter(function(d){return d.t>0;}).filter(function(d){ return !filterCat || d.cat===filterCat; }).sort(function(a,b){ if(sortBy==='nome') return a.cat.localeCompare(b.cat); if(sortBy==='pct') return b.t-a.t; return b.t-a.t; });
     if (!cd.length) return '<div class="empty"><p>Sem dados para o período selecionado</p></div>';
     var showMonths = filterM===-1 ? MN.map(function(_,i){return i;}) : [filterM];
-    var hdr = '<tr><th>Categoria</th>'+showMonths.map(function(m){return '<th>'+MS[m]+'</th>';}).join('')+'<th>Total</th>'+(GA_PCT&&refTotal>0?'<th>% do tipo</th>':'')+( GA_PCT&&totRec>0?'<th>% receita</th>':''  )+'</tr>';
+    var hdr = '<tr><th>Categoria</th>'+showMonths.map(function(m){return '<th>'+MS[m]+'</th>';}).join('')+'<th>Total</th>'+(G_DET_VIEW==='pct'&&refTotal>0?'<th>% do tipo</th>':'')+( G_DET_VIEW==='pct'&&totRec>0?'<th>% receita</th>':''  )+'</tr>';
     var bdy = cd.map(function(d){
       var cells = showMonths.map(function(m){
         var v2=d.v[m];
         return '<td style="font-size:12px">'+(v2?fmt(v2):'-')+'</td>';
       }).join('');
-      var pctTipo = GA_PCT&&refTotal>0 ? '<td style="font-size:11px;color:var(--teal3)">'+(d.t/refTotal*100).toFixed(1)+'%</td>' : '';
-      var pctRec = GA_PCT&&totRec>0 ? '<td style="font-size:11px;color:var(--mu)">'+(d.t/totRec*100).toFixed(1)+'%</td>' : '';
+      var pctTipo = G_DET_VIEW==='pct'&&refTotal>0 ? '<td style="font-size:11px;color:var(--teal3)">'+(d.t/refTotal*100).toFixed(1)+'%</td>' : '';
+      var pctRec = G_DET_VIEW==='pct'&&totRec>0 ? '<td style="font-size:11px;color:var(--mu)">'+(d.t/totRec*100).toFixed(1)+'%</td>' : '';
       var trendHtml='';
       if(GA_TREND&&showMonths.length>1){
         var vLast=d.v[showMonths[showMonths.length-1]];
@@ -1901,7 +1907,63 @@ function rGestao() {
   var catMap = {'Entrada':user.catEntrada||[],'Saída':user.catSaida||[],'Rendimento':user.catRendimento||[]};
   var gTab = document.getElementById('gTabMain');
   if (gTab) gTab.innerHTML = buildTableG(catMap[GA_TABLE]||[], GA_TABLE);
+
+  // ── Orçado × Realizado table (always visible)
+  var orcTbl = document.getElementById('gOrcTable');
+  if (orcTbl) {
+    var showMonths = filterM===-1 ? MN.map(function(_,i){return i;}) : [filterM];
+    // Only months that have either lancamentos OR orcamento data
+    var activeMths = showMonths.filter(function(m){
+      return recArr[m]>0 || despArr[m]>0 || (user.orcamento&&user.orcamento[m]);
+    });
+    if (!activeMths.length) {
+      orcTbl.innerHTML = '<div class="empty"><p>Sem dados de orçamento para exibir</p></div>';
+    } else {
+      var cats = user.catSaida||[];
+      // Header
+      var hdr = '<tr><th>Categoria</th>'
+        + activeMths.map(function(m){ return '<th style="text-align:center">'+MS[m]+'<br><span style="font-size:9px;color:var(--mu);font-weight:400;">Orc / Real</span></th>'; }).join('')
+        + '<th style="text-align:right">Total Real</th></tr>';
+      // Rows
+      var bdy = cats.map(function(cat){
+        var hasData = false;
+        var cells = activeMths.map(function(m){
+          var orc   = user.orcamento&&user.orcamento[m]&&user.orcamento[m].cats ? (user.orcamento[m].cats[cat]||0) : 0;
+          var real  = byMonth(user,m).filter(function(l){return l.tipo==='Saída'&&l.cat===cat;}).reduce(function(s,l){return s+l.valor;},0);
+          var recM  = recArr[m];
+          var ok    = real<=orc&&orc>0;
+          var over  = real>orc&&orc>0;
+          if (orc>0||real>0) hasData=true;
+          var orcStr, realStr;
+          if (G_ORC_VIEW==='pct') {
+            orcStr  = recM>0?(orc/recM*100).toFixed(1)+'%':'-';
+            realStr = recM>0?(real/recM*100).toFixed(1)+'%':'-';
+          } else {
+            orcStr  = orc>0  ? fmt(orc)  : '-';
+            realStr = real>0 ? fmt(real) : '-';
+          }
+          return '<td style="text-align:center;padding:7px 10px;">'
+            +'<div style="font-size:11px;color:var(--mu);">'+orcStr+'</div>'
+            +'<div style="font-size:12px;font-weight:600;color:'+(over?'var(--red)':ok?'var(--green)':'var(--tx)')+'">'+realStr+'</div>'
+            +'</td>';
+        }).join('');
+        if (!hasData) return '';
+        var totReal = activeMths.reduce(function(s,m){
+          return s+byMonth(user,m).filter(function(l){return l.tipo==='Saída'&&l.cat===cat;}).reduce(function(s2,l){return s2+l.valor;},0);
+        },0);
+        var totStr = G_ORC_VIEW==='pct'
+          ? (totRec>0?(totReal/totRec*100).toFixed(1)+'%':'-')
+          : (totReal>0?fmt(totReal):'-');
+        return '<tr><td><span style="font-size:13px">'+getCatIcon(user,cat)+'</span> <strong>'+cat+'</strong></td>'+cells+'<td style="text-align:right;font-weight:700;">'+totStr+'</td></tr>';
+      }).filter(Boolean).join('');
+      orcTbl.innerHTML = bdy
+        ? '<table class="tbl"><thead>'+hdr+'</thead><tbody>'+bdy+'</tbody></table>'
+        : '<div class="empty"><p>Sem categorias com dados para exibir</p></div>';
+    }
+  }
 }
+
+
 
 
 // ══════════════════════════════════════════════════════
@@ -2305,7 +2367,19 @@ function rFuturo() {
   // ── Meses da projeção
   // O primeiro ponto = mês 1 (próximo mês)
   // Cada step = 12 meses (exibição anual)
-  var mesesAteRet = (retAge - currentAge) * 12;  // âncora: inteiros
+  // ── mesesAteRet: meses exatos de HOJE até o mês do aniversário no ano de retiro
+  // Isso garante que t=mesesAteRet no chart caia no mês correto da aposentadoria
+  var mesesAteRet;
+  if (birthDate && !isNaN(birthDate)) {
+    var retireDate = new Date(birthDate);
+    retireDate.setFullYear(birthDate.getFullYear() + retAge);
+    // Meses inteiros de hoje até o mês de aposentadoria
+    mesesAteRet = (retireDate.getFullYear() - now.getFullYear()) * 12
+                + (retireDate.getMonth()    - now.getMonth());
+    if (mesesAteRet < 1) mesesAteRet = 1;
+  } else {
+    mesesAteRet = (retAge - currentAge) * 12;
+  }
   var maxMeses    = F_PERIOD > 0
     ? F_PERIOD * 12
     : (100 - currentAge) * 12;
@@ -2366,18 +2440,18 @@ function rFuturo() {
       labels.push('');
     }
 
-    // ── AZUL: aportes acumulados sem rendimento
-    capitalInv.push(Math.round(t <= mesesAteRet
-      ? V0 + invMensal * t
-      : V0 + invMensal * mesesAteRet));
+    // ── AZUL: capital investido
+    // Acumulação: cresce com aportes; Retirada: decresce por rendaLiq/mês
+    if (t <= mesesAteRet) {
+      capitalInv.push(Math.round(V0 + invMensal * t));
+    } else {
+      var mRetiro = t - mesesAteRet;
+      var capRet  = V0 + invMensal * mesesAteRet;
+      capitalInv.push(Math.round(Math.max(0, capRet - rendaLiq * mRetiro)));
+    }
 
-    // ── VERDE e LARANJA: cache do fator composto para este mês
+    // ── Cache do fator composto para Verde / Laranja
     var fnT = (t <= mesesAteRet) ? Math.pow(1+r1, t) : 0;
-
-    // ── AZUL: aportes acumulados sem rendimento
-    capitalInv.push(Math.round(t <= mesesAteRet
-      ? V0 + invMensal * t
-      : V0 + invMensal * mesesAteRet));
 
     // ── VERDE: projetado com rendimento composto
     // Acumulação: FV = V0*(1+r1)^t + invMensal*((1+r1)^t - 1)/r1
@@ -2560,6 +2634,7 @@ function rFuturo() {
       }
     }
   });
+  setTimeout(syncFuturoChartHeight, 50);
 }
 function fmtM(v) {
   if (!v && v !== 0) return 'R$ 0';
@@ -2859,6 +2934,115 @@ function makeEditable(span, sliderId, tipo) {
   });
 }
 
+
+// ══════════════════════════════════════════════════════
+// SORT LANÇAMENTOS
+// ══════════════════════════════════════════════════════
+var LANC_SORT_COL = 'data';
+var LANC_SORT_ASC = false;
+
+function sortLanc(col) {
+  if (LANC_SORT_COL === col) {
+    LANC_SORT_ASC = !LANC_SORT_ASC;
+  } else {
+    LANC_SORT_COL = col;
+    LANC_SORT_ASC = col !== 'data'; // data defaults desc, others asc
+  }
+  // Update sort indicators
+  ['data','desc','cat','tipo','conta','valor'].forEach(function(c) {
+    var el = document.getElementById('sh' + c.charAt(0).toUpperCase() + c.slice(1));
+    if (el) el.textContent = '';
+  });
+  var activeEl = document.getElementById('sh' + col.charAt(0).toUpperCase() + col.slice(1));
+  if (activeEl) activeEl.textContent = LANC_SORT_ASC ? ' ↑' : ' ↓';
+  rLanc();
+}
+
+// ══════════════════════════════════════════════════════
+// ORÇAMENTO TOTALIZADOR
+// ══════════════════════════════════════════════════════
+function updateOrcTotal() {
+  var rendaEl  = document.getElementById('orcRenda');
+  var renda    = rendaEl ? parseFloat(rendaEl.value)||0 : 0;
+  var invEl    = document.getElementById('orcCalcInv');
+  var invVal   = invEl   ? parseFloat(invEl.textContent.replace(/[^0-9,.]/g,'').replace(',','.'))||0 : 0;
+
+  // Try to get invest value from calcInv output
+  var invSpan  = document.getElementById('orcCalcInv');
+  // Fallback: read from mode
+  var mode = (document.querySelector('input[name="invmode"]:checked')||{}).value || 'pct';
+  var inv;
+  if (mode === 'pct') {
+    var pct = parseFloat((document.getElementById('orcInvPct')||{}).value)||0;
+    inv = renda * pct / 100;
+  } else {
+    inv = parseFloat((document.getElementById('orcInvVal')||{}).value)||0;
+  }
+
+  var disponivel = Math.max(0, renda - inv);
+
+  // Sum all category inputs
+  var distribuido = 0;
+  document.querySelectorAll('[id^="orc_"]').forEach(function(el) {
+    distribuido += parseFloat(el.value)||0;
+  });
+
+  var restante = disponivel - distribuido;
+  var pct      = disponivel > 0 ? Math.min(100, distribuido/disponivel*100) : 0;
+
+  var dispEl  = document.getElementById('orcTotalDisp');
+  var distEl  = document.getElementById('orcTotalDist');
+  var restEl  = document.getElementById('orcTotalRest');
+  var fillEl  = document.getElementById('orcTotalFill');
+  var pctEl   = document.getElementById('orcTotalPct');
+
+  if (!dispEl) return;
+
+  var fmtBR = function(v) { return 'R$ ' + Math.round(Math.abs(v)).toLocaleString('pt-BR'); };
+
+  dispEl.textContent = fmtBR(disponivel);
+  distEl.textContent = fmtBR(distribuido);
+  restEl.textContent = (restante < 0 ? '-' : '') + fmtBR(restante);
+  restEl.style.color = restante < 0 ? 'var(--red)' : restante === 0 ? 'var(--green)' : 'var(--tx)';
+
+  fillEl.style.width = pct + '%';
+  fillEl.style.background = pct > 100 ? 'var(--red)' : pct > 90 ? 'var(--warn)' : 'var(--green)';
+  pctEl.textContent  = pct.toFixed(0) + '%';
+  pctEl.style.color  = pct > 100 ? 'var(--red)' : pct > 90 ? 'var(--warn)' : 'var(--green)';
+}
+
+// ══════════════════════════════════════════════════════
+// FUTURO CHART HEIGHT — match params panel
+// ══════════════════════════════════════════════════════
+function syncFuturoChartHeight() {
+  var panel = document.getElementById('fParamsPanel');
+  var box   = document.getElementById('fChartBox');
+  if (!panel || !box) return;
+  // Match chart box total height to params panel
+  box.style.height = panel.offsetHeight + 'px';
+}
+
+
+// ══════════════════════════════════════════════════════
+// GESTÃO ANUAL — Orçado × Realizado table view
+// ══════════════════════════════════════════════════════
+var G_ORC_VIEW = 'brl';
+var G_DET_VIEW = 'brl';
+function setGDetView(v) {
+  G_DET_VIEW = v;
+  document.querySelectorAll('#gDetViewPill button').forEach(function(b,idx){ b.classList.toggle('active', idx===(v==='brl'?0:1)); });
+  rGestao();
+}
+
+
+function setGOrcView(v) {
+  G_ORC_VIEW = v;
+  var btns = document.querySelectorAll('#gOrcViewPill button');
+  if (btns[0]) btns[0].classList.toggle('active', v==='brl');
+  if (btns[1]) btns[1].classList.toggle('active', v==='pct');
+  rGestao();
+}
+
 function toggleTheme() {
   var html = document.documentElement;
   var isDark = html.getAttribute('data-theme') === 'dark';
@@ -2886,6 +3070,8 @@ function applyTheme() {
   if (dEl) dEl.classList.toggle('active', saved==='dark');
   if (lEl) lEl.classList.toggle('active', saved==='light');
 }
+
+window.addEventListener('resize', syncFuturoChartHeight);
 
 function updateSbUser() {
   if (!CU) return;
