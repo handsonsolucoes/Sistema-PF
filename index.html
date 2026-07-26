@@ -379,6 +379,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
 .icon-picker-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;max-height:180px;overflow-y:auto;margin:10px 0;}
 .icon-picker-grid span{font-size:20px;cursor:pointer;text-align:center;padding:5px;border-radius:6px;transition:background .12s;}
 .icon-picker-grid span:hover{background:var(--s2);}
+/* ══ EDIÇÃO INLINE ══ */
+.fi-val-wrap{position:relative;display:inline-flex;align-items:center;}
 </style>
 </head>
 <body>
@@ -613,100 +615,117 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
         </div>
 
         <!-- RIGHT: Sliders -->
-        <div class="dash-chart-box" style="display:flex;flex-direction:column;gap:20px;">
-          <div style="font-family:var(--fh);font-size:13px;font-weight:600;color:var(--teal3);letter-spacing:.5px;padding-bottom:10px;border-bottom:1px solid var(--brd);">Parâmetros</div>
-
-          <div class="f-slider-group">
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-              <span class="ctrl-label">Idade atual</span>
-              <span id="fAgeVal" style="font-size:13px;font-weight:700;color:var(--tx);">30</span>
-            </div>
-            <input type="range" id="fAge" min="18" max="70" value="30" oninput="rFuturo()" class="f-slider">
+        <div class="dash-chart-box" style="display:flex;flex-direction:column;gap:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--brd);">
+            <span style="font-family:var(--fh);font-size:13px;font-weight:700;color:var(--tx);">Parâmetros</span>
+            <button onclick="openModal('fConfigModal')" style="display:flex;align-items:center;gap:5px;background:transparent;border:1px solid var(--brd2);border-radius:6px;color:var(--gold);font-size:11px;padding:4px 10px;cursor:pointer;transition:all .2s;">⚙ Configurações</button>
           </div>
 
+          <!-- Aposentadoria -->
           <div class="f-slider-group">
             <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
               <span class="ctrl-label">Aposentadoria</span>
-              <span id="fRetVal" style="font-size:13px;font-weight:700;color:var(--tx);">65 anos</span>
+              <span id="fRetVal" title="Duplo clique para editar" ondblclick="makeEditable(this,'fRet','age')" style="font-size:13px;font-weight:700;color:var(--tx);cursor:pointer;border-bottom:1px dashed var(--tx);padding-bottom:1px;transition:opacity .15s;" onmouseenter="this.style.opacity='.7'" onmouseleave="this.style.opacity='1'">65 anos</span>
             </div>
             <input type="range" id="fRet" min="45" max="80" value="65" oninput="rFuturo()" class="f-slider">
           </div>
 
+          <!-- Renda desejada -->
           <div class="f-slider-group">
             <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
               <span class="ctrl-label">Renda desejada / mês</span>
-              <span id="fRendaVal" style="font-size:13px;font-weight:700;color:#10b981;" id="fRendaVal">R$ 8.200</span>
+              <span id="fRendaVal" title="Duplo clique para editar" ondblclick="makeEditable(this,'fRenda','money')" style="font-size:13px;font-weight:700;color:var(--green);cursor:pointer;border-bottom:1px dashed var(--green);padding-bottom:1px;transition:opacity .15s;" onmouseenter="this.style.opacity='.7'" onmouseleave="this.style.opacity='1'">R$ 8.200</span>
             </div>
             <input type="range" id="fRenda" min="1000" max="30000" step="100" value="8200" oninput="rFuturo()" class="f-slider">
           </div>
 
+          <!-- Outras fontes -->
           <div class="f-slider-group">
             <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
               <span class="ctrl-label">Outras fontes / mês</span>
-              <span id="fOutrasVal" style="font-size:13px;font-weight:700;color:var(--mu);">R$ 0</span>
+              <span id="fOutrasVal" title="Duplo clique para editar" ondblclick="makeEditable(this,'fOutras','money')" style="font-size:13px;font-weight:700;color:var(--mu);cursor:pointer;border-bottom:1px dashed var(--mu);padding-bottom:1px;transition:opacity .15s;" onmouseenter="this.style.opacity='.7'" onmouseleave="this.style.opacity='1'">R$ 0</span>
             </div>
             <input type="range" id="fOutras" min="0" max="10000" step="100" value="0" oninput="rFuturo()" class="f-slider">
           </div>
 
+          <!-- Investimento mensal -->
           <div class="f-slider-group">
             <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
               <span class="ctrl-label">Investimento mensal</span>
-              <span id="fInvVal" style="font-size:13px;font-weight:700;color:var(--teal3);">R$ 1.000</span>
+              <span id="fInvVal" title="Duplo clique para editar" ondblclick="makeEditable(this,'fInv','money')" style="font-size:13px;font-weight:700;color:var(--gold);cursor:pointer;border-bottom:1px dashed var(--gold);padding-bottom:1px;transition:opacity .15s;" onmouseenter="this.style.opacity='.7'" onmouseleave="this.style.opacity='1'">R$ 1.000</span>
             </div>
-            <input type="range" id="fInv" min="100" max="20000" step="50" value="1000" oninput="rFuturo()" class="f-slider">
+            <input type="range" id="fInv" min="0" max="20000" step="50" value="1000" oninput="rFuturo()" class="f-slider">
           </div>
 
-          <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid var(--brd);">
-            <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);">Taxas de Retorno</span>
-            <button onclick="openModal('fRateModal')" style="background:transparent;border:1px solid var(--brd);border-radius:6px;color:var(--teal3);font-size:11px;padding:3px 8px;cursor:pointer;">⚙ Configurar</button>
-          </div>
-          <div class="f-slider-group">
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-              <span class="ctrl-label">Retorno — Acumulação</span>
-              <span id="fRateAcumVal" style="font-size:13px;font-weight:700;color:var(--warn);">5,5% a.a.</span>
+          <!-- Resumo taxas (read-only, abre modal) -->
+          <div style="background:var(--s2);border:1px solid var(--brd);border-radius:var(--rs);padding:12px 14px;">
+            <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:8px;font-weight:600;">Configurações avançadas</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <div style="font-size:10px;color:var(--mu);margin-bottom:2px;">Início</div>
+                <div id="fAgeDisplay" style="font-size:12px;font-weight:700;color:var(--tx);">—</div>
+              </div>
+              <div>
+                <div style="font-size:10px;color:var(--mu);margin-bottom:2px;">Patrimônio inicial</div>
+                <div id="fV0Display" style="font-size:12px;font-weight:700;color:var(--gold);">R$ 0</div>
+              </div>
+              <div>
+                <div style="font-size:10px;color:var(--mu);margin-bottom:2px;">Taxa acumulação</div>
+                <div id="fRateAcumVal" style="font-size:12px;font-weight:700;color:var(--warn);">5,5% a.a.</div>
+              </div>
+              <div>
+                <div style="font-size:10px;color:var(--mu);margin-bottom:2px;">Taxa retirada</div>
+                <div id="fRateRetVal" style="font-size:12px;font-weight:700;color:var(--purp);">3,5% a.a.</div>
+              </div>
             </div>
-            <input type="range" id="fRateAcum" min="1" max="20" step="0.5" value="5.5" oninput="rFuturo()" class="f-slider">
-            <div style="font-size:9px;color:var(--mu);margin-top:3px;">Taxa real na fase de acumulação</div>
-          </div>
-          <div class="f-slider-group">
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-              <span class="ctrl-label">Retorno — Retirada</span>
-              <span id="fRateRetVal" style="font-size:13px;font-weight:700;color:#8b5cf6;">3,5% a.a.</span>
-            </div>
-            <input type="range" id="fRateRet" min="0.5" max="15" step="0.5" value="3.5" oninput="rFuturo()" class="f-slider">
-            <div style="font-size:9px;color:var(--mu);margin-top:3px;">Taxa real após aposentadoria</div>
           </div>
 
-          <button onclick="rFuturo()" style="margin-top:4px;padding:10px;background:linear-gradient(135deg,#1c3a5e,#c9a84c);border:none;border-radius:var(--rs);color:#fff;font-family:var(--fb);font-weight:600;font-size:13px;cursor:pointer;letter-spacing:.5px;">Recalcular</button>
-          <button id="fSaveMeta" onclick="saveFMeta()" style="padding:8px;background:transparent;border:1px solid var(--brd);border-radius:var(--rs);color:var(--teal3);font-family:var(--fb);font-size:12px;cursor:pointer;">Salvar meta</button>
+          <button id="fSaveMeta" onclick="saveFMeta()" style="padding:10px;background:linear-gradient(135deg,var(--navy),var(--gold));border:none;border-radius:var(--rs);color:#fff;font-family:var(--fb);font-weight:600;font-size:13px;cursor:pointer;box-shadow:0 2px 10px var(--gold-glow);">Salvar configuração</button>
         </div>
       </div>
 
-      <!-- RATE SETTINGS MODAL -->
-      <div id="fRateModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
-        <div style="background:var(--s1);border:1px solid var(--brd2);border-radius:16px;padding:32px 36px;width:460px;max-width:90vw;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.6);">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
-            <span style="font-family:var(--fh);font-size:15px;font-weight:600;color:var(--tx);">Configurações da simulação</span>
-            <button onclick="closeModal('fRateModal')" style="background:transparent;border:none;color:var(--mu);font-size:20px;cursor:pointer;line-height:1;">×</button>
+      <!-- CONFIGURAÇÕES MODAL -->
+      <div id="fConfigModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
+        <div style="background:var(--s1);border:1px solid var(--brd2);border-radius:16px;padding:32px 36px;width:480px;max-width:92vw;box-shadow:var(--sh-lg);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;">
+            <span style="font-family:var(--fh);font-size:15px;font-weight:700;color:var(--tx);">Configurações da simulação</span>
+            <button onclick="closeModal('fConfigModal')" style="background:transparent;border:none;color:var(--mu);font-size:22px;cursor:pointer;line-height:1;">×</button>
           </div>
-          <div style="margin-bottom:20px;">
-            <label style="display:block;font-size:13px;color:var(--tx);margin-bottom:8px;">Taxa de juros real anual na fase de acumulação</label>
-            <input type="number" id="fRateAcumInp" step="0.1" min="0.5" max="20" value="5.5" style="width:100%;padding:12px 14px;background:var(--s2);border:1px solid var(--brd2);border-radius:8px;color:var(--tx);font-size:14px;outline:none;box-sizing:border-box;" placeholder="5,5%">
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+            <div>
+              <label style="display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:7px;font-weight:600;">Data de nascimento</label>
+              <input type="date" id="fBirth" style="width:100%;padding:10px 13px;background:var(--s2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:13px;outline:none;font-family:var(--fb);" onchange="rFuturo()">
+            </div>
+            <div>
+              <label style="display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:7px;font-weight:600;">Patrimônio inicial (R$)</label>
+              <input type="number" id="fValInicial" min="0" step="1000" value="0" style="width:100%;padding:10px 13px;background:var(--s2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:13px;outline:none;font-family:var(--fb);" onchange="rFuturo()">
+            </div>
           </div>
-          <div style="margin-bottom:24px;">
-            <label style="display:block;font-size:13px;color:var(--tx);margin-bottom:8px;">Taxa de juros real anual após aposentadoria</label>
-            <input type="number" id="fRateRetInp" step="0.1" min="0.5" max="15" value="3.5" style="width:100%;padding:12px 14px;background:var(--s2);border:1px solid var(--brd2);border-radius:8px;color:var(--tx);font-size:14px;outline:none;box-sizing:border-box;" placeholder="3,5%">
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;">
+            <div>
+              <label style="display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:7px;font-weight:600;">Taxa real — Acumulação (% a.a.)</label>
+              <input type="number" id="fRateAcumInp" step="0.1" min="0.5" max="20" value="5.5" style="width:100%;padding:10px 13px;background:var(--s2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:13px;outline:none;font-family:var(--fb);">
+            </div>
+            <div>
+              <label style="display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:7px;font-weight:600;">Taxa real — Retirada (% a.a.)</label>
+              <input type="number" id="fRateRetInp" step="0.1" min="0.5" max="15" value="3.5" style="width:100%;padding:10px 13px;background:var(--s2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:13px;outline:none;font-family:var(--fb);">
+            </div>
           </div>
-          <div style="background:rgba(29,126,168,.08);border:1px solid rgba(29,126,168,.2);border-radius:8px;padding:12px 14px;margin-bottom:24px;display:flex;gap:10px;align-items:flex-start;">
-            <span style="color:var(--teal3);font-size:14px;flex-shrink:0;">ⓘ</span>
-            <span style="font-size:11px;color:var(--mu);line-height:1.5;">As taxas de juros padrão estão de acordo com a visão conservadora do mercado. Alterar os valores pode gerar uma simulação que não condiz com a realidade. Consulte um especialista para ajustar com segurança.</span>
+
+          <div style="background:var(--navy-dim);border:1px solid rgba(28,58,94,.3);border-radius:8px;padding:12px 14px;margin-bottom:24px;display:flex;gap:10px;align-items:flex-start;">
+            <span style="color:var(--gold);font-size:14px;flex-shrink:0;">ⓘ</span>
+            <span style="font-size:11px;color:var(--mu);line-height:1.6;">As taxas padrão (5,5% acumulação / 3,5% retirada) seguem a visão conservadora do mercado brasileiro. Altere com cautela e consulte um especialista.</span>
           </div>
+
           <div style="display:flex;justify-content:space-between;gap:12px;">
-            <button onclick="resetFRates()" style="padding:11px 18px;background:transparent;border:1px solid var(--brd2);border-radius:8px;color:var(--mu);font-size:13px;cursor:pointer;flex:1;">Voltar às taxas padrão</button>
-            <button onclick="saveFRates()" style="padding:11px 18px;background:linear-gradient(135deg,#1c3a5e,#c9a84c);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;flex:1;">Salvar configuração</button>
+            <button onclick="resetFConfig()" style="padding:11px 18px;background:transparent;border:1.5px solid var(--brd2);border-radius:8px;color:var(--mu);font-size:13px;cursor:pointer;flex:1;font-family:var(--fb);">Voltar ao padrão</button>
+            <button onclick="saveFConfig()" style="padding:11px 18px;background:linear-gradient(135deg,var(--navy),var(--gold));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;flex:1;font-family:var(--fb);">Salvar configuração</button>
           </div>
         </div>
       </div>
+
     </div>
 
     <!-- ══ ALOCAÇÃO ══ -->
@@ -1213,6 +1232,7 @@ function initApp() {
   document.getElementById('adminNav').style.display = CU.role==='admin' ? 'block' : 'none';
   rCad();
   updateSbUser();
+  initFuturoDefaults();
   rCadPatrim();
   rPatrimAloc();
   rOrcFull();
@@ -1234,7 +1254,7 @@ function sp(id) {
     if ((n.getAttribute('onclick')||'').indexOf("'"+id+"'") >= 0) n.classList.add('active');
   });
   if (id==='gestao') rGestao();
-  if (id==='futuro') rFuturo();
+  if (id==='futuro') { initFuturoDefaults(); rFuturo(); }
   if (id==='alocacao') rAloc();
   if (id==='cadastro') rCad();
   if (id==='clientes') rCli();
@@ -2166,231 +2186,390 @@ function setFPeriod(v) {
   rFuturo();
 }
 
-function resetFRates() {
+// ══════════════════════════════════════════════════════
+// FUTURO — v2: data nascimento + valor inicial + lógica corrigida
+// ══════════════════════════════════════════════════════
+var fChart = null;
+var F_PERIOD = 0;
+
+function setFPeriod(v) {
+  F_PERIOD = v;
+  document.querySelectorAll('#fPeriodPill button').forEach(function(b,i){
+    b.classList.toggle('active', [5,10,20,0][i]===v);
+  });
+  rFuturo();
+}
+
+function resetFConfig() {
+  var today = new Date();
+  var y30 = new Date(today.getFullYear()-30, today.getMonth(), today.getDate());
+  document.getElementById('fBirth').value = y30.toISOString().split('T')[0];
+  document.getElementById('fValInicial').value = 0;
   document.getElementById('fRateAcumInp').value = 5.5;
   document.getElementById('fRateRetInp').value  = 3.5;
 }
 
-function saveFRates() {
-  var ra = parseFloat(document.getElementById('fRateAcumInp').value)||5.5;
-  var rr = parseFloat(document.getElementById('fRateRetInp').value)||3.5;
-  document.getElementById('fRateAcum').value = Math.min(20,Math.max(1,ra));
-  document.getElementById('fRateRet').value  = Math.min(15,Math.max(0.5,rr));
-  closeModal('fRateModal');
+function saveFConfig() {
+  closeModal('fConfigModal');
   rFuturo();
 }
+
+// legacy aliases so any remaining refs work
+function resetFRates() { resetFConfig(); }
+function saveFRates()  { saveFConfig(); }
 
 function saveFMeta() {
   var user = getUser(CU.id);
   user.futuroMeta = {
-    age:    parseInt(document.getElementById('fAge').value),
+    birth:  document.getElementById('fBirth').value,
+    valIni: parseFloat(document.getElementById('fValInicial').value)||0,
     ret:    parseInt(document.getElementById('fRet').value),
     renda:  parseInt(document.getElementById('fRenda').value),
     outras: parseInt(document.getElementById('fOutras').value),
     inv:    parseInt(document.getElementById('fInv').value),
-    rateAcum: parseFloat(document.getElementById('fRateAcum').value),
-    rateRet:  parseFloat(document.getElementById('fRateRet').value)
+    rateAcum: parseFloat(document.getElementById('fRateAcumInp').value)||5.5,
+    rateRet:  parseFloat(document.getElementById('fRateRetInp').value)||3.5
   };
-  var db = getDB();
-  var idx = db.users.findIndex(function(u){return u.id===CU.id;});
-  if (idx>=0) { db.users[idx]=user; saveDB(db); }
-  var btn = document.getElementById('fSaveMeta');
-  if (btn) { btn.textContent='✓ Salvo!'; setTimeout(function(){ btn.textContent='Salvar meta'; },2000); }
+  var db = getDB(); var idx = db.users.findIndex(function(u){return u.id===CU.id;});
+  if (idx>=0){ db.users[idx]=user; saveDB(db); }
+  var btn=document.getElementById('fSaveMeta');
+  if(btn){btn.textContent='✓ Salvo!';setTimeout(function(){btn.textContent='Salvar configuração';},2000);}
 }
 
 function rFuturo() {
   var user = getUser(CU.id);
-  var meta = user.futuroMeta||{};
-  var ageEl=document.getElementById('fAge'), retEl=document.getElementById('fRet'),
-      rendaEl=document.getElementById('fRenda'), outrasEl=document.getElementById('fOutras'),
-      invEl=document.getElementById('fInv'), rateAcumEl=document.getElementById('fRateAcum'),
-      rateRetEl=document.getElementById('fRateRet');
-  if (!ageEl) return;
+  var meta = user.futuroMeta || {};
 
-  // Restore saved meta on first load
-  if (meta.age && ageEl.dataset.loaded!=='1') {
-    ageEl.value=meta.age; retEl.value=meta.ret; rendaEl.value=meta.renda;
-    outrasEl.value=meta.outras; invEl.value=meta.inv;
-    if (meta.rateAcum) rateAcumEl.value=meta.rateAcum;
-    if (meta.rateRet)  rateRetEl.value=meta.rateRet;
-    ageEl.dataset.loaded='1';
+  var retEl    = document.getElementById('fRet');
+  var rendaEl  = document.getElementById('fRenda');
+  var outrasEl = document.getElementById('fOutras');
+  var invEl    = document.getElementById('fInv');
+  var birthEl  = document.getElementById('fBirth');
+  var valIniEl = document.getElementById('fValInicial');
+  var acumEl   = document.getElementById('fRateAcumInp');
+  var retREl   = document.getElementById('fRateRetInp');
+  if (!retEl) return;
+
+  // Restaura meta salva na primeira carga
+  if (meta.ret && retEl.dataset.loaded !== '1') {
+    if (meta.birth  && birthEl)  birthEl.value   = meta.birth;
+    if (meta.valIni && valIniEl) valIniEl.value  = meta.valIni;
+    if (meta.ret)                retEl.value     = meta.ret;
+    if (meta.renda  && rendaEl)  rendaEl.value   = meta.renda;
+    if (meta.outras != null)     outrasEl.value  = meta.outras;
+    if (meta.inv    && invEl)    invEl.value     = meta.inv;
+    if (meta.rateAcum != null && acumEl) acumEl.value = Math.max(0.5, Math.min(20, parseFloat(meta.rateAcum)||5.5));
+    if (meta.rateRet  != null && retREl) retREl.value  = Math.max(0.5, Math.min(15, parseFloat(meta.rateRet)||3.5));
+    retEl.dataset.loaded = '1';
   }
 
-  var currentAge  = parseInt(ageEl.value);
-  var retAge      = parseInt(retEl.value);
-  var renda       = parseInt(rendaEl.value);
-  var outras      = parseInt(outrasEl.value);
-  var invMensal   = parseInt(invEl.value);
-  var rateAcum    = parseFloat(rateAcumEl.value)||5.5;
-  var rateRet     = parseFloat(rateRetEl.value)||3.5;
-  var showNeg     = document.getElementById('fNeg')&&document.getElementById('fNeg').checked;
-  if (retAge<=currentAge) { retAge=currentAge+1; retEl.value=retAge; }
+  // ── Lê parâmetros
+  var retAge    = parseInt(retEl.value);
+  var renda     = parseInt(rendaEl.value);
+  var outras    = parseInt(outrasEl.value);
+  var invMensal = parseInt(invEl.value) || 0;
+  var rateAcum  = parseFloat(acumEl ? acumEl.value : 5.5) || 5.5;
+  var rateRet   = parseFloat(retREl ? retREl.value : 3.5) || 3.5;
+  var V0        = parseFloat(valIniEl ? valIniEl.value : 0) || 0;
+  // Clamp rates to valid ranges
+  rateAcum = Math.max(0.5, Math.min(20, rateAcum || 5.5));
+  rateRet  = Math.max(0.5, Math.min(15, rateRet  || 3.5));
+  // Sync rates back to modal inputs (ensures consistency)
+  if (acumEl) acumEl.value = rateAcum;
+  if (retREl) retREl.value = rateRet;
+  // Update chart header rate label
+  var rl = document.getElementById('fRateLabel');
+  if (rl) rl.textContent = rateAcum.toFixed(1).replace('.',',')+'/'+rateRet.toFixed(1).replace('.',',')+'% a.a.';
+  var showNeg   = document.getElementById('fNeg') && document.getElementById('fNeg').checked;
 
-  // Sync modal inputs
-  var aInp=document.getElementById('fRateAcumInp'), rInp=document.getElementById('fRateRetInp');
-  if (aInp) aInp.value=rateAcum; if (rInp) rInp.value=rateRet;
+  // ── Idade exata a partir da data de nascimento
+  var now = new Date();
+  var nowYear = now.getFullYear();
+  var birthDate = birthEl && birthEl.value ? new Date(birthEl.value + 'T12:00:00') : null;
+  var currentAgeExact;
+  if (birthDate && !isNaN(birthDate)) {
+    currentAgeExact = (now - birthDate) / (1000*60*60*24*365.25);
+  } else {
+    currentAgeExact = 30;
+  }
+  var currentAge = Math.floor(currentAgeExact);
+  var currentMonthFrac = currentAgeExact - currentAge; // fração do ano atual (em anos)
 
-  // Update labels
-  document.getElementById('fAgeVal').textContent   = currentAge+' anos';
-  document.getElementById('fRetVal').textContent   = retAge+' anos';
-  document.getElementById('fRendaVal').textContent = 'R$ '+renda.toLocaleString('pt-BR');
-  document.getElementById('fOutrasVal').textContent= 'R$ '+outras.toLocaleString('pt-BR');
-  document.getElementById('fInvVal').textContent   = 'R$ '+invMensal.toLocaleString('pt-BR');
-  document.getElementById('fRateAcumVal').textContent = rateAcum.toFixed(1).replace('.',',')+'% a.a.';
-  document.getElementById('fRateRetVal').textContent  = rateRet.toFixed(1).replace('.',',')+'% a.a.';
-  var negLbl=document.getElementById('fNegLbl'); if(negLbl) negLbl.textContent=showNeg?'Visível':'Oculto';
+  if (retAge <= currentAge) { retAge = currentAge + 1; retEl.value = retAge; }
 
-  // Monthly rates (real rates)
-  var r1 = Math.pow(1+rateAcum/100, 1/12)-1; // acumulação
-  var r2 = Math.pow(1+rateRet/100,  1/12)-1; // retirada
-  var rendaLiq = Math.max(0, renda-outras);
-  var mesesAcum = (retAge-currentAge)*12;
-  var maxAge = F_PERIOD>0 ? Math.min(currentAge+F_PERIOD,100) : 100;
+  // ── Taxas mensais reais
+  var r1 = Math.pow(1 + rateAcum/100, 1/12) - 1; // acumulação
+  var r2 = Math.pow(1 + rateRet/100,  1/12) - 1; // retirada
+  var rendaLiq = Math.max(0, renda - outras);
 
-  // ── Patrimônio acumulado na aposentadoria (fase de acumulação com r1)
-  var patrimonioNaAposentadoria = mesesAcum>0 && r1>0
-    ? invMensal * (Math.pow(1+r1,mesesAcum)-1) / r1
-    : invMensal * mesesAcum;
-  var capitalInvestidoTotal = invMensal * mesesAcum;
+  // ── Meses da projeção
+  // O primeiro ponto = mês 1 (próximo mês)
+  // Cada step = 12 meses (exibição anual)
+  var mesesAteRet = (retAge - currentAge) * 12;  // âncora: inteiros
+  var maxMeses    = F_PERIOD > 0
+    ? F_PERIOD * 12
+    : (100 - currentAge) * 12;
 
-  // ── Capital necessário para sustentar renda com r2 até os 100 anos
-  var mesesRet = (100-retAge)*12;
-  var capNecessario = rendaLiq>0 && r2>0
-    ? rendaLiq/r2*(1-Math.pow(1+r2,-mesesRet))
-    : rendaLiq*mesesRet;
+  // ── Capital necessário na aposentadoria (usando r2)
+  var mesesRet100 = (100 - retAge) * 12;
+  var C = r2 > 0 && rendaLiq > 0
+    ? rendaLiq / r2 * (1 - Math.pow(1+r2, -mesesRet100))
+    : rendaLiq * mesesRet100;
 
-  // ── Investimento mensal necessário para atingir capNecessario
-  var invNecessario = capNecessario>0 && r1>0 && mesesAcum>0
-    ? capNecessario*r1/(Math.pow(1+r1,mesesAcum)-1)
-    : capNecessario>0 ? capNecessario/Math.max(1,mesesAcum) : 0;
+  // ── Patrimônio projetado ao atingir a aposentadoria (com invMensal real)
+  var patrimonioNaRet = V0 * Math.pow(1+r1, mesesAteRet)
+    + (r1 > 0 ? invMensal * (Math.pow(1+r1, mesesAteRet)-1) / r1 : invMensal * mesesAteRet);
 
-  // ── Build chart arrays year by year
-  var ages=[], patrimProj=[], capitalInv=[], aposentIdeal=[];
-  var saldoRetiro = patrimonioNaAposentadoria; // usado na fase de retirada
-  var retiroComecou = false;
+  // ── Aporte necessário para atingir C partindo de V0
+  // ── aporte necessário: PMT para atingir C a partir de V0 em mesesAteRet meses
+  // FV = V0*(1+r1)^n + PMT*((1+r1)^n - 1)/r1 = C
+  // PMT = (C - V0*(1+r1)^n) * r1 / ((1+r1)^n - 1)
+  var fnRet    = Math.pow(1+r1, mesesAteRet); // (1+r1)^n
+  var fvV0     = V0 * fnRet;
+  var invNecessario = (r1 > 0 && mesesAteRet > 0 && fnRet > 1)
+    ? Math.max(0, (C - fvV0) * r1 / (fnRet - 1))
+    : Math.max(0, mesesAteRet > 0 ? (C - V0) / mesesAteRet : 0);
 
-  for (var age=currentAge; age<=maxAge; age++) {
-    ages.push(age);
-    var mesesDesdInicio = (age-currentAge)*12;
+  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════
+  // BUILD DATA ARRAYS — passo mensal, início = próximo mês
+  // ══════════════════════════════════════════════════════
+  var MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var labels     = [];
+  var patrimProj = [];
+  var capitalInv = [];
+  var aposentId  = [];
 
-    var patrim, cap;
-    if (age<=retAge) {
-      // ── FASE ACUMULAÇÃO: crescimento pelo r1
-      patrim = r1>0
-        ? invMensal*(Math.pow(1+r1,mesesDesdInicio)-1)/r1
-        : invMensal*mesesDesdInicio;
-      cap = invMensal*mesesDesdInicio;
-      saldoRetiro = patrim; // atualiza para quando aposentadoria começar
+  // Mês e ano de início (próximo mês)
+  var startMonth = now.getMonth() + 1; // 0-based → próximo mês (0-based)
+  if (startMonth > 11) { startMonth = 0; }
+  var startYear  = startMonth === 0 ? nowYear + 1 : nowYear;
+  // Correto: se o mês atual é dezembro (11), próximo é jan do ano seguinte
+  var curM = now.getMonth();   // mês atual 0-based
+  var curY = nowYear;
+
+  // Saldos para fase de retirada (acompanhados mês a mês)
+  var saldoVerde = patrimonioNaRet;
+  var saldoIdeal = C;
+  var retiroVerde = false;
+  var retiroIdeal = false;
+
+  for (var t = 1; t <= maxMeses; t++) {
+    // Mês e ano deste ponto
+    var ptMonth = (curM + t) % 12;        // 0-based
+    var ptYear  = curY + Math.floor((curM + t) / 12);
+
+    // Label — mostra apenas Jan de cada ano e o primeiro mês
+    if (t === 1 || ptMonth === 0) {
+      labels.push(MESES_PT[ptMonth] + '/' + String(ptYear).slice(2));
     } else {
-      // ── FASE RETIRADA: consome renda mensalmente com rendimento r2
-      if (!retiroComecou) { saldoRetiro=patrimonioNaAposentadoria; retiroComecou=true; }
-      // Simula 12 meses do ano
-      for (var m=0; m<12; m++) {
-        saldoRetiro = saldoRetiro*(1+r2)-rendaLiq;
-        if (!showNeg && saldoRetiro<0) { saldoRetiro=0; break; }
-      }
-      patrim = saldoRetiro;
-      cap = capitalInvestidoTotal; // capital investido não muda após aposentadoria
+      labels.push('');
     }
 
-    // Linha da aposentadoria ideal: valor presente do capital necessário em cada ano
-    var mRestAteRet = Math.max(0,(retAge-age))*12;
-    var ideal;
-    if (age<=retAge) {
-      // Valor presente do capNecessario descontado por r1
-      ideal = r1>0 ? capNecessario/Math.pow(1+r1,mRestAteRet) : capNecessario;
+    // ── AZUL: aportes acumulados sem rendimento
+    capitalInv.push(Math.round(t <= mesesAteRet
+      ? V0 + invMensal * t
+      : V0 + invMensal * mesesAteRet));
+
+    // ── VERDE e LARANJA: cache do fator composto para este mês
+    var fnT = (t <= mesesAteRet) ? Math.pow(1+r1, t) : 0;
+
+    // ── AZUL: aportes acumulados sem rendimento
+    capitalInv.push(Math.round(t <= mesesAteRet
+      ? V0 + invMensal * t
+      : V0 + invMensal * mesesAteRet));
+
+    // ── VERDE: projetado com rendimento composto
+    // Acumulação: FV = V0*(1+r1)^t + invMensal*((1+r1)^t - 1)/r1
+    if (t <= mesesAteRet) {
+      var pv = V0 * fnT + (r1 > 0 ? invMensal * (fnT-1) / r1 : invMensal * t);
+      patrimProj.push(Math.round(showNeg ? pv : Math.max(0, pv)));
     } else {
-      var mRet2 = Math.max(0,(100-age))*12;
-      ideal = rendaLiq>0 && r2>0
-        ? rendaLiq/r2*(1-Math.pow(1+r2,-mRet2))
-        : rendaLiq*mRet2;
-      if (!showNeg && ideal<0) ideal=0;
+      if (!retiroVerde) { saldoVerde = patrimonioNaRet; retiroVerde = true; }
+      saldoVerde = saldoVerde * (1+r2) - rendaLiq;
+      if (!showNeg && saldoVerde < 0) saldoVerde = 0;
+      patrimProj.push(Math.round(saldoVerde));
     }
 
-    patrimProj.push(Math.round(Math.max(showNeg?patrim:Math.max(0,patrim),showNeg?patrim:0)));
-    capitalInv.push(Math.round(Math.max(0,cap)));
-    aposentIdeal.push(Math.round(Math.max(0,ideal)));
+    // ── LARANJA: trajetória ideal usando invNecessario
+    // Mesma fórmula do verde mas com PMT = invNecessario
+    // Garante que laranja(mesesAteRet) = C (capital meta na aposentadoria)
+    if (t <= mesesAteRet) {
+      var pi = V0 * fnT + (r1 > 0 ? invNecessario * (fnT-1) / r1 : invNecessario * t);
+      aposentId.push(Math.round(Math.max(0, pi)));
+    } else {
+      if (!retiroIdeal) { saldoIdeal = C; retiroIdeal = true; }
+      saldoIdeal = saldoIdeal * (1+r2) - rendaLiq;
+      if (!showNeg && saldoIdeal < 0) saldoIdeal = 0;
+      aposentId.push(Math.round(Math.max(0, saldoIdeal)));
+    }
   }
 
-  var maxPatrim = Math.max.apply(null,patrimProj);
-  var maxPatrimAge = ages[patrimProj.indexOf(maxPatrim)];
-  // Idade em que o dinheiro acaba (patrimônio chega a zero após aposentadoria)
+  // ── Análises
+  var maxPatrim    = Math.max.apply(null, patrimProj);
+  var maxPatrimIdx = patrimProj.indexOf(maxPatrim);           // 0-based, mês 1-based
+  var maxPatrimAge = currentAge + (maxPatrimIdx + 1) / 12;
+  var maxPatrimYr  = curY + Math.floor((curM + maxPatrimIdx + 1) / 12);
+  var metaOk       = patrimonioNaRet >= C;
+  var cobertura    = C > 0 ? Math.min(200, patrimonioNaRet/C*100) : 100;
+
   var acabaAge = null;
-  for (var k=ages.indexOf(retAge)+1; k<ages.length; k++) {
-    if (patrimProj[k]===0 && patrimProj[k-1]>0) { acabaAge=ages[k]; break; }
+  for (var k = mesesAteRet; k < patrimProj.length; k++) {
+    if (patrimProj[k] === 0 && k > 0 && patrimProj[k-1] > 0) {
+      acabaAge = Math.floor(currentAge + (k+1)/12); break;
+    }
   }
-  var cobertura = capNecessario>0 ? Math.min(200,patrimonioNaAposentadoria/capNecessario*100) : 100;
-  var metaOk = patrimonioNaAposentadoria>=capNecessario;
+
+
+  // ── Atualiza displays do painel
+  var negLbl = document.getElementById('fNegLbl');
+  if (negLbl) negLbl.textContent = showNeg ? 'Visível' : 'Oculto';
+  document.getElementById('fRetVal').textContent    = retAge + ' anos';
+  document.getElementById('fRendaVal').textContent  = 'R$ ' + renda.toLocaleString('pt-BR');
+  document.getElementById('fOutrasVal').textContent = 'R$ ' + outras.toLocaleString('pt-BR');
+  document.getElementById('fInvVal').textContent    = 'R$ ' + invMensal.toLocaleString('pt-BR');
+  document.getElementById('fRateAcumVal').textContent = rateAcum.toFixed(1).replace('.',',') + '% a.a.';
+  document.getElementById('fRateRetVal').textContent  = rateRet.toFixed(1).replace('.',',')  + '% a.a.';
+
+  var ageDisp = document.getElementById('fAgeDisplay');
+  if (ageDisp) {
+    var ageY = Math.floor(currentAgeExact);
+    var ageM = Math.round((currentAgeExact - ageY) * 12);
+    ageDisp.textContent = ageY + 'a ' + ageM + 'm → proj. a partir de ' + (nowYear) + '/' + String(now.getMonth()+2).padStart(2,'0');
+  }
+  var v0Disp = document.getElementById('fV0Display');
+  if (v0Disp) v0Disp.textContent = 'R$ ' + V0.toLocaleString('pt-BR');
 
   // ── KPI cards
-  var fi=document.getElementById('fInsight');
-  if (fi) fi.innerHTML=
+  var fi = document.getElementById('fInsight');
+  if (fi) fi.innerHTML =
     '<div class="kpi-card '+(metaOk?'saldo-pos':'saldo-neg')+'">'
-      +'<div class="kpi-label">Capital Necessário</div>'
-      +'<div class="kpi-val '+(metaOk?'b':'r')+'">'+fmtM(capNecessario)+'</div>'
-      +'<div class="kpi-sub">para R$ '+renda.toLocaleString('pt-BR')+'/mês até 100a</div>'
+      +'<div class="kpi-label">Patrimônio na aposentadoria</div>'
+      +'<div class="kpi-val '+(metaOk?'b':'r')+'">'+fmtM(patrimonioNaRet)+'</div>'
+      +'<div class="kpi-sub">Meta: '+fmtM(C)+'</div>'
     +'</div>'
-    +'<div class="kpi-card '+(invNecessario<=invMensal?'rec':'desp')+'">'
-      +'<div class="kpi-label">Investimento Necessário</div>'
-      +'<div class="kpi-val '+(invNecessario<=invMensal?'g':'r')+'">R$ '+Math.round(invNecessario).toLocaleString('pt-BR')+'</div>'
-      +'<div class="kpi-sub">'+(invNecessario<=invMensal?'✓ Você já investe o suficiente':'Você precisa investir mais R$ '+Math.round(invNecessario-invMensal).toLocaleString('pt-BR')+'/mês')+'</div>'
+    +'<div class="kpi-card '+(invMensal>=invNecessario?'rec':'desp')+'">'
+      +'<div class="kpi-label">Aporte necessário/mês</div>'
+      +'<div class="kpi-val '+(invMensal>=invNecessario?'g':'r')+'">R$ '+Math.round(invNecessario).toLocaleString('pt-BR')+'</div>'
+      +'<div class="kpi-sub">'+(invMensal>=invNecessario?'✓ Você já investe o suficiente':'Falta R$ '+Math.round(invNecessario-invMensal).toLocaleString('pt-BR')+'/mês')+'</div>'
     +'</div>'
     +'<div class="kpi-card inv">'
-      +'<div class="kpi-label">Pico do Patrimônio</div>'
+      +'<div class="kpi-label">Pico do patrimônio</div>'
       +'<div class="kpi-val y">'+fmtM(maxPatrim)+'</div>'
-      +'<div class="kpi-sub">aos '+maxPatrimAge+' anos de idade</div>'
+      +'<div class="kpi-sub">'+maxPatrimYr+' ('+maxPatrimAge+' anos)</div>'
     +'</div>'
     +'<div class="kpi-card '+(acabaAge?'saldo-neg':'rec')+'">'
-      +'<div class="kpi-label">'+(acabaAge?'Dinheiro Acaba':'Patrimônio Sustenta')+'</div>'
+      +'<div class="kpi-label">'+(acabaAge?'Dinheiro acaba':'Patrimônio sustenta')+'</div>'
       +'<div class="kpi-val '+(acabaAge?'r':'g')+'">'+(acabaAge?'aos '+acabaAge+'a':'até 100a')+'</div>'
-      +'<div class="kpi-sub">'+(acabaAge?'⚠ Risco de insolvência':'✓ Cobertura: '+cobertura.toFixed(0)+'%')+'</div>'
+      +'<div class="kpi-sub">'+(acabaAge?'⚠ Risco de insolvência':'Cobertura: '+cobertura.toFixed(0)+'%')+'</div>'
     +'</div>';
 
   // ── Chart
   if (fChart) { try{fChart.destroy();}catch(e){} fChart=null; }
-  var cv=document.getElementById('fChart'); if(!cv) return;
-  var retIdx = ages.indexOf(retAge);
-  fChart=new Chart(cv.getContext('2d'),{
-    type:'line',
-    data:{
-      labels:ages.map(function(a){return a+'a';}),
-      datasets:[
-        {label:'Patrimônio Projetado',data:patrimProj,borderColor:'rgba(16,185,129,.9)',backgroundColor:'rgba(16,185,129,.12)',fill:true,tension:.3,pointRadius:0,borderWidth:2.5},
-        {label:'Capital Investido',data:capitalInv,borderColor:'rgba(59,130,246,.7)',backgroundColor:'rgba(59,130,246,.1)',fill:true,tension:.3,pointRadius:0,borderWidth:1.5},
-        {label:'Capital Necessário',data:aposentIdeal,borderColor:'rgba(245,158,11,.85)',backgroundColor:'transparent',fill:false,tension:.3,pointRadius:0,borderWidth:2,borderDash:[6,4]}
+  var cv = document.getElementById('fChart');
+  if (!cv) return;
+
+  // Linha de aposentadoria no índice correto
+  var aposentLineIdx = mesesAteRet - 1;  // índice mensal (0-based)
+
+  fChart = new Chart(cv.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Patrimônio total projetado',
+          data: patrimProj,
+          borderColor: 'rgba(34,197,94,.9)',
+          backgroundColor: 'rgba(34,197,94,.12)',
+          fill: true, tension: .35, pointRadius: 0, borderWidth: 2.5
+        },
+        {
+          label: 'Patrimônio principal investido',
+          data: capitalInv,
+          borderColor: 'rgba(96,165,250,.75)',
+          backgroundColor: 'rgba(96,165,250,.1)',
+          fill: true, tension: .1, pointRadius: 0, borderWidth: 1.5
+        },
+        {
+          label: 'Trajetória ideal',
+          data: aposentId,
+          borderColor: 'rgba(251,146,60,.9)',
+          backgroundColor: 'transparent',
+          fill: false, tension: .35, pointRadius: 0, borderWidth: 2, borderDash: [6,4]
+        }
       ]
     },
-    options:{
-      responsive:true,maintainAspectRatio:true,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{
-          title:function(ctx){return 'Idade: '+ctx[0].label+(parseInt(ctx[0].label)>retAge?' (retirada)':' (acumulação)');},
-          label:function(ctx){return ' '+ctx.dataset.label+': '+fmtM(ctx.parsed.y);}
-        }},
-        annotation:{annotations:{retLine:{type:'line',
-          xMin:retIdx,xMax:retIdx,
-          borderColor:'rgba(201,168,76,.65)',borderWidth:2,borderDash:[5,4],
-          label:{content:'Aposentadoria ('+retAge+'a)',display:true,position:'start',color:'#c9a84c',font:{size:10}}
-        }}}
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(8,13,24,.96)',
+          borderColor: 'rgba(201,168,76,.25)',
+          borderWidth: 1,
+          padding: 13,
+          titleColor: '#c9a84c',
+          titleFont: { weight: 700 },
+          bodyColor: '#e2e8f0',
+          bodySpacing: 5,
+          callbacks: {
+            title: function(ctx) {
+              var t    = ctx[0].dataIndex + 1;         // mês 1-based
+              var ptM  = (curM + t) % 12;
+              var ptY  = curY + Math.floor((curM + t) / 12);
+              // Idade exata em anos + meses
+              var totalMesesVida = Math.round(currentAgeExact * 12) + t;
+              var ageY = Math.floor(totalMesesVida / 12);
+              var ageM = totalMesesVida % 12;
+              // Tempo decorrido na fase (acumulação ou retirada)
+              var emAcum  = t <= mesesAteRet;
+              var elapsed = emAcum ? t : (t - mesesAteRet);
+              var elY = Math.floor(elapsed / 12);
+              var elM = elapsed % 12;
+              var elStr = '';
+              if (elY > 0) elStr += elY + ' ano' + (elY !== 1 ? 's' : '');
+              if (elY > 0 && elM > 0) elStr += ' e ';
+              if (elM > 0) elStr += elM + ' mês' + (elM !== 1 ? 'es' : '');
+              if (!elStr) elStr = '1 m\u00eas';
+              var idadeStr = ageY + ' anos' + (ageM > 0 ? ' e ' + ageM + ' mês' + (ageM!==1?'es':'') : '');
+              var fase = emAcum ? 'acumulação' : 'retirada';
+              return MESES_PT[ptM]+'/'+ptY+' \u2014 '+idadeStr+' ('+elStr+' de '+fase+')';
+            },
+            label: function(ctx) {
+              return '  ' + ctx.dataset.label + ': R$ ' + Math.round(ctx.parsed.y).toLocaleString('pt-BR');
+            }
+          }
+        }
       },
-      scales:{
-        x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:getComputedStyle(document.documentElement).getPropertyValue('--mu').trim()||'#64748b',font:{size:10},maxTicksLimit:15}},
-        y:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:getComputedStyle(document.documentElement).getPropertyValue('--mu').trim()||'#64748b',font:{size:10},callback:function(v){return fmtM(v);}}}
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,.03)' },
+          ticks: {
+            color: '#64748b', font: { size: 10 }, maxTicksLimit: 25,
+            callback: function(val, idx) {
+              return labels[idx] || '';
+            }
+          }
+        },
+        y: {
+          grid: { color: 'rgba(255,255,255,.04)' },
+          ticks: { color: '#64748b', font: { size: 10 }, callback: function(v){ return fmtM(v); } }
+        }
       }
     }
   });
 }
-
 function fmtM(v) {
-  if (!v&&v!==0) return 'R$0';
-  var abs=Math.abs(v);
-  if (abs>=1000000) return 'R$'+(v/1000000).toFixed(1).replace('.',',')+'M';
-  if (abs>=1000)    return 'R$'+Math.round(v/1000)+'k';
-  return 'R$'+Math.round(v);
+  if (!v && v !== 0) return 'R$ 0';
+  var fmt2 = function(n) { return Math.round(Math.abs(n)).toLocaleString('pt-BR'); };
+  var sign = v < 0 ? '-' : '';
+  var abs  = Math.abs(v);
+  if (abs >= 1000000) return sign + 'R$ ' + (abs/1000000).toFixed(1).replace('.',',') + 'M';
+  if (abs >= 1000)    return sign + 'R$ ' + Math.round(abs/1000) + 'k';
+  return sign + 'R$ ' + fmt2(v);
 }
-
 
 // ══════════════════════════════════════════════════════
 // PATRIMÔNIO — CADASTRO
@@ -2625,6 +2804,61 @@ function rPatrimAloc() {
 // ══════════════════════════════════════════════════════
 // THEME TOGGLE
 // ══════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════
+// EDIÇÃO INLINE — duplo clique nos valores do painel Futuro
+// ══════════════════════════════════════════════════════
+function makeEditable(span, sliderId, tipo) {
+  if (span.querySelector('input')) return; // já editando
+
+  var slider   = document.getElementById(sliderId);
+  var curVal   = slider ? parseFloat(slider.value) : 0;
+  var color    = span.style.color || 'var(--tx)';
+
+  // Cria o input inline
+  var inp = document.createElement('input');
+  inp.type  = 'number';
+  inp.value = curVal;
+  inp.step  = tipo === 'age' ? 1 : 100;
+  inp.min   = slider ? slider.min : 0;
+  inp.max   = slider ? slider.max : 9999999;
+  inp.style.cssText = [
+    'width:90px',
+    'padding:3px 7px',
+    'background:var(--s2)',
+    'border:1.5px solid var(--gold)',
+    'border-radius:6px',
+    'color:' + color,
+    'font-family:var(--fh)',
+    'font-size:13px',
+    'font-weight:700',
+    'outline:none',
+    'text-align:right',
+    'box-shadow:0 0 0 3px var(--gold-glow)',
+  ].join(';');
+
+  span.textContent = '';
+  span.appendChild(inp);
+  inp.focus();
+  inp.select();
+
+  function commit() {
+    var v = parseFloat(inp.value);
+    if (isNaN(v)) v = curVal;
+    v = Math.min(parseFloat(slider.max), Math.max(parseFloat(slider.min), v));
+    slider.value = v;
+    // Atualiza exibição e recalcula
+    rFuturo();
+    // inp será removido pelo rFuturo() que reescreve o textContent do span
+  }
+
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter')  { inp.blur(); }
+    if (e.key === 'Escape') { inp.value = curVal; inp.blur(); }
+  });
+}
+
 function toggleTheme() {
   var html = document.documentElement;
   var isDark = html.getAttribute('data-theme') === 'dark';
@@ -2633,6 +2867,15 @@ function toggleTheme() {
   localStorage.setItem('hoTheme', next);
   document.getElementById('thDark').classList.toggle('active', next==='dark');
   document.getElementById('thLight').classList.toggle('active', next==='light');
+}
+
+// Set default birth date (30 years ago) if not set
+function initFuturoDefaults() {
+  var b = document.getElementById('fBirth');
+  if (b && !b.value) {
+    var d = new Date(); d.setFullYear(d.getFullYear()-30);
+    b.value = d.toISOString().split('T')[0];
+  }
 }
 
 function applyTheme() {
