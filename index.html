@@ -701,7 +701,7 @@ body{
               <span class="ctrl-label">Renda desejada / mês</span>
               <span id="fRendaVal" title="Duplo clique para editar" ondblclick="makeEditable(this,'fRenda','money')" style="font-size:13px;font-weight:700;color:var(--green);cursor:pointer;border-bottom:1px dashed var(--green);padding-bottom:1px;transition:opacity .15s;" onmouseenter="this.style.opacity='.7'" onmouseleave="this.style.opacity='1'">R$ 8.200</span>
             </div>
-            <input type="range" id="fRenda" min="1000" max="30000" step="100" value="8200" oninput="rFuturo()" class="f-slider">
+            <input type="range" id="fRenda" min="0" max="99000" step="1" value="8200" oninput="rFuturo()" class="f-slider">
           </div>
 
           <!-- Outras fontes -->
@@ -710,7 +710,7 @@ body{
               <span class="ctrl-label">Outras fontes / mês</span>
               <span id="fOutrasVal" title="Duplo clique para editar" ondblclick="makeEditable(this,'fOutras','money')" style="font-size:13px;font-weight:700;color:var(--mu);cursor:pointer;border-bottom:1px dashed var(--mu);padding-bottom:1px;transition:opacity .15s;" onmouseenter="this.style.opacity='.7'" onmouseleave="this.style.opacity='1'">R$ 0</span>
             </div>
-            <input type="range" id="fOutras" min="0" max="10000" step="100" value="0" oninput="rFuturo()" class="f-slider">
+            <input type="range" id="fOutras" min="0" max="99000" step="1" value="0" oninput="rFuturo()" class="f-slider">
           </div>
 
           <!-- Investimento mensal -->
@@ -719,7 +719,7 @@ body{
               <span class="ctrl-label">Investimento mensal</span>
               <span id="fInvVal" title="Duplo clique para editar" ondblclick="makeEditable(this,'fInv','money')" style="font-size:13px;font-weight:700;color:var(--gold);cursor:pointer;border-bottom:1px dashed var(--gold);padding-bottom:1px;transition:opacity .15s;" onmouseenter="this.style.opacity='.7'" onmouseleave="this.style.opacity='1'">R$ 1.000</span>
             </div>
-            <input type="range" id="fInv" min="0" max="20000" step="50" value="1000" oninput="rFuturo()" class="f-slider">
+            <input type="range" id="fInv" min="0" max="99000" step="1" value="1000" oninput="rFuturo()" class="f-slider">
           </div>
 
           <!-- Resumo taxas (read-only, abre modal) -->
@@ -777,6 +777,15 @@ body{
               <label style="display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:7px;font-weight:600;">Taxa real — Retirada (% a.a.)</label>
               <input type="number" id="fRateRetInp" step="0.1" min="0.5" max="15" value="3.5" style="width:100%;padding:10px 13px;background:var(--s2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:13px;outline:none;font-family:var(--fb);">
             </div>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:7px;font-weight:600;">Expectativa de vida (anos)</label>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <input type="range" id="fVidaInp" min="70" max="110" step="1" value="90" oninput="document.getElementById('fVidaVal').textContent=this.value+' anos';rFuturo()" style="flex:1;height:4px;accent-color:var(--navy);">
+              <span id="fVidaVal" style="font-size:13px;font-weight:600;color:var(--tx);min-width:64px;text-align:right;">90 anos</span>
+            </div>
+            <div style="font-size:10px;color:var(--mu);margin-top:5px;">O capital precisará sustentar a renda desta idade até a aposentadoria.</div>
           </div>
 
           <div style="background:var(--navy-dim);border:1px solid rgba(28,58,94,.3);border-radius:8px;padding:12px 14px;margin-bottom:24px;display:flex;gap:10px;align-items:flex-start;">
@@ -2476,11 +2485,22 @@ function resetFConfig() {
   document.getElementById('fValInicial').value = 0;
   document.getElementById('fRateAcumInp').value = 5.5;
   document.getElementById('fRateRetInp').value  = 3.5;
+  document.getElementById('fVidaInp').value = 90;
+  document.getElementById('fVidaVal').textContent = '90 anos';
 }
 
 function saveFConfig() {
   closeModal('fConfigModal');
   rFuturo();
+  // Persist config to meta
+  var user2 = getUser(CU.id);
+  if (!user2.futuroMeta) user2.futuroMeta = {};
+  var vInp = document.getElementById('fVidaInp');
+  if (vInp) user2.futuroMeta.vidaAge = parseInt(vInp.value)||90;
+  var aInp2 = document.getElementById('fRateAcumInp'), rInp2 = document.getElementById('fRateRetInp');
+  if (aInp2) user2.futuroMeta.rateAcum = parseFloat(aInp2.value)||5.5;
+  if (rInp2) user2.futuroMeta.rateRet  = parseFloat(rInp2.value)||3.5;
+  saveUser(user2); CU = getUser(user2.id);
 }
 
 // legacy aliases so any remaining refs work
@@ -2497,7 +2517,8 @@ function saveFMeta() {
     outras: parseInt(document.getElementById('fOutras').value),
     inv:    parseInt(document.getElementById('fInv').value),
     rateAcum: parseFloat(document.getElementById('fRateAcumInp').value)||5.5,
-    rateRet:  parseFloat(document.getElementById('fRateRetInp').value)||3.5
+    rateRet:  parseFloat(document.getElementById('fRateRetInp').value)||3.5,
+    vidaAge: parseInt((document.getElementById('fVidaInp')||{value:'90'}).value)||90
   };
   var db = getDB(); var idx = db.users.findIndex(function(u){return u.id===CU.id;});
   if (idx>=0){ db.users[idx]=user; saveDB(db); }
@@ -2517,6 +2538,7 @@ function rFuturo() {
   var valIniEl = document.getElementById('fValInicial');
   var acumEl   = document.getElementById('fRateAcumInp');
   var retREl   = document.getElementById('fRateRetInp');
+  var vidaEl   = document.getElementById('fVidaInp');
   if (!retEl) return;
 
   // Restaura meta salva na primeira carga
@@ -2529,6 +2551,7 @@ function rFuturo() {
     if (meta.inv    && invEl)    invEl.value     = meta.inv;
     if (meta.rateAcum != null && acumEl) acumEl.value = Math.max(0.5, Math.min(20, parseFloat(meta.rateAcum)||5.5));
     if (meta.rateRet  != null && retREl) retREl.value  = Math.max(0.5, Math.min(15, parseFloat(meta.rateRet)||3.5));
+    if (meta.vidaAge && vidaEl) { vidaEl.value = meta.vidaAge; var vv2=document.getElementById('fVidaVal'); if(vv2) vv2.textContent=meta.vidaAge+' anos'; }
     retEl.dataset.loaded = '1';
   }
 
@@ -2539,6 +2562,8 @@ function rFuturo() {
   var invMensal = parseInt(invEl.value) || 0;
   var rateAcum  = parseFloat(acumEl ? acumEl.value : 5.5) || 5.5;
   var rateRet   = parseFloat(retREl ? retREl.value : 3.5) || 3.5;
+  var vidaAge   = parseInt(vidaEl ? vidaEl.value : 90) || 90;
+  if (vidaAge <= retAge) vidaAge = retAge + 10;
   var V0        = parseFloat(valIniEl ? valIniEl.value : 0) || 0;
   // Clamp rates to valid ranges
   rateAcum = Math.max(0.5, Math.min(20, rateAcum || 5.5));
@@ -2589,10 +2614,10 @@ function rFuturo() {
   }
   var maxMeses    = F_PERIOD > 0
     ? F_PERIOD * 12
-    : (100 - currentAge) * 12;
+    : (130 - currentAge) * 12;
 
   // ── Capital necessário na aposentadoria (usando r2)
-  var mesesRet100 = (100 - retAge) * 12;
+  var mesesRet100 = (vidaAge - retAge) * 12;
   var C = r2 > 0 && rendaLiq > 0
     ? rendaLiq / r2 * (1 - Math.pow(1+r2, -mesesRet100))
     : rendaLiq * mesesRet100;
@@ -2640,12 +2665,12 @@ function rFuturo() {
     var ptMonth = (curM + t) % 12;        // 0-based
     var ptYear  = curY + Math.floor((curM + t) / 12);
 
-    // Label — mostra apenas Jan de cada ano e o primeiro mês
-    if (t === 1 || ptMonth === 0) {
-      labels.push(MESES_PT[ptMonth] + '/' + String(ptYear).slice(2));
-    } else {
-      labels.push('');
-    }
+    // Label — idade a cada 5 anos
+    var ageAtT = currentAge + t / 12;
+    var nearAge = Math.round(ageAtT);
+    if (nearAge % 5 === 0 && Math.abs(ageAtT - nearAge) < 0.5) {
+      labels.push(nearAge + 'a');
+    } else { labels.push(''); }
 
     // ── AZUL: capital investido
     // Acumulação: cresce com aportes; Retirada: decresce por rendaLiq/mês
@@ -2686,6 +2711,14 @@ function rFuturo() {
     }
   }
 
+  // ── Idade em que a linha verde (patrimProj) chega a zero
+  for (var kai = 0; kai < patrimProj.length; kai++) {
+    if (patrimProj[kai] === 0 && kai > 0 && (patrimProj[kai-1]||0) > 0) {
+      // t = kai+1 (1-based), months from now
+      acabaAge = Math.floor(currentAge + (kai + 1) / 12);
+      break;
+    }
+  }
   // ── Análises
   var maxPatrim    = Math.max.apply(null, patrimProj);
   var maxPatrimIdx = patrimProj.indexOf(maxPatrim);           // 0-based, mês 1-based
@@ -2694,12 +2727,9 @@ function rFuturo() {
   var metaOk       = patrimonioNaRet >= C;
   var cobertura    = C > 0 ? Math.min(200, patrimonioNaRet/C*100) : 100;
 
-  var acabaAge = null;
-  for (var k = mesesAteRet; k < patrimProj.length; k++) {
-    if (patrimProj[k] === 0 && k > 0 && patrimProj[k-1] > 0) {
-      acabaAge = Math.floor(currentAge + (k+1)/12); break;
-    }
-  }
+
+
+
 
 
   // ── Atualiza displays do painel
@@ -2725,24 +2755,24 @@ function rFuturo() {
   var fi = document.getElementById('fInsight');
   if (fi) fi.innerHTML =
     '<div class="kpi-card '+(metaOk?'saldo-pos':'saldo-neg')+'">'
-      +'<div class="kpi-label">Patrimônio na aposentadoria</div>'
-      +'<div class="kpi-val '+(metaOk?'b':'r')+'">'+fmtM(patrimonioNaRet)+'</div>'
-      +'<div class="kpi-sub">Meta: '+fmtM(C)+'</div>'
+    +'<div class="kpi-label">Patrimônio Ideal</div>'
+    +'<div class="kpi-val '+(metaOk?'b':'r')+'" style="font-size:14px;letter-spacing:-.3px;">R$ '+Math.round(C).toLocaleString('pt-BR')+'</div>'
+    +'<div class="kpi-sub">Capital alvo aos '+retAge+' anos</div>'
     +'</div>'
     +'<div class="kpi-card '+(invMensal>=invNecessario?'rec':'desp')+'">'
-      +'<div class="kpi-label">Aporte necessário/mês</div>'
-      +'<div class="kpi-val '+(invMensal>=invNecessario?'g':'r')+'">R$ '+Math.round(invNecessario).toLocaleString('pt-BR')+'</div>'
-      +'<div class="kpi-sub">'+(invMensal>=invNecessario?'✓ Você já investe o suficiente':'Falta R$ '+Math.round(invNecessario-invMensal).toLocaleString('pt-BR')+'/mês')+'</div>'
+    +'<div class="kpi-label">Aporte Necessário</div>'
+    +'<div class="kpi-val '+(invMensal>=invNecessario?'g':'r')+'">R$ '+Math.round(invNecessario).toLocaleString('pt-BR')+'<span style="font-size:9px;opacity:.7;">/mês</span></div>'
+    +'<div class="kpi-sub">'+(invMensal>=invNecessario?'✓ Você já investe o suficiente':'Falta R$ '+Math.round(invNecessario-invMensal).toLocaleString('pt-BR')+'/mês')+'</div>'
     +'</div>'
-    +'<div class="kpi-card inv">'
-      +'<div class="kpi-label">Pico do patrimônio</div>'
-      +'<div class="kpi-val y">'+fmtM(maxPatrim)+'</div>'
-      +'<div class="kpi-sub">'+maxPatrimYr+' ('+maxPatrimAge+' anos)</div>'
+    +'<div class="kpi-card '+(patrimonioNaRet>=C?'rec':'desp')+'">'
+    +'<div class="kpi-label">Patrimônio Projetado</div>'
+    +'<div class="kpi-val '+(patrimonioNaRet>=C?'g':'r')+'" style="font-size:14px;letter-spacing:-.3px;">R$ '+Math.round(patrimonioNaRet).toLocaleString('pt-BR')+'</div>'
+    +'<div class="kpi-sub">Estimado aos '+retAge+' anos</div>'
     +'</div>'
     +'<div class="kpi-card '+(acabaAge?'saldo-neg':'rec')+'">'
-      +'<div class="kpi-label">'+(acabaAge?'Dinheiro acaba':'Patrimônio sustenta')+'</div>'
-      +'<div class="kpi-val '+(acabaAge?'r':'g')+'">'+(acabaAge?'aos '+acabaAge+'a':'até 100a')+'</div>'
-      +'<div class="kpi-sub">'+(acabaAge?'⚠ Risco de insolvência':'Cobertura: '+cobertura.toFixed(0)+'%')+'</div>'
+    +'<div class="kpi-label">Patrimônio Sustenta</div>'
+    +'<div class="kpi-val '+(acabaAge?'r':'g')+'">'+(acabaAge?'até os '+acabaAge+' anos':'até os '+vidaAge+' anos')+'</div>'
+    +'<div class="kpi-sub">'+(acabaAge?'⚠ Saldo zerado antes da expectativa':'✓ Sustenta até a expectativa de vida')+'</div>'
     +'</div>';
 
   // ── Chart
@@ -2830,10 +2860,10 @@ function rFuturo() {
           ticks: {
             color: '#64748b', font: { size: 10 }, maxTicksLimit: 25,
             callback: function(val, idx) {
+            color: '#64748b', font: { size: 10 }, autoSkip: false, maxRotation: 0,
+            callback: function(val, idx) {
               return labels[idx] || '';
             }
-          }
-        },
         y: {
           grid: { color: 'rgba(255,255,255,.04)' },
           ticks: { color: '#64748b', font: { size: 10 }, callback: function(v){ return fmtM(v); } }
