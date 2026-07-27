@@ -325,20 +325,20 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
 .pct-badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:var(--gold-dim);color:var(--gold);margin-left:4px;font-weight:600;}
 
 /* ═══ ALOCAÇÃO ════════════════════════════════════════════════ */
-.patr-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
+.patr-kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px;}
 @media(max-width:1100px){.patr-kpi-row{grid-template-columns:repeat(3,1fr);}}
 .patr-chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
 @media(max-width:900px){.patr-chart-row{grid-template-columns:1fr;}}
 
 /* ═══ PATRIMÔNIO CADASTRO ══════════════════════════════════════ */
 .patr-section{margin-top:28px;}
-.patr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px;}
-@media(max-width:900px){.patr-grid{grid-template-columns:1fr;}}
-.patr-col{background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-sm);}
+.patr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px;width:100%;}
+
+.patr-col{background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-sm);min-width:0;}
 .patr-col-head{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--brd);background:var(--s2);}
 .patr-col-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-.patr-col-title{font-family:var(--fh);font-size:13px;font-weight:600;color:var(--tx);margin-left:10px;}
-.patr-col-total{font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.patr-col-title{font-family:var(--fh);font-size:12px;font-weight:600;color:var(--tx);margin-left:8px;}
+.patr-col-total{font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;}
 .patr-items{padding:8px;max-height:230px;overflow-y:auto;}
 .patr-item{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:9px 10px;border-radius:8px;transition:background .12s;margin-bottom:2px;}
 .patr-item:hover{background:var(--s2);}
@@ -349,10 +349,10 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
 .patr-item-del{background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px;transition:color .15s;flex-shrink:0;}
 .patr-item-del:hover{color:var(--red);}
 .patr-add{padding:10px 10px 12px;border-top:1px solid var(--brd);display:flex;flex-direction:column;gap:6px;background:var(--s2);}
-.patr-add input{background:var(--s1);border:1.5px solid var(--brd2);color:var(--tx);padding:7px 10px;border-radius:var(--rs);font-size:12px;outline:none;width:100%;box-sizing:border-box;font-family:var(--fb);transition:border-color .2s;}
+.patr-add input{background:var(--s1);border:1.5px solid var(--brd2);color:var(--tx);padding:6px 8px;border-radius:var(--rs);font-size:11px;outline:none;width:100%;box-sizing:border-box;font-family:var(--fb);transition:border-color .2s;min-width:0;}
 .patr-add input:focus{border-color:var(--gold);}
 .patr-add-row{display:flex;gap:6px;}
-.patr-add button{padding:7px 14px;background:linear-gradient(135deg,var(--navy),var(--gold));border:none;border-radius:var(--rs);color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
+.patr-add button{padding:6px 10px;font-size:11px !important;white-space:nowrap;background:linear-gradient(135deg,var(--navy),var(--gold));border:none;border-radius:var(--rs);color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
 .patr-add button:hover{opacity:.88;}
 .patr-empty{padding:18px;text-align:center;color:var(--mu);font-size:12px;}
 .patr-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
@@ -437,8 +437,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
       <!-- Cartões do mês -->
       <div class="cg" id="orcCards"></div>
 
-      <!-- Alerta de distribuição -->
-      <div id="orcBudgetAlert" style="display:none"></div>
+      <!-- Barra de progresso orçamento -->
+      <div id="orcProgressBar" style="margin-bottom:18px;"></div>
 
       <!-- Split: tabela orçamento + painel lateral -->
       <div class="orc-split">
@@ -526,7 +526,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
           </div>
             <div class="toggle-pill" id="gDetViewPill" style="margin-left:8px;">
               <button class="active" onclick="setGDetView('brl')">R$</button>
-              <button onclick="setGDetView('pct')">% Receita</button>
+              <button onclick="setGDetView('pct')">% da Receita</button>
             </div>
         </div>
         <div id="gTabMain" style="overflow-x:auto;margin-top:10px;"></div>
@@ -743,8 +743,9 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
           <div class="sh">
             <span class="st">Detalhamento</span>
             <div class="toggle-pill" id="patrimTblPill">
-              <button onclick="setPatrimTab('movel')" class="active">Bens Móveis</button>
+              <button onclick="setPatrimTab('invest')" class="active">Investimentos</button>
               <button onclick="setPatrimTab('imovel')">Bens Imóveis</button>
+              <button onclick="setPatrimTab('movel')">Bens Móveis</button>
               <button onclick="setPatrimTab('divida')">Dívidas</button>
             </div>
           </div>
@@ -791,27 +792,29 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
       <!-- ══ SEÇÃO PATRIMÔNIO ══ -->
       <div class="patr-section">
         <p class="cad-sl" style="margin-top:28px;">Patrimônio</p>
-        <div class="patr-grid">
+        <div class="patr-grid" style="display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:12px;width:100%;">
 
-          <!-- BENS MÓVEIS -->
+
+          <!-- INVESTIMENTOS -->
           <div class="patr-col">
             <div class="patr-col-head">
               <div style="display:flex;align-items:center;">
-                <div class="patr-col-icon" style="background:rgba(16,185,129,.15);">🚗</div>
-                <span class="patr-col-title">Bens Móveis</span>
+                <div class="patr-col-icon" style="background:rgba(59,130,246,.15);">📈</div>
+                <span class="patr-col-title">Investimentos</span>
               </div>
-              <span class="patr-col-total" id="totBensMov" style="background:rgba(16,185,129,.12);color:#10b981;">R$ 0</span>
+              <span class="patr-col-total" id="totInvestimentos" style="background:rgba(59,130,246,.12);color:var(--blue);">R$ 0</span>
             </div>
-            <div class="patr-items" id="lstBensMov"></div>
+            <div class="patr-items" id="lstInvestimentos"></div>
             <div class="patr-add">
-              <input type="text" id="iBM_nm" placeholder="Nome (ex: Honda Civic 2022)">
-              <input type="text" id="iBM_ds" placeholder="Descrição (ex: Veículo quitado)">
+              <input type="text" id="iIN_nm" placeholder="Nome (ex: CDB Itaú, Tesouro Direto)">
+              <input type="text" id="iIN_ds" placeholder="Descrição (ex: Venc. 2026, LCA 90%)">
               <div class="patr-add-row">
-                <input type="number" id="iBM_vl" placeholder="Valor (R$)" step="100" style="flex:1;">
-                <button onclick="addBem('bensMov','iBM_nm','iBM_ds','iBM_vl')">+ Adicionar</button>
+                <input type="number" id="iIN_vl" placeholder="Valor atual (R$)" step="100" style="flex:1;">
+                <button onclick="addBem('investimentos','iIN_nm','iIN_ds','iIN_vl')">+ Adicionar</button>
               </div>
             </div>
           </div>
+
 
           <!-- BENS IMÓVEIS -->
           <div class="patr-col">
@@ -829,6 +832,26 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
               <div class="patr-add-row">
                 <input type="number" id="iBI_vl" placeholder="Valor de mercado (R$)" step="1000" style="flex:1;">
                 <button onclick="addBem('bensImov','iBI_nm','iBI_ds','iBI_vl')">+ Adicionar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- BENS MÓVEIS -->
+          <div class="patr-col">
+            <div class="patr-col-head">
+              <div style="display:flex;align-items:center;">
+                <div class="patr-col-icon" style="background:rgba(16,185,129,.15);">🚗</div>
+                <span class="patr-col-title">Bens Móveis</span>
+              </div>
+              <span class="patr-col-total" id="totBensMov" style="background:rgba(16,185,129,.12);color:#10b981;">R$ 0</span>
+            </div>
+            <div class="patr-items" id="lstBensMov"></div>
+            <div class="patr-add">
+              <input type="text" id="iBM_nm" placeholder="Nome (ex: Honda Civic 2022)">
+              <input type="text" id="iBM_ds" placeholder="Descrição (ex: Veículo quitado)">
+              <div class="patr-add-row">
+                <input type="number" id="iBM_vl" placeholder="Valor (R$)" step="100" style="flex:1;">
+                <button onclick="addBem('bensMov','iBM_nm','iBM_ds','iBM_vl')">+ Adicionar</button>
               </div>
             </div>
           </div>
@@ -1093,6 +1116,11 @@ function getDB() {
         1:{renda:6500,invMode:'val',invPct:10,invVal:650,cats:{Moradia:2200,Alimentação:900,Transporte:400,Saúde:500,Lazer:300}},
         2:{renda:6500,invMode:'val',invPct:10,invVal:650,cats:{Moradia:2500,Alimentação:900,Transporte:400,Saúde:600,Lazer:400}}
       }, alocacao:[],
+      investimentos:[
+        {id:'iv1',nome:'CDB Banco Inter',desc:'Venc. 12/2026 — 110% CDI',valor:25000},
+        {id:'iv2',nome:'Tesouro Selic 2027',desc:'Renda fixa pós-fixada',valor:18000},
+        {id:'iv3',nome:'Ações ITSA4',desc:'Carteira de longo prazo',valor:12500}
+      ],
       bensMov:[
         {id:'bm1',nome:'Honda Civic 2022',desc:'Veículo próprio quitado',valor:85000},
         {id:'bm2',nome:'Notebook Dell XPS',desc:'Equipamento de trabalho',valor:8500},
@@ -1365,37 +1393,75 @@ function rOrc(user) {
   var tot = orc.cats ? Object.values(orc.cats).reduce(function(s,v){ return s+(v||0); },0) : 0;
   var restante = disp - tot;
 
-  // Budget alert
-  var alertEl = document.getElementById('orcBudgetAlert');
-  if (alertEl) {
-    if (orc.renda) {
-      alertEl.style.display = 'flex';
-      if (restante > 0) {
-        alertEl.className = 'budget-info ok';
-        alertEl.innerHTML = '<div><div class="bi-label">Ainda pode distribuir</div><div class="bi-val" style="color:var(--teal3)">'+fmt(restante)+'</div></div>'
-          +'<div style="font-size:12px;color:var(--mu);text-align:right">De '+fmt(disp)+' disponível<br>'+fmt(tot)+' já orçado</div>';
-      } else if (restante === 0) {
-        alertEl.className = 'budget-info ok';
-        alertEl.innerHTML = '<div><div class="bi-label">Orçamento totalmente distribuído</div><div class="bi-val" style="color:var(--teal3)">✓ Perfeito</div></div>';
-      } else {
-        alertEl.className = 'budget-info over';
-        alertEl.innerHTML = '<div><div class="bi-label">⚠ Orçamento extrapolado</div><div class="bi-val" style="color:var(--red)">'+fmt(Math.abs(restante))+' acima</div></div>'
-          +'<div style="font-size:12px;color:var(--mu);text-align:right">Disponível: '+fmt(disp)+'<br>Orçado: '+fmt(tot)+'</div>';
-      }
-    } else {
-      alertEl.style.display = 'none';
-    }
+  // ── Barra de progresso orçamento
+  var barEl = document.getElementById('orcProgressBar');
+  if (barEl && orc.renda) {
+    var rendaEsp  = orc.renda || 0;
+    var recMes    = byMonth(user, OM).filter(function(l){ return l.tipo==='Entrada'; }).reduce(function(s,l){ return s+l.valor; },0);
+    var gastoMes  = byMonth(user, OM).filter(function(l){ return l.tipo==='Sa\u00edda'; }).reduce(function(s,l){ return s+l.valor; },0);
+    var pctRec    = rendaEsp>0 ? Math.min(100, recMes/rendaEsp*100) : 0;
+    var pctGasto  = rendaEsp>0 ? Math.min(pctRec, gastoMes/rendaEsp*100) : 0;
+    var pctInv    = rendaEsp>0 ? Math.min(100, invVal/rendaEsp*100) : 0;
+    barEl.innerHTML =
+      '<div style="position:relative;height:14px;background:rgba(100,116,139,.25);border-radius:7px;overflow:hidden;margin-bottom:6px;">'
+      // Verde: receita - gastos, encolhe pela direita conforme gasta
+     +'  <div style="position:absolute;left:0;top:0;bottom:0;width:'+Math.max(0,pctRec-pctGasto)+'%;background:var(--green);opacity:.85;transition:width .4s;"></div>'
+      // Vermelho: gastos, fica à direita do verde (come da direita para esquerda)
+     +'  <div style="position:absolute;left:'+Math.max(0,pctRec-pctGasto)+'%;top:0;bottom:0;width:'+pctGasto+'%;background:var(--red);opacity:.9;transition:left .4s,width .4s;"></div>'
+      // Traço azul: limite do investimento
+     +(pctInv>0 ? '  <div style="position:absolute;left:calc('+pctInv+'% - 1px);top:0;bottom:0;width:3px;background:var(--blue);z-index:2;opacity:.9;" title="Investimento: '+fmt(invVal)+'"></div>' : '')
+     +'</div>'
+     +'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--mu);">'
+     +'  <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block;"></span>Gastos '+fmt(gastoMes)+'</span>'
+     +(pctInv>0?'  <span style="display:flex;align-items:center;gap:4px;"><span style="width:3px;height:10px;border-radius:1px;background:var(--blue);display:inline-block;"></span>Investir '+fmt(invVal)+'</span>':'')
+     +'  <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block;"></span>Receita '+fmt(recMes)+' / '+fmt(rendaEsp)+'</span>'
+     +'</div>';
+  } else if (barEl) {
+    barEl.innerHTML = '';
   }
+
 
   // Params panel
   var pEl = document.getElementById('orcParams');
   if (pEl) {
+    var totColor = restante<0 ? 'var(--red)' : (restante===0 ? 'var(--green)' : 'var(--tx)');
+    var barColor = restante<0 ? 'var(--red)' : (disp>0 && tot/disp>0.9 ? 'var(--warn)' : 'var(--green)');
+    var barWidth = disp>0 ? Math.min(100, tot/disp*100) : 0;
+    var restMsg  = restante<0
+      ? '&#9888; Extrapolado em ' + fmt(-restante)
+      : 'Restam ' + fmt(restante);
+    var restColor = restante<0 ? 'color:var(--red)' : 'color:var(--mu)';
     pEl.innerHTML =
-      '<div class="sr"><span class="slb">Renda Esperada</span><span class="sv">'+fmt(orc.renda||0)+'</span></div>'
-     +'<div class="sr"><span class="slb">Para Investir</span><span class="sv" style="color:var(--teal3)">'+fmt(invVal)+(invMode==='pct'?' ('+orc.invPct+'%)':'')+'</span></div>'
-     +'<div class="sr"><span class="slb">Disponível p/ Gastos</span><span class="sv">'+fmt(disp)+'</span></div>'
-     +'<div class="sr"><span class="slb">Total Orçado</span><span class="sv'+(restante<0?' r':'')+'">'+fmt(tot)+'</span></div>'
-     +'<button class="btn bgh" style="width:100%;margin-top:10px;font-size:12px" onclick="openOrcModal()">Editar Orçamento</button>';
+      '<div style="margin-bottom:14px;">'
+     +'<div style="background:var(--s2);border:1px solid var(--brd);border-radius:var(--rs);padding:12px 14px;margin-bottom:8px;">'
+     +'  <div style="font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--mu);font-weight:600;margin-bottom:4px;">Renda Esperada</div>'
+     +'  <div style="font-family:var(--fh);font-size:20px;font-weight:700;color:var(--tx);">'+fmt(orc.renda||0)+'</div>'
+     +'</div>'
+     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">'
+     +'  <div style="background:var(--s2);border:1px solid var(--brd);border-radius:var(--rs);padding:10px 12px;">'
+     +'    <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);font-weight:600;margin-bottom:3px;">Investir</div>'
+     +'    <div style="font-family:var(--fh);font-size:14px;font-weight:700;color:var(--gold);">'+fmt(invVal)+'</div>'
+     +'  </div>'
+     +'  <div style="background:var(--s2);border:1px solid var(--brd);border-radius:var(--rs);padding:10px 12px;">'
+     +'    <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);font-weight:600;margin-bottom:3px;">Disponível</div>'
+     +'    <div style="font-family:var(--fh);font-size:14px;font-weight:700;color:var(--green);">'+fmt(disp)+'</div>'
+     +'  </div>'
+     +'</div>'
+     +'<div style="background:var(--s2);border:1px solid var(--brd);border-radius:var(--rs);padding:10px 14px;">'
+     +'  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'
+     +'    <span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);font-weight:600;">Total Or&#231;ado</span>'
+     +'    <span style="font-family:var(--fh);font-size:13px;font-weight:700;color:'+totColor+';">'+fmt(tot)+'</span>'
+     +'  </div>'
+     +'  <div style="height:5px;background:var(--s3);border-radius:3px;overflow:hidden;">'
+     +'    <div style="height:100%;border-radius:3px;background:'+barColor+';width:'+barWidth+'%;transition:width .4s;"></div>'
+     +'  </div>'
+     +'  <div style="display:flex;justify-content:space-between;margin-top:4px;">'
+     +'    <span style="font-size:9px;color:var(--mu);">0</span>'
+     +'    <span style="font-size:9px;'+restColor+';">'+restMsg+'</span>'
+     +'  </div>'
+     +'</div>'
+     +'</div>'
+     +'<button class="btn bp" style="width:100%;font-size:12px;letter-spacing:.5px;" onclick="openOrcModal()">&#9998; Editar Or&#231;amento</button>';
   }
 
   // Categories table
@@ -1479,8 +1545,8 @@ function rLanc(user) {
      +'<td style="color:var(--mu);font-size:11px">'+contaCell+'</td>'
      +'<td style="text-align:right;font-weight:600;color:'+valColor+';font-size:12px">'+fmt(l.valor)+'</td>'
      +'<td style="text-align:right;white-space:nowrap">'
-     +'<button class="btn bgh bsm" data-lid="'+l.id+'" onclick="openLancModal(this.dataset.lid)">✏</button> '
-     +'<button class="btn bd bsm" data-lid="'+l.id+'" onclick="delLanc(this.dataset.lid)">✕</button>'
+     +'<button class="btn bgh bsm" data-lid="'+l.id+'" onclick="openLancModal(this.dataset.lid)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button> '
+     +'<button class="btn bd bsm" data-lid="'+l.id+'" onclick="delLanc(this.dataset.lid)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>'
      +'</td>'
      +'</tr>';
   });
@@ -1801,33 +1867,35 @@ function rGestao() {
     if (rendData.some(function(v){return v>0;})) {
       datasets.push({label:'Rendimentos',data:rendData,backgroundColor:'rgba(139,92,246,.7)',borderRadius:4});
     }
-    // Orçado: sempre como linha pontilhada
+
+    // ── Orçado: calcula valores disponíveis por mês ──
     var orcData = months.map(function(m){
       var o = user.orcamento&&user.orcamento[m];
       if (!o) return null;
       var inv = o.invMode==='pct' ? (o.renda||0)*(o.invPct||0)/100 : (o.invVal||0);
       return Math.max(0, (o.renda||0) - inv);
     });
+
+    // Entrada na legenda (sem dados reais — desenhado pelo plugin)
     if (orcData.some(function(v){return v!=null&&v>0;})) {
       datasets.push({
-        label:'Renda Orçada',
-        data:orcData,
+        label:'Renda Or\u00e7ada',
+        data:[],
         type:'line',
-        borderColor:'rgba(245,158,11,.85)',
+        borderColor:'rgba(245,158,11,.9)',
         backgroundColor:'transparent',
         borderWidth:2,
-        borderDash:[6,4],
-        pointRadius:0,
-        tension:0.3,
-        fill:false,
-        order:0
+        borderDash:[5,4],
+        pointRadius:0
       });
     }
+
     gMainChart = new Chart(mc.getContext('2d'), {
       type:'bar',
       data:{labels:labels,datasets:datasets},
       options:{
         responsive:true,maintainAspectRatio:true,
+        orcSegments: orcData,
         plugins:{
           legend:{labels:{color:getComputedStyle(document.documentElement).getPropertyValue('--tx').trim()||'#e2e8f0',font:{size:11},boxWidth:10}},
           tooltip:{callbacks:{label:function(ctx){return ' '+ctx.dataset.label+': '+fmt(ctx.parsed.y);}}}
@@ -1836,9 +1904,39 @@ function rGestao() {
           x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:getComputedStyle(document.documentElement).getPropertyValue('--mu').trim()||'#64748b',font:{size:11}}},
           y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:getComputedStyle(document.documentElement).getPropertyValue('--mu').trim()||'#64748b',font:{size:11},callback:function(v){return 'R$'+Math.round(v/1000)+'k';}}}
         }
-      }
+      },
+      plugins:[{
+        id:'orcSegments',
+        afterDatasetsDraw:function(chart){
+          var segs = chart.options.orcSegments;
+          if (!segs||!segs.some(function(v){return v!=null&&v>0;})) return;
+          var meta0 = chart.getDatasetMeta(0);
+          if (!meta0||!meta0.data||!meta0.data.length) return;
+          var ctx2 = chart.ctx;
+          var yScale = chart.scales.y;
+          ctx2.save();
+          ctx2.strokeStyle = 'rgba(245,158,11,.9)';
+          ctx2.lineWidth = 2;
+          ctx2.setLineDash([5,4]);
+          ctx2.lineCap = 'round';
+          segs.forEach(function(val,idx){
+            if (val==null||val<=0) return;
+            var bar = meta0.data[idx];
+            if (!bar) return;
+            var y  = yScale.getPixelForValue(val);
+            var x1 = bar.x - bar.width/2;
+            var x2 = bar.x + bar.width/2;
+            ctx2.beginPath();
+            ctx2.moveTo(x1,y);
+            ctx2.lineTo(x2,y);
+            ctx2.stroke();
+          });
+          ctx2.restore();
+        }
+      }]
     });
   }
+
 
   // ── Category Donut ──
   if (gCatChart) { try{gCatChart.destroy();}catch(e){} gCatChart=null; }
@@ -1883,14 +1981,23 @@ function rGestao() {
     }).filter(function(d){return d.t>0;}).filter(function(d){ return !filterCat || d.cat===filterCat; }).sort(function(a,b){ if(sortBy==='nome') return a.cat.localeCompare(b.cat); if(sortBy==='pct') return b.t-a.t; return b.t-a.t; });
     if (!cd.length) return '<div class="empty"><p>Sem dados para o período selecionado</p></div>';
     var showMonths = filterM===-1 ? MN.map(function(_,i){return i;}) : [filterM];
-    var hdr = '<tr><th>Categoria</th>'+showMonths.map(function(m){return '<th>'+MS[m]+'</th>';}).join('')+'<th>Total</th>'+(G_DET_VIEW==='pct'&&refTotal>0?'<th>% do tipo</th>':'')+( G_DET_VIEW==='pct'&&totRec>0?'<th>% receita</th>':''  )+'</tr>';
+    var hdr = '<tr><th>Categoria</th>'+showMonths.map(function(m){
+      var mhdr = G_DET_VIEW==='pct' ? MS[m]+'<br><span style="font-size:9px;color:var(--mu);font-weight:400;">% receita</span>' : MS[m];
+      return '<th>'+mhdr+'</th>';
+    }).join('')+'<th>Total</th>'+(G_DET_VIEW==='pct'?'<th>% do tipo</th><th>% receita</th>':'')+'</tr>';
     var bdy = cd.map(function(d){
       var cells = showMonths.map(function(m){
-        var v2=d.v[m];
+        var v2 = d.v[m];
+        var recM = recArr[m];
+        if (G_DET_VIEW==='pct') {
+          var pctVal = (v2 && recM>0) ? (v2/recM*100).toFixed(1)+'%' : '-';
+          var pctColor = tipo==='Sa\u00edda' ? (v2/recM>0.3?'var(--red)':v2/recM>0.15?'var(--warn)':'var(--tx)') : 'var(--green)';
+          return '<td style="font-size:12px;color:'+pctColor+'">'+pctVal+'</td>';
+        }
         return '<td style="font-size:12px">'+(v2?fmt(v2):'-')+'</td>';
       }).join('');
-      var pctTipo = G_DET_VIEW==='pct'&&refTotal>0 ? '<td style="font-size:11px;color:var(--teal3)">'+(d.t/refTotal*100).toFixed(1)+'%</td>' : '';
-      var pctRec = G_DET_VIEW==='pct'&&totRec>0 ? '<td style="font-size:11px;color:var(--mu)">'+(d.t/totRec*100).toFixed(1)+'%</td>' : '';
+      var pctTipo = G_DET_VIEW==='pct'&&refTotal>0 ? '<td style="font-size:11px;color:var(--gold);font-weight:600;">'+(d.t/refTotal*100).toFixed(1)+'%</td>' : '';
+      var pctRec = G_DET_VIEW==='pct'&&totRec>0 ? '<td style="font-size:11px;color:var(--mu);">'+(d.t/totRec*100).toFixed(1)+'%</td>' : '';
       var trendHtml='';
       if(GA_TREND&&showMonths.length>1){
         var vLast=d.v[showMonths[showMonths.length-1]];
@@ -1900,7 +2007,10 @@ function rGestao() {
           trendHtml='<span class="'+(trendPct>0&&tipo==='Saída'?'trend-dn':'trend-up')+'">('+(trendPct>0?'+':'')+trendPct.toFixed(0)+'%)</span>';
         }
       }
-      return '<tr><td><span style="font-size:13px">'+getCatIcon(user,d.cat)+'</span> <strong>'+d.cat+'</strong>'+trendHtml+'</td>'+cells+'<td style="font-weight:700">'+fmt(d.t)+'</td>'+pctTipo+pctRec+'</tr>';
+      var totCell = G_DET_VIEW==='pct' && refTotal>0
+        ? '<td style="font-weight:700;color:var(--gold);">'+(d.t/refTotal*100).toFixed(1)+'%</td>'
+        : '<td style="font-weight:700;">'+fmt(d.t)+'</td>';
+      return '<tr><td><span style="font-size:13px">'+getCatIcon(user,d.cat)+'</span> <strong>'+d.cat+'</strong>'+trendHtml+'</td>'+cells+totCell+pctTipo+pctRec+'</tr>';
     }).join('');
     return '<table class="tbl"><thead>'+hdr+'</thead><tbody>'+bdy+'</tbody></table>';
   }
@@ -2652,20 +2762,23 @@ function fmtM(v) {
 var PATRIM_TAB = 'movel';
 
 function calcPatrim(user) {
+  var inv  = (user.investimentos||[]).reduce(function(s,b){return s+b.valor;},0);
   var bm   = (user.bensMov||[]).reduce(function(s,b){return s+b.valor;},0);
   var bi   = (user.bensImov||[]).reduce(function(s,b){return s+b.valor;},0);
   var dv   = (user.dividas||[]).reduce(function(s,b){return s+b.valor;},0);
-  var liq  = bm + bi - dv;
-  return { bensMov:bm, bensImov:bi, dividas:dv, ativos:bm+bi, liq:liq };
+  var liq  = inv + bm + bi - dv;
+  return { investimentos:inv, bensMov:bm, bensImov:bi, dividas:dv, ativos:inv+bm+bi, liq:liq };
 }
 
 function rCadPatrim() {
   var user = getUser(CU.id);
   var p    = calcPatrim(user);
 
+  var totIN = document.getElementById('totInvestimentos');
   // Totais
   var totBM = document.getElementById('totBensMov');
   var totBI = document.getElementById('totBensImov');
+  if (totIN) totIN.textContent = fmt(p.investimentos);
   var totDV = document.getElementById('totDividas');
   if (totBM) totBM.textContent = fmt(p.bensMov);
   if (totBI) totBI.textContent = fmt(p.bensImov);
@@ -2681,11 +2794,11 @@ function rCadPatrim() {
     cadPL.style.color = p.liq >= 0 ? '#10b981' : 'var(--red)';
   }
 
-  renderBemList('bensMov',  'lstBensMov',  '#10b981');
+  renderBemList('investimentos','lstInvestimentos','var(--blue)');
   renderBemList('bensImov', 'lstBensImov', '#c9a84c');
+  renderBemList('bensMov',  'lstBensMov',  '#10b981');
   renderBemList('dividas',  'lstDividas',  'var(--red)');
 }
-
 function renderBemList(field, elId, color) {
   var user  = getUser(CU.id);
   var items = user[field]||[];
@@ -2791,7 +2904,8 @@ function rPatrimAloc() {
   if (kEl) {
     var debtRatio = p.ativos>0 ? (p.dividas/p.ativos*100).toFixed(1) : '0';
     kEl.innerHTML =
-      '<div class="kpi-card rec"><div class="kpi-label">Bens Móveis</div><div class="kpi-val g">'+fmt(p.bensMov)+'</div><div class="kpi-sub">'+(user.bensMov||[]).length+' item(s)</div></div>'
+      '<div class="kpi-card saldo-pos"><div class="kpi-label">Investimentos</div><div class="kpi-val b">'+fmt(p.investimentos)+'</div><div class="kpi-sub">'+(user.investimentos||[]).length+' ativo(s)</div></div>'
+     +'<div class="kpi-card rec"><div class="kpi-label">Bens Móveis</div><div class="kpi-val g">'+fmt(p.bensMov)+'</div><div class="kpi-sub">'+(user.bensMov||[]).length+' item(s)</div></div>'
      +'<div class="kpi-card inv"><div class="kpi-label">Bens Imóveis</div><div class="kpi-val y">'+fmt(p.bensImov)+'</div><div class="kpi-sub">'+(user.bensImov||[]).length+' item(s)</div></div>'
      +'<div class="kpi-card desp"><div class="kpi-label">Dívidas</div><div class="kpi-val r">'+fmt(p.dividas)+'</div><div class="kpi-sub">Índice: '+debtRatio+'% dos ativos</div></div>'
      +'<div class="kpi-card saldo-pos"><div class="kpi-label">Total Ativos</div><div class="kpi-val b">'+fmt(p.ativos)+'</div><div class="kpi-sub">Bruto sem passivos</div></div>'
@@ -2803,6 +2917,9 @@ function rPatrimAloc() {
   var dc = document.getElementById('patrimDonut');
   if (dc && p.ativos>0) {
     var donutLabels = [], donutData = [], donutColors = [];
+    (user.investimentos||[]).forEach(function(b) {
+      donutLabels.push('📈 '+b.nome); donutData.push(b.valor);
+    });
     (user.bensMov||[]).forEach(function(b) {
       donutLabels.push('🚗 '+b.nome); donutData.push(b.valor); donutColors.push('rgba(16,185,129,'+Math.max(.4,(b.valor/p.bensMov)).toFixed(2)+')');
     });
@@ -2810,9 +2927,11 @@ function rPatrimAloc() {
       donutLabels.push('🏠 '+b.nome); donutData.push(b.valor); donutColors.push('rgba(201,168,76,'+Math.max(.4,(b.valor/Math.max(p.bensImov,1))).toFixed(2)+')');
     });
     // Normalize colors for groups
+    var invColors = ['rgba(59,130,246,.85)','rgba(59,130,246,.6)','rgba(59,130,246,.4)'];
     var bmColors = ['rgba(16,185,129,.85)','rgba(16,185,129,.6)','rgba(16,185,129,.4)','rgba(16,185,129,.25)'];
     var biColors = ['rgba(201,168,76,.85)','rgba(201,168,76,.6)','rgba(201,168,76,.4)'];
     donutColors = [];
+    (user.investimentos||[]).forEach(function(_,i){ donutColors.push(invColors[i%invColors.length]); });
     (user.bensMov||[]).forEach(function(_,i){ donutColors.push(bmColors[i%bmColors.length]); });
     (user.bensImov||[]).forEach(function(_,i){ donutColors.push(biColors[i%biColors.length]); });
 
@@ -2843,11 +2962,12 @@ function rPatrimAloc() {
     chartPatrimBar = new Chart(bc.getContext('2d'), {
       type:'bar',
       data:{
-        labels:['Bens Móveis','Bens Imóveis','Dívidas','Patrimônio Líquido'],
+        labels:['Investimentos','Bens Imóveis','Bens Móveis','Dívidas','Patrimônio Líquido'],
         datasets:[{
           label:'Valor',
-          data:[bmTot, biTot, -dvTot, p.liq],
+          data:[p.investimentos, biTot, bmTot, -dvTot, p.liq],
           backgroundColor:[
+            'rgba(59,130,246,.75)',
             'rgba(16,185,129,.75)',
             'rgba(201,168,76,.75)',
             'rgba(224,92,107,.75)',
