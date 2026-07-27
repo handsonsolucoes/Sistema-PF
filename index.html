@@ -348,10 +348,10 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
 .patr-item-val{font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;}
 .patr-item-del{background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px;transition:color .15s;flex-shrink:0;}
 .patr-item-del:hover{color:var(--red);}
-.patr-add{padding:10px 10px 12px;border-top:1px solid var(--brd);display:flex;flex-direction:column;gap:6px;background:var(--s2);}
-.patr-add input{background:var(--s1);border:1.5px solid var(--brd2);color:var(--tx);padding:6px 8px;border-radius:var(--rs);font-size:11px;outline:none;width:100%;box-sizing:border-box;font-family:var(--fb);transition:border-color .2s;min-width:0;}
+.patr-add{padding:10px 10px 12px;border-top:1px solid var(--brd);display:flex;flex-direction:column;gap:6px;}
+.patr-add input{background:var(--s2);border:1px solid var(--brd);color:var(--tx);padding:7px 10px;border-radius:var(--rs);font-size:12px;outline:none;width:100%;box-sizing:border-box;font-family:var(--fb);transition:border-color .2s;min-width:0;}.patr-add input:focus{border-color:var(--gold);}
 .patr-add input:focus{border-color:var(--gold);}
-.patr-add-row{display:flex;gap:6px;}
+.patr-add-row{display:flex;gap:6px;align-items:center;margin-top:2px;}
 .patr-add button{padding:6px 10px;font-size:11px !important;white-space:nowrap;background:linear-gradient(135deg,var(--navy),var(--gold));border:none;border-radius:var(--rs);color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
 .patr-add button:hover{opacity:.88;}
 .patr-empty{padding:18px;text-align:center;color:var(--mu);font-size:12px;}
@@ -503,34 +503,26 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
       </div>
 
       <!-- ORC x REAL TABLE —— always visible ——  -->
+      <!-- DETALHE POR CATEGORIA -->
       <div class="sec" id="gOrcSection" style="margin-bottom:14px;">
         <div class="sh">
-          <span class="st">Orçado × Realizado — Detalhe Mensal</span>
-          <div class="toggle-pill" id="gOrcViewPill">
-            <button class="active" onclick="setGOrcView('brl')">R$</button>
-            <button onclick="setGOrcView('pct')">% da Receita</button>
+          <span class="st">Detalhe por Categoria</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="toggle-pill" id="gTblPill">
+              <button onclick="setGTable('Saída')" class="active">Despesas</button>
+              <button onclick="setGTable('Entrada')">Receitas</button>
+              <button onclick="setGTable('Rendimento')">Rendimentos</button>
+            </div>
+            <div class="ctrl-sep"></div>
+            <div class="toggle-pill" id="gOrcViewPill">
+              <button class="active" onclick="setGOrcView('brl')">R$</button>
+              <button onclick="setGOrcView('pct')">% da Receita</button>
+            </div>
           </div>
         </div>
         <div id="gOrcTable" style="overflow-x:auto;margin-top:10px;"></div>
-
       </div>
 
-      <!-- SINGLE TABLE WITH TOGGLE -->
-      <div class="sec">
-        <div class="sh">
-          <span class="st">Detalhe por Categoria</span>
-          <div class="toggle-pill" id="gTblPill">
-            <button onclick="setGTable('Sa\u00edda')" class="active">Despesas</button>
-            <button onclick="setGTable('Entrada')">Receitas</button>
-            <button onclick="setGTable('Rendimento')">Rendimentos</button>
-          </div>
-            <div class="toggle-pill" id="gDetViewPill" style="margin-left:8px;">
-              <button class="active" onclick="setGDetView('brl')">R$</button>
-              <button onclick="setGDetView('pct')">% da Receita</button>
-            </div>
-        </div>
-        <div id="gTabMain" style="overflow-x:auto;margin-top:10px;"></div>
-      </div>
     </div>
 
     <!-- ══ FUTURO ══ -->
@@ -758,42 +750,37 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
     <!-- ══ CADASTROS ══ -->
     <div class="pg" id="page-cadastro">
       <div class="ph"><div><h1 class="pt">Cadastros</h1><p class="psub">Categorias e contas — refletem em todo o sistema</p></div></div>
-      <p class="cad-sl">Categorias de transação</p>
-      <div class="cad-grid">
+      <p class="cad-sl">Categorias e Contas</p>
+      <div class="cad-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="cad-col">
+          <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(160,80,255,.15)">🏦</div>Contas </div><span class="badge bpu" id="cntCON">0</span></div>
+          <div class="cad-items" id="lstCON"></div>
+          <div class="cad-add" style="flex-direction:column;gap:6px;">
+            <input type="text" id="iCON_nm" placeholder="Nome da conta (ex: Nubank)" style="width:100%;box-sizing:border-box;" onkeydown="if(event.key==='Enter')addConta()">
+            <input type="number" id="iCON_sl" placeholder="Saldo inicial (R$)" step="0.01" style="width:100%;box-sizing:border-box;" onkeydown="if(event.key==='Enter')addConta()">
+            <button onclick="addConta(">+ Adicionar</button>
+          </div>
+        </div>
         <div class="cad-col">
           <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(46,196,182,.15)">📥</div>Entrada</div><span class="badge bg" id="cntCE">0</span></div>
           <div class="cad-items" id="lstCE"></div>
-          <div class="cad-add"><input type="text" id="iCE" placeholder="Ex: Salário, Freelance..." onkeydown="if(event.key==='Enter')addCad('catEntrada','iCE','lstCE','cntCE')"><button onclick="addCad('catEntrada','iCE','lstCE','cntCE')">+</button></div>
+          <div class="cad-add"><input type="text" id="iCE" placeholder="Ex: Salário, Freelance..." onkeydown="if(event.key==='Enter')addCad('catEntrada','iCE','lstCE','cntCE')"><button onclick="addCad('catEntrada','iCE','lstCE','cntCE'">+ Adicionar</button></div>
         </div>
         <div class="cad-col">
           <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(224,92,107,.15)">📤</div>Saída</div><span class="badge br" id="cntCS">0</span></div>
           <div class="cad-items" id="lstCS"></div>
-          <div class="cad-add"><input type="text" id="iCS" placeholder="Ex: Moradia, Alimentação..." onkeydown="if(event.key==='Enter')addCad('catSaida','iCS','lstCS','cntCS')"><button onclick="addCad('catSaida','iCS','lstCS','cntCS')">+</button></div>
+          <div class="cad-add"><input type="text" id="iCS" placeholder="Ex: Moradia, Alimentação..." onkeydown="if(event.key==='Enter')addCad('catSaida','iCS','lstCS','cntCS')"><button onclick="addCad('catSaida','iCS','lstCS','cntCS'">+ Adicionar</button></div>
         </div>
         <div class="cad-col">
           <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(232,160,32,.15)">📈</div>Rendimento</div><span class="badge by" id="cntCR">0</span></div>
           <div class="cad-items" id="lstCR"></div>
-          <div class="cad-add"><input type="text" id="iCR" placeholder="Ex: Juros, Dividendos..." onkeydown="if(event.key==='Enter')addCad('catRendimento','iCR','lstCR','cntCR')"><button onclick="addCad('catRendimento','iCR','lstCR','cntCR')">+</button></div>
+          <div class="cad-add"><input type="text" id="iCR" placeholder="Ex: Juros, Dividendos..." onkeydown="if(event.key==='Enter')addCad('catRendimento','iCR','lstCR','cntCR')"><button onclick="addCad('catRendimento','iCR','lstCR','cntCR'">+ Adicionar</button></div>
         </div>
-      </div>
-      <p class="cad-sl">Contas bancárias</p>
-      <div class="cad-grid">
-        <div class="cad-col" style="grid-column:span 2">
-          <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(160,80,255,.15)">🏦</div>Contas <span style="font-size:11px;color:var(--mu);font-weight:400;margin-left:5px">(com saldo inicial)</span></div><span class="badge bpu" id="cntCON">0</span></div>
-          <div class="cad-items" id="lstCON"></div>
-          <div class="cad-add" style="gap:7px">
-            <input type="text" id="iCON_nm" placeholder="Nome da conta (ex: Nubank)" style="flex:2" onkeydown="if(event.key==='Enter')addConta()">
-            <input type="number" id="iCON_sl" placeholder="Saldo inicial (R$)" step="0.01" style="flex:1" onkeydown="if(event.key==='Enter')addConta()">
-            <button onclick="addConta()">+</button>
-          </div>
-        </div>
-
       </div>
       <!-- ══ SEÇÃO PATRIMÔNIO ══ -->
       <div class="patr-section">
         <p class="cad-sl" style="margin-top:28px;">Patrimônio</p>
         <div class="patr-grid" style="display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:12px;width:100%;">
-
 
           <!-- INVESTIMENTOS -->
           <div class="patr-col">
@@ -805,16 +792,10 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
               <span class="patr-col-total" id="totInvestimentos" style="background:rgba(59,130,246,.12);color:var(--blue);">R$ 0</span>
             </div>
             <div class="patr-items" id="lstInvestimentos"></div>
-            <div class="patr-add">
-              <input type="text" id="iIN_nm" placeholder="Nome (ex: CDB Itaú, Tesouro Direto)">
-              <input type="text" id="iIN_ds" placeholder="Descrição (ex: Venc. 2026, LCA 90%)">
-              <div class="patr-add-row">
-                <input type="number" id="iIN_vl" placeholder="Valor atual (R$)" step="100" style="flex:1;">
-                <button onclick="addBem('investimentos','iIN_nm','iIN_ds','iIN_vl')">+ Adicionar</button>
-              </div>
+            <div style="padding:10px 12px;border-top:1px solid var(--brd);">
+              <button onclick="openPatrimModal('investimentos','Nome (ex: CDB Itaú, Tesouro Direto)','Descrição (ex: Venc. 2026, LCA 90%)','Valor atual (R$)')" style="width:100%;padding:8px 12px;background:transparent;border:1px solid var(--brd2);border-radius:var(--rs);color:var(--mu);font-size:12px;font-family:var(--fb);cursor:pointer;transition:all .2s;" onmouseenter="this.style.background='var(--s2)';this.style.color='var(--tx)'" onmouseleave="this.style.background='transparent';this.style.color='var(--mu)'">+ Adicionar</button>
             </div>
           </div>
-
 
           <!-- BENS IMÓVEIS -->
           <div class="patr-col">
@@ -826,13 +807,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
               <span class="patr-col-total" id="totBensImov" style="background:rgba(201,168,76,.12);color:#c9a84c;">R$ 0</span>
             </div>
             <div class="patr-items" id="lstBensImov"></div>
-            <div class="patr-add">
-              <input type="text" id="iBI_nm" placeholder="Nome (ex: Apartamento Jardins)">
-              <input type="text" id="iBI_ds" placeholder="Descrição (ex: 80m² financiado)">
-              <div class="patr-add-row">
-                <input type="number" id="iBI_vl" placeholder="Valor de mercado (R$)" step="1000" style="flex:1;">
-                <button onclick="addBem('bensImov','iBI_nm','iBI_ds','iBI_vl')">+ Adicionar</button>
-              </div>
+            <div style="padding:10px 12px;border-top:1px solid var(--brd);">
+              <button onclick="openPatrimModal('bensImov','Nome (ex: Apartamento Jardins)','Descrição (ex: 80m² financiado)','Valor de mercado (R$)')" style="width:100%;padding:8px 12px;background:transparent;border:1px solid var(--brd2);border-radius:var(--rs);color:var(--mu);font-size:12px;font-family:var(--fb);cursor:pointer;transition:all .2s;" onmouseenter="this.style.background='var(--s2)';this.style.color='var(--tx)'" onmouseleave="this.style.background='transparent';this.style.color='var(--mu)'">+ Adicionar</button>
             </div>
           </div>
 
@@ -846,13 +822,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
               <span class="patr-col-total" id="totBensMov" style="background:rgba(16,185,129,.12);color:#10b981;">R$ 0</span>
             </div>
             <div class="patr-items" id="lstBensMov"></div>
-            <div class="patr-add">
-              <input type="text" id="iBM_nm" placeholder="Nome (ex: Honda Civic 2022)">
-              <input type="text" id="iBM_ds" placeholder="Descrição (ex: Veículo quitado)">
-              <div class="patr-add-row">
-                <input type="number" id="iBM_vl" placeholder="Valor (R$)" step="100" style="flex:1;">
-                <button onclick="addBem('bensMov','iBM_nm','iBM_ds','iBM_vl')">+ Adicionar</button>
-              </div>
+            <div style="padding:10px 12px;border-top:1px solid var(--brd);">
+              <button onclick="openPatrimModal('bensMov','Nome (ex: Honda Civic 2022)','Descrição (ex: Veículo quitado)','Valor (R$)')" style="width:100%;padding:8px 12px;background:transparent;border:1px solid var(--brd2);border-radius:var(--rs);color:var(--mu);font-size:12px;font-family:var(--fb);cursor:pointer;transition:all .2s;" onmouseenter="this.style.background='var(--s2)';this.style.color='var(--tx)'" onmouseleave="this.style.background='transparent';this.style.color='var(--mu)'">+ Adicionar</button>
             </div>
           </div>
 
@@ -866,17 +837,37 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
               <span class="patr-col-total" id="totDividas" style="background:rgba(224,92,107,.12);color:var(--red);">R$ 0</span>
             </div>
             <div class="patr-items" id="lstDividas"></div>
-            <div class="patr-add">
-              <input type="text" id="iDV_nm" placeholder="Nome (ex: Financiamento CEF)">
-              <input type="text" id="iDV_ds" placeholder="Descrição (ex: Saldo devedor atual)">
-              <div class="patr-add-row">
-                <input type="number" id="iDV_vl" placeholder="Valor total da dívida (R$)" step="100" style="flex:1;">
-                <button onclick="addBem('dividas','iDV_nm','iDV_ds','iDV_vl')">+ Adicionar</button>
-              </div>
+            <div style="padding:10px 12px;border-top:1px solid var(--brd);">
+              <button onclick="openPatrimModal('dividas','Nome (ex: Financiamento CEF)','Descrição (ex: Saldo devedor atual)','Valor total da dívida (R$)')" style="width:100%;padding:8px 12px;background:transparent;border:1px solid var(--brd2);border-radius:var(--rs);color:var(--mu);font-size:12px;font-family:var(--fb);cursor:pointer;transition:all .2s;" onmouseenter="this.style.background='var(--s2)';this.style.color='var(--tx)'" onmouseleave="this.style.background='transparent';this.style.color='var(--mu)'">+ Adicionar</button>
             </div>
           </div>
 
         </div><!-- /patr-grid -->
+
+        <!-- MODAL ADICIONAR ITEM PATRIMÔNIO -->
+        <div id="mPatrim" class="mo" style="display:none;">
+          <div class="modal" style="width:420px;max-width:95vw;">
+            <div class="mt2" id="mPatrimTit">Adicionar item</div>
+            <div class="ir" style="grid-template-columns:1fr;gap:12px;">
+              <div class="ig">
+                <label>Nome</label>
+                <input type="text" id="pNm" style="width:100%;">
+              </div>
+              <div class="ig">
+                <label>Descrição</label>
+                <input type="text" id="pDs" style="width:100%;">
+              </div>
+              <div class="ig">
+                <label id="pVlLabel">Valor (R$)</label>
+                <input type="number" id="pVl" step="100" min="0" style="width:100%;">
+              </div>
+            </div>
+            <div class="ma">
+              <button class="bs" onclick="closeModal('mPatrim')">Cancelar</button>
+              <button class="bp" onclick="confirmPatrimAdd()">Adicionar</button>
+            </div>
+          </div>
+        </div>
 
         <!-- RESUMO PATRIMÔNIO LÍQUIDO -->
         <div style="margin-top:14px;padding:14px 18px;background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
@@ -2015,8 +2006,8 @@ function rGestao() {
     return '<table class="tbl"><thead>'+hdr+'</thead><tbody>'+bdy+'</tbody></table>';
   }
   var catMap = {'Entrada':user.catEntrada||[],'Saída':user.catSaida||[],'Rendimento':user.catRendimento||[]};
-  var gTab = document.getElementById('gTabMain');
-  if (gTab) gTab.innerHTML = buildTableG(catMap[GA_TABLE]||[], GA_TABLE);
+  // gTabMain removed — using gOrcTable as unified table
+
 
   // ── Orçado × Realizado table (always visible)
   var orcTbl = document.getElementById('gOrcTable');
@@ -2029,7 +2020,9 @@ function rGestao() {
     if (!activeMths.length) {
       orcTbl.innerHTML = '<div class="empty"><p>Sem dados de orçamento para exibir</p></div>';
     } else {
-      var cats = user.catSaida||[];
+    var catMap2 = {'Entrada':user.catEntrada||[],'Sa\u00edda':user.catSaida||[],'Rendimento':user.catRendimento||[]};
+    var cats = catMap2[GA_TABLE]||[];
+    var tipoOrc = GA_TABLE;
       // Header
       var hdr = '<tr><th>Categoria</th>'
         + activeMths.map(function(m){ return '<th style="text-align:center">'+MS[m]+'<br><span style="font-size:9px;color:var(--mu);font-weight:400;">Orc / Real</span></th>'; }).join('')
@@ -2038,8 +2031,9 @@ function rGestao() {
       var bdy = cats.map(function(cat){
         var hasData = false;
         var cells = activeMths.map(function(m){
-          var orc   = user.orcamento&&user.orcamento[m]&&user.orcamento[m].cats ? (user.orcamento[m].cats[cat]||0) : 0;
-          var real  = byMonth(user,m).filter(function(l){return l.tipo==='Saída'&&l.cat===cat;}).reduce(function(s,l){return s+l.valor;},0);
+          var orc = tipoOrc==='Sa\u00edda' && user.orcamento&&user.orcamento[m]&&user.orcamento[m].cats
+            ? (user.orcamento[m].cats[cat]||0) : 0;
+          var real  = byMonth(user,m).filter(function(l){return l.tipo===tipoOrc&&l.cat===cat;}).reduce(function(s,l){return s+l.valor;},0);
           var recM  = recArr[m];
           var ok    = real<=orc&&orc>0;
           var over  = real>orc&&orc>0;
@@ -3161,6 +3155,51 @@ function setGOrcView(v) {
   if (btns[0]) btns[0].classList.toggle('active', v==='brl');
   if (btns[1]) btns[1].classList.toggle('active', v==='pct');
   rGestao();
+}
+
+
+// ══════════════════════════════════════════════════════
+// PATRIMÔNIO — modal de adição
+// ══════════════════════════════════════════════════════
+var _patrimField = '';
+var _patrimVlLabel = '';
+
+function openPatrimModal(field, nmPh, dsPh, vlPh) {
+  _patrimField = field;
+  var titles = {
+    investimentos: '📈 Adicionar Investimento',
+    bensImov:      '🏠 Adicionar Bem Imóvel',
+    bensMov:       '🚗 Adicionar Bem Móvel',
+    dividas:       '💳 Adicionar Dívida'
+  };
+  document.getElementById('mPatrimTit').textContent = titles[field] || 'Adicionar item';
+  document.getElementById('pNm').placeholder = nmPh;
+  document.getElementById('pDs').placeholder = dsPh;
+  document.getElementById('pVlLabel').textContent = vlPh;
+  document.getElementById('pVl').placeholder = '';
+  document.getElementById('pNm').value = '';
+  document.getElementById('pDs').value = '';
+  document.getElementById('pVl').value = '';
+  openModal('mPatrim');
+  setTimeout(function(){ document.getElementById('pNm').focus(); }, 100);
+}
+
+function confirmPatrimAdd() {
+  var nm = document.getElementById('pNm').value.trim();
+  var ds = document.getElementById('pDs').value.trim();
+  var vl = parseFloat(document.getElementById('pVl').value) || 0;
+  if (!nm || vl <= 0) {
+    document.getElementById('pNm').style.borderColor = nm ? '' : 'var(--red)';
+    document.getElementById('pVl').style.borderColor = vl > 0 ? '' : 'var(--red)';
+    return;
+  }
+  var user = getUser(CU.id);
+  if (!user[_patrimField]) user[_patrimField] = [];
+  user[_patrimField].push({ id: uid(), nome: nm, desc: ds, valor: vl });
+  saveUser(user); CU = getUser(user.id);
+  closeModal('mPatrim');
+  rCadPatrim();
+  rPatrimAloc();
 }
 
 function toggleTheme() {
