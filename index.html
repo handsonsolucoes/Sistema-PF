@@ -167,13 +167,13 @@ body{
 }
 [data-theme="dark"] .sb-toggle-btn{background:#0a1728;}
 .sb-toggle-btn:hover{background:var(--s3);}
-.sb-hidden .sb-toggle-btn{left:0;border-left:1px solid var(--brd2);border-radius:0 5px 5px 0;}
+body.sb-hidden .sb-toggle-btn{left:0;border-left:1px solid var(--brd2);border-radius:0 5px 5px 0;}
 .sb-toggle-btn svg{transition:transform .28s;color:var(--mu);}
-.sb-hidden .sb-toggle-btn svg{transform:rotate(180deg);}
+body.sb-hidden .sb-toggle-btn svg{transform:rotate(180deg);}
 
 /* ═══ MAIN CONTENT ══════════════════════════════════════ */
 .main{margin-left:var(--sb-w);min-height:100vh;padding:24px 28px 40px;transition:margin-left .28s cubic-bezier(.4,0,.2,1);}
-.sb-hidden ~ .main,.sb-hidden+* .main{margin-left:0;}
+body.sb-hidden .main{margin-left:0;}
 .sb.hidden ~ .main{margin-left:0;}
 .pg{display:none;animation:up .22s ease;}.pg.active{display:block;}
 .ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--brd);}
@@ -2646,29 +2646,24 @@ function rFuturo() {
   var curM = now.getMonth();
   var curY = nowYear;
 
-  // ── Primeiro data point alinhado ao mes de aniversario
+  // Birthday month for x-axis tick alignment
   var birthMonth = (birthDate && !isNaN(birthDate)) ? birthDate.getMonth() : curM;
-  // Meses até o proximo aniversario (minimo 1)
-  var mesToBday = ((birthMonth - curM + 12) % 12) || 12;
+  var mesToBday  = ((birthMonth - curM + 12) % 12) || 12;  // months to next birthday
 
   var saldoVerde = patrimonioNaRet;
   var saldoIdeal = C;
   var retiroVerde = false;
   var retiroIdeal = false;
 
-  var maxAnos = Math.ceil(maxMeses / 12);
+  for (var t = 1; t <= maxMeses; t++) {
+    var ptMonth = (curM + t) % 12;
+    var ptYear  = curY + Math.floor((curM + t) / 12);
 
-  for (var ano = 0; ano < maxAnos; ano++) {
-    // t = meses desde hoje até este aniversario
-    var t = mesToBday + ano * 12;
-    if (t > maxMeses) break;
-
-    var ageAtT  = currentAgeExact + t / 12;
-    var ageInt  = Math.round(ageAtT);
-    var ptY     = curY + Math.floor((curM + t) / 12);
-
-    // Label apenas em idades multiplas de 5
-    labels.push(ageInt % 5 === 0 ? ageInt + 'a' : '');
+    // Label: show age every 5 years, aligned to birthday month
+    var ageAtT = currentAgeExact + t / 12;
+    var ageInt = Math.round(ageAtT);
+    var isBday = (t % 12 === mesToBday % 12);
+    labels.push(isBday && ageInt % 5 === 0 ? ageInt + 'a' : '');
 
     // ── AZUL
     if (t <= mesesAteRet) {
@@ -2680,47 +2675,39 @@ function rFuturo() {
 
     // ── VERDE
     if (t <= mesesAteRet) {
-      var pvG = V0 * Math.pow(1+r1, t) + (r1 > 0 ? invMensal * (Math.pow(1+r1,t)-1)/r1 : invMensal*t);
-      patrimProj.push(Math.round(showNeg ? pvG : Math.max(0, pvG)));
-      saldoVerde = Math.max(0, pvG);
+      var pv = V0 * Math.pow(1+r1, t) + (r1 > 0 ? invMensal * (Math.pow(1+r1,t)-1)/r1 : invMensal*t);
+      patrimProj.push(Math.round(showNeg ? pv : Math.max(0, pv)));
     } else {
       if (!retiroVerde) { saldoVerde = patrimonioNaRet; retiroVerde = true; }
-      for (var m = 0; m < 12; m++) {
-        saldoVerde = saldoVerde * (1+r2) - rendaLiq;
-        if (!showNeg && saldoVerde < 0) { saldoVerde = 0; break; }
-      }
-      patrimProj.push(Math.round(showNeg ? saldoVerde : Math.max(0, saldoVerde)));
+      saldoVerde = saldoVerde * (1+r2) - rendaLiq;
+      if (!showNeg && saldoVerde < 0) saldoVerde = 0;
+      patrimProj.push(Math.round(saldoVerde));
     }
 
     // ── LARANJA
     if (t <= mesesAteRet) {
-      var pvI = V0 * Math.pow(1+r1, t) + (r1 > 0 ? invNecessario * (Math.pow(1+r1,t)-1)/r1 : invNecessario*t);
-      aposentId.push(Math.round(Math.max(0, pvI)));
-      saldoIdeal = Math.max(0, pvI);
+      var pi = V0 * Math.pow(1+r1, t) + (r1 > 0 ? invNecessario * (Math.pow(1+r1,t)-1)/r1 : invNecessario*t);
+      aposentId.push(Math.round(Math.max(0, pi)));
     } else {
       if (!retiroIdeal) { saldoIdeal = C; retiroIdeal = true; }
-      for (var mi = 0; mi < 12; mi++) {
-        saldoIdeal = saldoIdeal * (1+r2) - rendaLiq;
-        if (!showNeg && saldoIdeal < 0) { saldoIdeal = 0; break; }
-      }
+      saldoIdeal = saldoIdeal * (1+r2) - rendaLiq;
+      if (!showNeg && saldoIdeal < 0) saldoIdeal = 0;
       aposentId.push(Math.round(Math.max(0, saldoIdeal)));
     }
   }
 
-
-  // ── Idade em que a linha verde (patrimProj) chega a zero
+  // ── Idade em que a linha verde chega a zero
   for (var kai = 0; kai < patrimProj.length; kai++) {
     if (patrimProj[kai] === 0 && kai > 0 && (patrimProj[kai-1]||0) > 0) {
-      // t = kai+1 (1-based), months from now
-      acabaAge = Math.floor(currentAgeExact + (mesToBday + kai * 12) / 12);
+      acabaAge = Math.floor(currentAgeExact + (kai + 1) / 12);
       break;
     }
   }
   // ── Análises
   var maxPatrim    = Math.max.apply(null, patrimProj);
   var maxPatrimIdx = patrimProj.indexOf(maxPatrim);           // 0-based, mês 1-based
-  var maxPatrimAge = Math.floor(currentAgeExact + (mesToBday + maxPatrimIdx * 12) / 12);
-  var maxPatrimYr  = curY + Math.floor((curM + mesToBday + maxPatrimIdx * 12) / 12);
+  var maxPatrimAge = Math.floor(currentAgeExact + (maxPatrimIdx + 1) / 12);
+  var maxPatrimYr  = curY + Math.floor((curM + maxPatrimIdx + 1) / 12);
   var metaOk       = patrimonioNaRet >= C;
   var cobertura    = C > 0 ? Math.min(200, patrimonioNaRet/C*100) : 100;
 
@@ -2778,7 +2765,7 @@ function rFuturo() {
   if (!cv) return;
 
   // Linha de aposentadoria no índice correto
-  var aposentLineIdx = Math.round((mesesAteRet - mesToBday) / 12);
+  var aposentLineIdx = mesesAteRet - 1;
 
   fChart = new Chart(cv.getContext('2d'), {
     type: 'line',
@@ -2824,7 +2811,7 @@ function rFuturo() {
           bodySpacing: 5,
           callbacks: {
             title: function(ctx) {
-              var t    = mesToBday + ctx[0].dataIndex * 12;
+              var t    = ctx[0].dataIndex + 1;   // 1-based month offset from today
               var ptM  = (curM + t) % 12;
               var ptY  = curY + Math.floor((curM + t) / 12);
               // Idade exata em anos + meses
@@ -2855,12 +2842,11 @@ function rFuturo() {
         x: {
           grid: { color: 'rgba(255,255,255,.03)' },
           ticks: {
-            color: '#8fa3bf', font: { size: 10 }, autoSkip: false, maxRotation: 0,
-            padding: 4,
-            callback: function(val, idx) {
-              var lbl = labels[idx];
-              return lbl ? lbl : null;
-            }
+            color: function(ctx) {
+              return labels[ctx.index] ? '#8fa3bf' : 'transparent';
+            },
+            font: { size: 10 }, autoSkip: false, maxRotation: 0, padding: 4,
+            callback: function(val, idx) { return labels[idx] || null; }
           }
         },
         y: {
