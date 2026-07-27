@@ -2564,6 +2564,7 @@ function rFuturo() {
   var rateRet   = parseFloat(retREl ? retREl.value : 3.5) || 3.5;
   var vidaAge   = parseInt(vidaEl ? vidaEl.value : 90) || 90;
   if (vidaAge <= retAge) vidaAge = retAge + 10;
+  if (vidaAge > 110) vidaAge = 110;
   var V0        = parseFloat(valIniEl ? valIniEl.value : 0) || 0;
   // Clamp rates to valid ranges
   rateAcum = Math.max(0.5, Math.min(20, rateAcum || 5.5));
@@ -2614,7 +2615,7 @@ function rFuturo() {
   }
   var maxMeses    = F_PERIOD > 0
     ? F_PERIOD * 12
-    : (130 - currentAge) * 12;
+    : (110 - currentAge) * 12;
 
   // ── Capital necessário na aposentadoria (usando r2)
   var mesesRet100 = (vidaAge - retAge) * 12;
@@ -2636,94 +2637,90 @@ function rFuturo() {
     ? Math.max(0, (C - fvV0) * r1 / (fnRet - 1))
     : Math.max(0, mesesAteRet > 0 ? (C - V0) / mesesAteRet : 0);
 
-  // ══════════════════════════════════════════════════════
-  // ══════════════════════════════════════════════════════
-  // BUILD DATA ARRAYS — passo mensal, início = próximo mês
-  // ══════════════════════════════════════════════════════
   var MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   var labels     = [];
   var patrimProj = [];
   var capitalInv = [];
   var aposentId  = [];
 
-  // Mês e ano de início (próximo mês)
-  var startMonth = now.getMonth() + 1; // 0-based → próximo mês (0-based)
-  if (startMonth > 11) { startMonth = 0; }
-  var startYear  = startMonth === 0 ? nowYear + 1 : nowYear;
-  // Correto: se o mês atual é dezembro (11), próximo é jan do ano seguinte
-  var curM = now.getMonth();   // mês atual 0-based
+  var curM = now.getMonth();
   var curY = nowYear;
 
-  // Saldos para fase de retirada (acompanhados mês a mês)
+  // ── Primeiro data point alinhado ao mes de aniversario
+  var birthMonth = (birthDate && !isNaN(birthDate)) ? birthDate.getMonth() : curM;
+  // Meses até o proximo aniversario (minimo 1)
+  var mesToBday = ((birthMonth - curM + 12) % 12) || 12;
+
   var saldoVerde = patrimonioNaRet;
   var saldoIdeal = C;
   var retiroVerde = false;
   var retiroIdeal = false;
 
-  for (var t = 1; t <= maxMeses; t++) {
-    // Mês e ano deste ponto
-    var ptMonth = (curM + t) % 12;        // 0-based
-    var ptYear  = curY + Math.floor((curM + t) / 12);
+  var maxAnos = Math.ceil(maxMeses / 12);
 
-    // Label — idade a cada 5 anos
-    var ageAtT = currentAge + t / 12;
-    var nearAge = Math.round(ageAtT);
-    if (nearAge % 5 === 0 && Math.abs(ageAtT - nearAge) < 0.5) {
-      labels.push(nearAge + 'a');
-    } else { labels.push(''); }
+  for (var ano = 0; ano < maxAnos; ano++) {
+    // t = meses desde hoje até este aniversario
+    var t = mesToBday + ano * 12;
+    if (t > maxMeses) break;
 
-    // ── AZUL: capital investido
-    // Acumulação: cresce com aportes; Retirada: decresce por rendaLiq/mês
+    var ageAtT  = currentAgeExact + t / 12;
+    var ageInt  = Math.round(ageAtT);
+    var ptY     = curY + Math.floor((curM + t) / 12);
+
+    // Label apenas em idades multiplas de 5
+    labels.push(ageInt % 5 === 0 ? ageInt + 'a' : '');
+
+    // ── AZUL
     if (t <= mesesAteRet) {
       capitalInv.push(Math.round(V0 + invMensal * t));
     } else {
-      var mRetiro = t - mesesAteRet;
-      var capRet  = V0 + invMensal * mesesAteRet;
-      capitalInv.push(Math.round(Math.max(0, capRet - rendaLiq * mRetiro)));
+      var mRet = t - mesesAteRet;
+      capitalInv.push(Math.round(Math.max(0, V0 + invMensal * mesesAteRet - rendaLiq * mRet)));
     }
 
-    // ── Cache do fator composto para Verde / Laranja
-    var fnT = (t <= mesesAteRet) ? Math.pow(1+r1, t) : 0;
-
-    // ── VERDE: projetado com rendimento composto
-    // Acumulação: FV = V0*(1+r1)^t + invMensal*((1+r1)^t - 1)/r1
+    // ── VERDE
     if (t <= mesesAteRet) {
-      var pv = V0 * fnT + (r1 > 0 ? invMensal * (fnT-1) / r1 : invMensal * t);
-      patrimProj.push(Math.round(showNeg ? pv : Math.max(0, pv)));
+      var pvG = V0 * Math.pow(1+r1, t) + (r1 > 0 ? invMensal * (Math.pow(1+r1,t)-1)/r1 : invMensal*t);
+      patrimProj.push(Math.round(showNeg ? pvG : Math.max(0, pvG)));
+      saldoVerde = Math.max(0, pvG);
     } else {
       if (!retiroVerde) { saldoVerde = patrimonioNaRet; retiroVerde = true; }
-      saldoVerde = saldoVerde * (1+r2) - rendaLiq;
-      if (!showNeg && saldoVerde < 0) saldoVerde = 0;
-      patrimProj.push(Math.round(saldoVerde));
+      for (var m = 0; m < 12; m++) {
+        saldoVerde = saldoVerde * (1+r2) - rendaLiq;
+        if (!showNeg && saldoVerde < 0) { saldoVerde = 0; break; }
+      }
+      patrimProj.push(Math.round(showNeg ? saldoVerde : Math.max(0, saldoVerde)));
     }
 
-    // ── LARANJA: trajetória ideal usando invNecessario
-    // Mesma fórmula do verde mas com PMT = invNecessario
-    // Garante que laranja(mesesAteRet) = C (capital meta na aposentadoria)
+    // ── LARANJA
     if (t <= mesesAteRet) {
-      var pi = V0 * fnT + (r1 > 0 ? invNecessario * (fnT-1) / r1 : invNecessario * t);
-      aposentId.push(Math.round(Math.max(0, pi)));
+      var pvI = V0 * Math.pow(1+r1, t) + (r1 > 0 ? invNecessario * (Math.pow(1+r1,t)-1)/r1 : invNecessario*t);
+      aposentId.push(Math.round(Math.max(0, pvI)));
+      saldoIdeal = Math.max(0, pvI);
     } else {
       if (!retiroIdeal) { saldoIdeal = C; retiroIdeal = true; }
-      saldoIdeal = saldoIdeal * (1+r2) - rendaLiq;
-      if (!showNeg && saldoIdeal < 0) saldoIdeal = 0;
+      for (var mi = 0; mi < 12; mi++) {
+        saldoIdeal = saldoIdeal * (1+r2) - rendaLiq;
+        if (!showNeg && saldoIdeal < 0) { saldoIdeal = 0; break; }
+      }
       aposentId.push(Math.round(Math.max(0, saldoIdeal)));
     }
   }
+
 
   // ── Idade em que a linha verde (patrimProj) chega a zero
   for (var kai = 0; kai < patrimProj.length; kai++) {
     if (patrimProj[kai] === 0 && kai > 0 && (patrimProj[kai-1]||0) > 0) {
       // t = kai+1 (1-based), months from now
-      acabaAge = Math.floor(currentAge + (kai + 1) / 12);
+      acabaAge = Math.floor(currentAgeExact + (mesToBday + kai * 12) / 12);
       break;
     }
   }
   // ── Análises
   var maxPatrim    = Math.max.apply(null, patrimProj);
   var maxPatrimIdx = patrimProj.indexOf(maxPatrim);           // 0-based, mês 1-based
-  var maxPatrimAge = currentAge + (maxPatrimIdx + 1) / 12;
-  var maxPatrimYr  = curY + Math.floor((curM + maxPatrimIdx + 1) / 12);
+  var maxPatrimAge = Math.floor(currentAgeExact + (mesToBday + maxPatrimIdx * 12) / 12);
+  var maxPatrimYr  = curY + Math.floor((curM + mesToBday + maxPatrimIdx * 12) / 12);
   var metaOk       = patrimonioNaRet >= C;
   var cobertura    = C > 0 ? Math.min(200, patrimonioNaRet/C*100) : 100;
 
@@ -2781,7 +2778,7 @@ function rFuturo() {
   if (!cv) return;
 
   // Linha de aposentadoria no índice correto
-  var aposentLineIdx = mesesAteRet - 1;  // índice mensal (0-based)
+  var aposentLineIdx = Math.round((mesesAteRet - mesToBday) / 12);
 
   fChart = new Chart(cv.getContext('2d'), {
     type: 'line',
@@ -2827,7 +2824,7 @@ function rFuturo() {
           bodySpacing: 5,
           callbacks: {
             title: function(ctx) {
-              var t    = ctx[0].dataIndex + 1;         // mês 1-based
+              var t    = mesToBday + ctx[0].dataIndex * 12;
               var ptM  = (curM + t) % 12;
               var ptY  = curY + Math.floor((curM + t) / 12);
               // Idade exata em anos + meses
@@ -2858,12 +2855,14 @@ function rFuturo() {
         x: {
           grid: { color: 'rgba(255,255,255,.03)' },
           ticks: {
-            color: '#64748b', font: { size: 10 }, maxTicksLimit: 25,
+            color: '#8fa3bf', font: { size: 10 }, autoSkip: false, maxRotation: 0,
+            padding: 4,
             callback: function(val, idx) {
-            color: '#64748b', font: { size: 10 }, autoSkip: false, maxRotation: 0,
-            callback: function(val, idx) {
-              return labels[idx] || '';
+              var lbl = labels[idx];
+              return lbl ? lbl : null;
             }
+          }
+        },
         y: {
           grid: { color: 'rgba(255,255,255,.04)' },
           ticks: { color: '#64748b', font: { size: 10 }, callback: function(v){ return fmtM(v); } }
