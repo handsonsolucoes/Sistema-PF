@@ -240,7 +240,7 @@ body.sb-hidden .main { margin-left:0; }
 .kpi-card.saldo-neg::after { background:var(--red); }
 .kpi-card.inv::after { background:var(--warn); }
 .kpi-label { font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:7px;font-weight:600; }
-.kpi-val { font-size:20px;font-weight:600;letter-spacing:-.3px;line-height:1.1; }
+.kpi-val { font-size:17px;font-weight:600;letter-spacing:-.3px;line-height:1.2; }
 .kpi-val.g { color:var(--green); } .kpi-val.r { color:var(--red); } .kpi-val.b { color:var(--gold); } .kpi-val.p { color:var(--purp); }
 .kpi-sub { font-size:11px;color:var(--mu);margin-top:4px; }
 
@@ -395,6 +395,18 @@ body.sb-hidden .main { margin-left:0; }
   .patr-grid,.cad-grid { grid-template-columns:1fr; }
   .patr-kpi-row { grid-template-columns:1fr 1fr; }
 }
+#fInsight { grid-template-columns:repeat(4,1fr) !important; align-items:stretch; overflow:visible; }
+#fInsight .kpi-card { padding:10px 14px; box-sizing:border-box; overflow:visible; }
+#fInsight .kpi-val { font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#fInsight .kpi-sub { font-size:10px; }
+#fInsight .kpi-label { font-size:9px; margin-bottom:4px; }
+.kpi-info-icon{position:relative;display:inline-flex;align-items:center;cursor:help;margin-left:6px;opacity:.5;vertical-align:middle;transition:opacity .15s;}
+.kpi-info-icon:hover{opacity:1;}
+.kpi-info-icon .kpi-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a2640;border:1px solid var(--brd2);border-radius:6px;padding:8px 12px;font-size:11px;color:var(--tx);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4);}
+.kpi-info-icon:hover .kpi-tooltip{opacity:1;}
+.kpi-tooltip-row{display:flex;justify-content:space-between;gap:16px;line-height:1.8;}
+.kpi-tooltip-row span:first-child{color:var(--mu);font-size:10px;}
+.kpi-tooltip-row span:last-child{font-weight:600;}
 </style>
 </head>
 <body>
@@ -514,7 +526,7 @@ body.sb-hidden .main { margin-left:0; }
       <div class="dash-chart-row">
         <div class="dash-chart-box">
           <div class="dash-chart-title" id="gChartTitle">Receitas × Despesas Mensais</div>
-          <canvas id="gMainChart" height="160"></canvas>
+          <canvas id="gMainChart" height="160" style="max-height:200px;"></canvas>
         </div>
         <div class="dash-chart-box">
           <div class="dash-chart-title">Composição de Despesas</div>
@@ -552,7 +564,8 @@ body.sb-hidden .main { margin-left:0; }
       </div>
 
       <!-- INSIGHT CARD -->
-      <div id="fInsight" class="kpi-grid" style="margin-bottom:16px;grid-template-columns:1fr 1fr 1fr 1fr;"></div>
+      <div id="fInsight" class="kpi-grid" style="margin-bottom:16px;grid-template-columns:repeat(4,1fr);"></div>
+
 
       <!-- MAIN CONTENT -->
       <div style="display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start;">
@@ -588,7 +601,7 @@ body.sb-hidden .main { margin-left:0; }
               <span>Independência Financeira</span>
               <span style="font-size:10px;color:var(--mu);">taxa: <span id="fRateLabel">8% a.a.</span></span>
             </div>
-            <canvas id="fChart" style="display:block;width:100%;"></canvas>
+            <canvas id="fChart" style="display:block;width:100%;height:320px;"></canvas>
             <div style="display:flex;gap:18px;margin-top:12px;flex-wrap:wrap;">
               <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mu);"><span style="width:10px;height:10px;border-radius:2px;background:rgba(16,185,129,.7);display:inline-block;"></span>Patrimônio Projetado</div>
               <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mu);"><span style="width:10px;height:10px;border-radius:2px;background:rgba(59,130,246,.5);display:inline-block;"></span>Capital Investido</div>
@@ -724,18 +737,28 @@ body.sb-hidden .main { margin-left:0; }
     <div class="pg" id="page-alocacao">
       <div class="ph"><div><h1 class="pt">Alocação</h1><p class="psub">Saldo das contas e composição do patrimônio</p></div></div>
       <div class="cg" id="alocCards"></div>
-      <div class="chart-row">
+      <div class="chart-row" style="grid-template-columns:1fr 280px;align-items:stretch;">
         <div class="chart-box">
+          <div class="chart-title">Patrimônio Mês a Mês</div>
+          <canvas id="chartPatrim" height="220"></canvas>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="chart-box" style="background:var(--s2);">
           <div class="chart-title">Composição
-            <select id="alocFilterM" onchange="rAloc()" style="background:var(--s2);border:1px solid var(--brd);color:var(--tx);padding:4px 9px;border-radius:var(--rs);font-size:12px;outline:none">
+            <select id="alocFilterM" onchange="rAloc()" style="background:var(--s2);border:1px solid var(--brd);border-radius:4px;color:var(--tx);font-size:11px;padding:2px 6px;outline:none;margin-left:6px;">
               <option value="-1">Hoje (atual)</option>
               <option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option><option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option><option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option><option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option>
             </select>
           </div>
-          <canvas id="chartDonut" height="200"></canvas>
+          <canvas id="chartDonut" height="160"></canvas>
+          </div>
+          <div class="chart-box" style="background:var(--s3);">
+            <div class="chart-title" style="margin-bottom:10px;">Ranking de Contas</div>
+            <canvas id="chartRankContas" height="110"></canvas>
+          </div>
         </div>
-        <div class="chart-box"><div class="chart-title">Patrimônio Mês a Mês</div><canvas id="chartPatrim" height="200"></canvas></div>
       </div>
+
       <div class="sec"><div class="sh"><span class="st">Saldo por Conta / Mês</span></div>
         <div style="overflow-x:auto"><table class="tbl"><thead id="alocTh"></thead><tbody id="alocTb"></tbody></table></div>
       </div>
@@ -746,20 +769,6 @@ body.sb-hidden .main { margin-left:0; }
         <!-- KPI CARDS -->
         <div class="patr-kpi-row" id="patrimKpis"></div>
 
-        <!-- CHARTS -->
-        <div class="patr-chart-row">
-          <div class="dash-chart-box">
-            <div class="dash-chart-title">Composição do Patrimônio</div>
-            <canvas id="patrimDonut" height="210"></canvas>
-            <div class="patr-legend" id="patrimDonutLegend"></div>
-          </div>
-          <div class="dash-chart-box">
-            <div class="dash-chart-title">Ativos × Passivos</div>
-            <canvas id="patrimBar" height="210"></canvas>
-          </div>
-        </div>
-
-        <!-- DETAIL TABLE -->
         <div class="sec">
           <div class="sh">
             <span class="st">Detalhamento</span>
@@ -772,6 +781,7 @@ body.sb-hidden .main { margin-left:0; }
           </div>
           <div id="patrimTblContent" style="overflow-x:auto;margin-top:10px;"></div>
         </div>
+        </div>
       </div>
 
     </div>
@@ -782,30 +792,56 @@ body.sb-hidden .main { margin-left:0; }
       <p class="cad-sl">Categorias e Contas</p>
       <div class="cad-grid" style="grid-template-columns:repeat(4,1fr);">
         <div class="cad-col">
-          <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(160,80,255,.15)">🏦</div>Contas </div><span class="badge bpu" id="cntCON">0</span></div>
+          <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(160,80,255,.15)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>Contas </div><span class="badge bpu" id="cntCON">0</span></div>
           <div class="cad-items" id="lstCON"></div>
-          <div class="cad-add" style="flex-direction:column;gap:6px;">
-            <input type="text" id="iCON_nm" placeholder="Nome da conta (ex: Nubank)" style="width:100%;box-sizing:border-box;" onkeydown="if(event.key==='Enter')addConta()">
-            <input type="number" id="iCON_sl" placeholder="Saldo inicial (R$)" step="0.01" style="width:100%;box-sizing:border-box;" onkeydown="if(event.key==='Enter')addConta()">
-            <button onclick="addConta(">+ Adicionar</button>
+          <div style="padding:8px 10px;border-top:1px solid var(--brd);">
+            <button onclick="openCadModal('conta')" style="width:100%;padding:8px;background:transparent;border:1px solid var(--brd2);border-radius:var(--rs);color:var(--mu);font-size:12px;font-family:var(--f);cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseleave="this.style.borderColor='var(--brd2)';this.style.color='var(--mu)'">+ Adicionar</button>
           </div>
         </div>
         <div class="cad-col">
-          <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(46,196,182,.15)">📥</div>Entrada</div><span class="badge bg" id="cntCE">0</span></div>
+          <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(46,196,182,.15)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>Entrada</div><span class="badge bg" id="cntCE">0</span></div>
           <div class="cad-items" id="lstCE"></div>
-          <div class="cad-add"><input type="text" id="iCE" placeholder="Ex: Salário, Freelance..." onkeydown="if(event.key==='Enter')addCad('catEntrada','iCE','lstCE','cntCE')"><button onclick="addCad('catEntrada','iCE','lstCE','cntCE'">+ Adicionar</button></div>
+          <div style="padding:8px 10px;border-top:1px solid var(--brd);">
+            <button onclick="openCadModal('catEntrada')" style="width:100%;padding:8px;background:transparent;border:1px solid var(--brd2);border-radius:var(--rs);color:var(--mu);font-size:12px;font-family:var(--f);cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseleave="this.style.borderColor='var(--brd2)';this.style.color='var(--mu)'">+ Adicionar</button>
+          </div>
         </div>
         <div class="cad-col">
-          <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(224,92,107,.15)">📤</div>Saída</div><span class="badge br" id="cntCS">0</span></div>
+          <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(224,92,107,.15)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>Saída</div><span class="badge br" id="cntCS">0</span></div>
           <div class="cad-items" id="lstCS"></div>
-          <div class="cad-add"><input type="text" id="iCS" placeholder="Ex: Moradia, Alimentação..." onkeydown="if(event.key==='Enter')addCad('catSaida','iCS','lstCS','cntCS')"><button onclick="addCad('catSaida','iCS','lstCS','cntCS'">+ Adicionar</button></div>
+          <div style="padding:8px 10px;border-top:1px solid var(--brd);">
+            <button onclick="openCadModal('catSaida')" style="width:100%;padding:8px;background:transparent;border:1px solid var(--brd2);border-radius:var(--rs);color:var(--mu);font-size:12px;font-family:var(--f);cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseleave="this.style.borderColor='var(--brd2)';this.style.color='var(--mu)'">+ Adicionar</button>
+          </div>
         </div>
         <div class="cad-col">
-          <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(232,160,32,.15)">📈</div>Rendimento</div><span class="badge by" id="cntCR">0</span></div>
+          <div class="cad-ch"><div class="cad-ct"><div class="cad-ic" style="background:rgba(232,160,32,.15)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>Rendimento</div><span class="badge by" id="cntCR">0</span></div>
           <div class="cad-items" id="lstCR"></div>
-          <div class="cad-add"><input type="text" id="iCR" placeholder="Ex: Juros, Dividendos..." onkeydown="if(event.key==='Enter')addCad('catRendimento','iCR','lstCR','cntCR')"><button onclick="addCad('catRendimento','iCR','lstCR','cntCR'">+ Adicionar</button></div>
+          <div style="padding:8px 10px;border-top:1px solid var(--brd);">
+            <button onclick="openCadModal('catRendimento')" style="width:100%;padding:8px;background:transparent;border:1px solid var(--brd2);border-radius:var(--rs);color:var(--mu);font-size:12px;font-family:var(--f);cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseleave="this.style.borderColor='var(--brd2)';this.style.color='var(--mu)'">+ Adicionar</button>
+          </div>
         </div>
       </div>
+
+        <!-- MODAL ADICIONAR CATEGORIA / CONTA -->
+        <div id="mCad" class="mo" style="display:none;">
+          <div class="modal" style="width:400px;">
+            <div class="mt2" id="mCadTit">Adicionar</div>
+            <div class="ir" style="grid-template-columns:1fr;gap:12px;">
+              <div class="ig" id="mCadNmWrap">
+                <label id="mCadNmLbl">Nome</label>
+                <input type="text" id="mCadNm" placeholder="" style="width:100%;">
+              </div>
+              <div class="ig" id="mCadSlWrap" style="display:none;">
+                <label>Saldo Inicial (R$)</label>
+                <input type="number" id="mCadSl" placeholder="0,00" step="0.01" style="width:100%;">
+              </div>
+            </div>
+            <div class="ma">
+              <button class="bs" onclick="closeModal('mCad')">Cancelar</button>
+              <button class="bp" onclick="confirmCadAdd()">Adicionar</button>
+            </div>
+          </div>
+        </div>
+
       <!-- ══ SEÇÃO PATRIMÔNIO ══ -->
       <div class="patr-section">
         <p class="cad-sl" style="margin-top:28px;">Patrimônio</p>
@@ -815,7 +851,7 @@ body.sb-hidden .main { margin-left:0; }
           <div class="patr-col">
             <div class="patr-col-head">
               <div style="display:flex;align-items:center;">
-                <div class="patr-col-icon" style="background:rgba(59,130,246,.15);">📈</div>
+                <div class="patr-col-icon" style="background:rgba(59,130,246,.15);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg></div>
                 <span class="patr-col-title">Investimentos</span>
               </div>
               <span class="patr-col-total" id="totInvestimentos" style="background:rgba(59,130,246,.12);color:var(--blue);">R$ 0</span>
@@ -830,7 +866,7 @@ body.sb-hidden .main { margin-left:0; }
           <div class="patr-col">
             <div class="patr-col-head">
               <div style="display:flex;align-items:center;">
-                <div class="patr-col-icon" style="background:rgba(201,168,76,.15);">🏠</div>
+                <div class="patr-col-icon" style="background:rgba(201,168,76,.15);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
                 <span class="patr-col-title">Bens Imóveis</span>
               </div>
               <span class="patr-col-total" id="totBensImov" style="background:rgba(201,168,76,.12);color:#c9a84c;">R$ 0</span>
@@ -845,7 +881,7 @@ body.sb-hidden .main { margin-left:0; }
           <div class="patr-col">
             <div class="patr-col-head">
               <div style="display:flex;align-items:center;">
-                <div class="patr-col-icon" style="background:rgba(16,185,129,.15);">🚗</div>
+                <div class="patr-col-icon" style="background:rgba(16,185,129,.15);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
                 <span class="patr-col-title">Bens Móveis</span>
               </div>
               <span class="patr-col-total" id="totBensMov" style="background:rgba(16,185,129,.12);color:#10b981;">R$ 0</span>
@@ -860,7 +896,7 @@ body.sb-hidden .main { margin-left:0; }
           <div class="patr-col">
             <div class="patr-col-head">
               <div style="display:flex;align-items:center;">
-                <div class="patr-col-icon" style="background:rgba(224,92,107,.15);">💳</div>
+                <div class="patr-col-icon" style="background:rgba(224,92,107,.15);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2m-4 5h12"/></svg></div>
                 <span class="patr-col-title">Dívidas</span>
               </div>
               <span class="patr-col-total" id="totDividas" style="background:rgba(224,92,107,.12);color:var(--red);">R$ 0</span>
@@ -1255,7 +1291,7 @@ var GA_TABLE = 'Saída';
 var GA_TREND = false;
 var chartPatrimDonut = null;
 var chartPatrimBar   = null;
-var PATRIM_TAB = 'movel';
+var PATRIM_TAB = 'invest';
 
 // ══════════════════════════════════════════════════════
 // INIT — no login, auto-start as admin
@@ -1977,7 +2013,7 @@ function rGestao() {
         options:{
           responsive:true,maintainAspectRatio:true,cutout:'62%',
           plugins:{
-            legend:{position:'right',labels:{color:getComputedStyle(document.documentElement).getPropertyValue('--tx').trim()||'#e2e8f0',font:{size:10},boxWidth:8}},
+            legend:{display:false},
             tooltip:{callbacks:{label:function(ctx){
               var pct = totDesp>0 ? ' ('+( ctx.parsed/totDesp*100).toFixed(1)+'%)' : '';
               return ' '+fmt(ctx.parsed)+pct;
@@ -2095,6 +2131,7 @@ function rGestao() {
         : '<div class="empty"><p>Sem categorias com dados para exibir</p></div>';
     }
   }
+
 }
 
 
@@ -2128,24 +2165,97 @@ function rAloc() {
   var donutCanvas = document.getElementById('chartDonut');
   if (donutCanvas && contas.length) {
     var donutData = contas.map(function(c){ return Math.max(0,saldoConta(user,c.nome,displayM)); });
-    chartDonut = new Chart(donutCanvas.getContext('2d'), {
+    window.chartDonut = new Chart(donutCanvas.getContext('2d'), {
       type:'doughnut',
       data:{labels:contas.map(function(c){return c.nome;}),datasets:[{data:donutData,backgroundColor:PALETTE,borderWidth:0,hoverOffset:8}]},
-      options:{responsive:true,maintainAspectRatio:true,cutout:'68%',plugins:{legend:{position:'right',labels:{color:'var(--tx)',font:{size:12},boxWidth:12}},tooltip:{callbacks:{label:function(ctx){return ctx.label+': '+fmt(ctx.parsed);}}}}}
+      options:{responsive:true,maintainAspectRatio:true,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.label+': R$'+Math.round(ctx.parsed/1000*10)/10+'k';}}}}}
     });
+  // ── Ranking de contas (horizontal bar)
+  var rankCtx = document.getElementById('chartRankContas');
+  if (rankCtx) {
+    if (window.chartRankContas && window.chartRankContas.destroy) window.chartRankContas.destroy();
+    var txClr = getComputedStyle(document.documentElement).getPropertyValue('--tx').trim()||'#c8d8ec';
+    var muClr = getComputedStyle(document.documentElement).getPropertyValue('--mu').trim()||'#3d5470';
+    var rankData = contas.map(function(c,i) {
+      return { label: c.nome, value: Math.max(0, saldoConta(user, c.nome, displayM)), color: PALETTE[i%PALETTE.length] };
+    }).sort(function(a,b){ return b.value - a.value; });
+    window.chartRankContas = new Chart(rankCtx.getContext('2d'), {
+      type:'bar',
+      data:{
+        labels: rankData.map(function(d){ return d.label; }),
+        datasets:[{ data: rankData.map(function(d){ return d.value; }), backgroundColor: rankData.map(function(d){ return d.color+'cc'; }), borderRadius:4 }]
+      },
+      options:{
+        indexAxis:'y', responsive:true, maintainAspectRatio:true,
+        plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(ctx){ return ' R$'+Math.round(ctx.parsed.x).toLocaleString('pt-BR'); }}} },
+        scales:{
+          x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:muClr,font:{size:10},callback:function(v){return 'R$'+Math.round(v/1000)+'k';}}},
+          y:{grid:{display:false},ticks:{color:txClr,font:{size:11}}}
+        }
+      }
+    });
+  }
+
   }
 
   // Bar chart
   if (chartPatrim) { try{chartPatrim.destroy();}catch(e){} chartPatrim=null; }
   var patrimCanvas = document.getElementById('chartPatrim');
   if (patrimCanvas) {
+    // Calcular total por mês (soma de todas as contas)
+    var monthTotals = MN.map(function(_,m){
+      return contas.reduce(function(s,c){ return s + Math.max(0,saldoConta(user,c.nome,m)); }, 0);
+    });
+
     chartPatrim = new Chart(patrimCanvas.getContext('2d'), {
       type:'bar',
       data:{
         labels:MS,
         datasets:contas.map(function(c,i){ return {label:c.nome,data:MN.map(function(_,m){return Math.max(0,saldoConta(user,c.nome,m));}),backgroundColor:PALETTE[i%PALETTE.length]+'cc',borderRadius:4}; })
       },
-      options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{color:'var(--tx)',font:{size:12},boxWidth:10}}},scales:{x:{stacked:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8ba8',font:{size:12}}},y:{stacked:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8ba8',font:{size:12},callback:function(v){return 'R$'+Math.round(v/1000)+'k';}}}}}
+      options:{
+        responsive:true,maintainAspectRatio:true,
+        plugins:{
+          legend:{labels:{color:getComputedStyle(document.documentElement).getPropertyValue('--tx').trim()||'#c8d8ec',font:{size:11},boxWidth:10}},
+          tooltip:{callbacks:{
+            title: function(items) {
+              var m   = items[0].dataIndex;
+              var lbl = MS[m];
+              return lbl;
+            },
+            afterTitle: function(items) {
+              var m     = items[0].dataIndex;
+              var total = monthTotals[m];
+              var prev  = m > 0 ? monthTotals[m-1] : null;
+              var lines = ['Total contas: R$'+Math.round(total/1000*10)/10+'k'];
+              if (prev !== null) {
+                var dt  = total - prev;
+                var pct = prev > 0 ? (dt/prev*100).toFixed(1) : '—';
+                lines.push('Variação total: '+(dt>=0?'+':'')+Math.round(dt).toLocaleString('pt-BR')+' ('+pct+'%)');
+              }
+              return lines;
+            },
+            label: function(ctx) {
+              var m    = ctx.dataIndex;
+              var val  = ctx.parsed.y;
+              var prev = m > 0 ? contas.reduce(function(s,c,ci){
+                return s + Math.max(0, saldoConta(user, contas[ci].nome, m-1));
+              }, 0) : null;
+              // per-account prev
+              var acPrev = m > 0 ? Math.max(0, saldoConta(user, ctx.dataset.label, m-1)) : null;
+              var acDt   = acPrev !== null ? val - acPrev : null;
+              var acPct  = acPrev > 0 ? (acDt/acPrev*100).toFixed(1) : null;
+              var line = ' '+ctx.dataset.label+': R$'+Math.round(val).toLocaleString('pt-BR');
+              if (acDt !== null) line += '  ('+(acDt>=0?'+':'')+Math.round(acDt).toLocaleString('pt-BR')+(acPct?', '+acPct+'%':'')+')';
+              return line;
+            }
+          }}
+        },
+        scales:{
+          x:{stacked:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8ba8',font:{size:11}}},
+          y:{stacked:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8ba8',font:{size:11},callback:function(v){return 'R$'+Math.round(v/1000)+'k';}}}
+        }
+      },
     });
   }
 
@@ -2228,6 +2338,79 @@ function rCadContas() {
       +'</div>';
   });
   el.innerHTML=html;
+}
+
+
+// ══════════════════════════════════════════════════════
+// CATEGORIAS E CONTAS — modal de adição
+// ══════════════════════════════════════════════════════
+var _cadField = '';
+
+function openCadModal(field) {
+  _cadField = field;
+  var titles = {
+    conta:         'Nova Conta Bancária',
+    catEntrada:    'Nova Categoria de Entrada',
+    catSaida:      'Nova Categoria de Saída',
+    catRendimento: 'Nova Categoria de Rendimento'
+  };
+  var placeholders = {
+    conta:         'Ex: Nubank, Itaú, XP',
+    catEntrada:    'Ex: Salário, Freelance',
+    catSaida:      'Ex: Moradia, Alimentação',
+    catRendimento: 'Ex: Juros, Dividendos'
+  };
+  document.getElementById('mCadTit').textContent = titles[field] || 'Adicionar';
+  document.getElementById('mCadNm').placeholder  = placeholders[field] || '';
+  document.getElementById('mCadNm').value = '';
+  document.getElementById('mCadSl').value = '';
+
+  // Show saldo field only for conta
+  document.getElementById('mCadSlWrap').style.display = field === 'conta' ? '' : 'none';
+  document.getElementById('mCadNmLbl').textContent = field === 'conta' ? 'Nome da conta' : 'Nome da categoria';
+
+  openModal('mCad');
+  setTimeout(function(){ document.getElementById('mCadNm').focus(); }, 120);
+}
+
+function confirmCadAdd() {
+  var nm = document.getElementById('mCadNm').value.trim();
+  if (!nm) {
+    document.getElementById('mCadNm').style.borderColor = 'var(--red)';
+    return;
+  }
+  document.getElementById('mCadNm').style.borderColor = '';
+
+  var user = getUser(CU.id);
+
+  if (_cadField === 'conta') {
+    var sl = parseFloat(document.getElementById('mCadSl').value) || 0;
+    if (!user.contas) user.contas = [];
+    if (user.contas.find(function(c){ return c.nome === nm; })) {
+      document.getElementById('mCadNm').style.borderColor = 'var(--warn)';
+      return;
+    }
+    user.contas.push({ id: uid(), nome: nm, saldoInicial: sl });
+    saveUser(user); CU = getUser(user.id);
+    closeModal('mCad');
+    rCadContas();
+  } else {
+    if (!user[_cadField]) user[_cadField] = [];
+    if (user[_cadField].indexOf(nm) >= 0) {
+      document.getElementById('mCadNm').style.borderColor = 'var(--warn)';
+      return;
+    }
+    user[_cadField].push(nm);
+    saveUser(user); CU = getUser(user.id);
+    closeModal('mCad');
+    var mapIds = {
+      catEntrada:    ['lstCE','cntCE'],
+      catSaida:      ['lstCS','cntCS'],
+      catRendimento: ['lstCR','cntCR']
+    };
+    var ids = mapIds[_cadField];
+    if (ids) rCadCol(_cadField, ids[0], ids[1]);
+  }
 }
 
 function addCad(field, inputId, listId, cntId) {
@@ -2614,13 +2797,25 @@ function rFuturo() {
     }
   }
 
-  // ── Idade em que a linha verde chega a zero
-  for (var kai = 0; kai < patrimProj.length; kai++) {
-    if (patrimProj[kai] === 0 && kai > 0 && (patrimProj[kai-1]||0) > 0) {
-      acabaAge = Math.floor(currentAgeExact + (kai + 1) / 12);
-      break;
+  // ══ Cálculo exato: quando o patrimônio chega a zero
+  // Fórmula da anuidade: t = -ln(1 - P*r/W) / ln(1+r)
+  var sustentaParaSempre = false;
+  if (rendaLiq <= 0) {
+    sustentaParaSempre = true;  // sem saque → para sempre
+  } else if (patrimonioNaRet > 0 && r2 > 0) {
+    var ratio = patrimonioNaRet * r2 / rendaLiq;
+    if (ratio >= 1) {
+      sustentaParaSempre = true;  // juro >= saque → para sempre
+    } else {
+      var mesesAteZero = -Math.log(1 - ratio) / Math.log(1 + r2);
+      var idadeZero    = retAge + mesesAteZero / 12;
+      if (idadeZero < vidaAge) {
+        acabaAge = Math.round(idadeZero);
+      }
+      // se idadeZero >= vidaAge: dinheiro dura além da expectativa configurada
     }
   }
+
   // ── Análises
   var maxPatrim    = Math.max.apply(null, patrimProj);
   var maxPatrimIdx = patrimProj.indexOf(maxPatrim);           // 0-based, mês 1-based
@@ -2653,12 +2848,31 @@ function rFuturo() {
   var v0Disp = document.getElementById('fV0Display');
   if (v0Disp) v0Disp.textContent = 'R$ ' + V0.toLocaleString('pt-BR');
 
+  // ── Renda possível e Idade possível
+  var nMRet = (vidaAge - retAge) * 12;
+  var rendaPossivel = 0;
+  if (r2 > 0 && patrimonioNaRet > 0 && nMRet > 0) {
+    var fatAnuidade = 1 - Math.pow(1+r2, -nMRet);
+    rendaPossivel = fatAnuidade > 0 ? patrimonioNaRet * r2 / fatAnuidade : patrimonioNaRet * r2;
+  }
+  var idadePossivel = null;
+  if (rendaLiq > 0 && r2 > 0) {
+    for (var ai = Math.ceil(currentAgeExact); ai < vidaAge; ai++) {
+      var mAc = (ai - currentAgeExact) * 12;
+      var pAc = V0*Math.pow(1+r1,mAc) + (r1>0 ? invMensal*(Math.pow(1+r1,mAc)-1)/r1 : invMensal*mAc);
+      var nRt = (vidaAge - ai) * 12;
+      var capNec = nRt > 0 ? rendaLiq/r2*(1-Math.pow(1+r2,-nRt)) : 0;
+      if (pAc >= capNec) { idadePossivel = ai; break; }
+    }
+  }
+
   // ── KPI cards
   var fi = document.getElementById('fInsight');
+
   if (fi) fi.innerHTML =
     '<div class="kpi-card '+(metaOk?'saldo-pos':'saldo-neg')+'">'
     +'<div class="kpi-label">Patrimônio Ideal</div>'
-    +'<div class="kpi-val '+(metaOk?'b':'r')+'" style="font-size:14px;letter-spacing:-.3px;">R$ '+Math.round(C).toLocaleString('pt-BR')+'</div>'
+    +'<div class="kpi-val '+(metaOk?'b':'r')+'" >R$ '+Math.round(C).toLocaleString('pt-BR')+'</div>'
     +'<div class="kpi-sub">Capital alvo aos '+retAge+' anos</div>'
     +'</div>'
     +'<div class="kpi-card '+(invMensal>=invNecessario?'rec':'desp')+'">'
@@ -2667,14 +2881,14 @@ function rFuturo() {
     +'<div class="kpi-sub">'+(invMensal>=invNecessario?'✓ Você já investe o suficiente':'Falta R$ '+Math.round(invNecessario-invMensal).toLocaleString('pt-BR')+'/mês')+'</div>'
     +'</div>'
     +'<div class="kpi-card '+(patrimonioNaRet>=C?'rec':'desp')+'">'
-    +'<div class="kpi-label">Patrimônio Projetado</div>'
-    +'<div class="kpi-val '+(patrimonioNaRet>=C?'g':'r')+'" style="font-size:14px;letter-spacing:-.3px;">R$ '+Math.round(patrimonioNaRet).toLocaleString('pt-BR')+'</div>'
+    +'<div class="kpi-label">Patrimônio Projetado <span class="kpi-info-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="kpi-tooltip"><div class="kpi-tooltip-row"><span>Renda possível</span><span>'+fmt(Math.round(rendaPossivel))+'/mês</span></div><div class="kpi-tooltip-row"><span>Aposentadoria possível</span><span>'+(idadePossivel!==null?idadePossivel+' anos':'inviável')+'</span></div></div></span></div>'
+    +'<div class="kpi-val '+(patrimonioNaRet>=C?'g':'r')+'" >R$ '+Math.round(patrimonioNaRet).toLocaleString('pt-BR')+'</div>'
     +'<div class="kpi-sub">Estimado aos '+retAge+' anos</div>'
     +'</div>'
-    +'<div class="kpi-card '+(acabaAge?'saldo-neg':'rec')+'">'
+    +'<div class="kpi-card '+(sustentaParaSempre?'rec':acabaAge?'saldo-neg':'inv')+'">'
     +'<div class="kpi-label">Patrimônio Sustenta</div>'
-    +'<div class="kpi-val '+(acabaAge?'r':'g')+'">'+(acabaAge?'até os '+acabaAge+' anos':'até os '+vidaAge+' anos')+'</div>'
-    +'<div class="kpi-sub">'+(acabaAge?'⚠ Saldo zerado antes da expectativa':'✓ Sustenta até a expectativa de vida')+'</div>'
+    +'<div class="kpi-val '+(sustentaParaSempre?'g':acabaAge?'r':'b')+'">'+(sustentaParaSempre?'Para sempre ∞':acabaAge?'até os '+acabaAge+' anos':'além dos '+vidaAge+' anos')+'</div>'
+    +'<div class="kpi-sub">'+(sustentaParaSempre?'✓ Rendimento cobre o saque indefinidamente':acabaAge?'⚠ Saldo zerado antes da expectativa':'✓ Sustenta além da expectativa configurada')+'</div>'
     +'</div>';
 
   // ── Chart
@@ -2714,7 +2928,7 @@ function rFuturo() {
       ]
     },
     options: {
-      responsive: true, maintainAspectRatio: true,
+      responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
@@ -2789,7 +3003,7 @@ function fmtM(v) {
 // ══════════════════════════════════════════════════════
 // PATRIMÔNIO — CADASTRO
 // ══════════════════════════════════════════════════════
-var PATRIM_TAB = 'movel';
+var PATRIM_TAB = 'invest';
 
 function calcPatrim(user) {
   var inv  = (user.investimentos||[]).reduce(function(s,b){return s+b.valor;},0);
@@ -2884,16 +3098,17 @@ var chartPatrimBar   = null;
 function setPatrimTab(tab) {
   PATRIM_TAB = tab;
   var btns = document.querySelectorAll('#patrimTblPill button');
-  btns[0].classList.toggle('active', tab==='movel');
-  btns[1].classList.toggle('active', tab==='imovel');
-  btns[2].classList.toggle('active', tab==='divida');
+  if (btns[0]) btns[0].classList.toggle('active', tab==='invest');
+  if (btns[1]) btns[1].classList.toggle('active', tab==='imovel');
+  if (btns[2]) btns[2].classList.toggle('active', tab==='movel');
+  if (btns[3]) btns[3].classList.toggle('active', tab==='divida');
   renderPatrimTable();
 }
 
 function renderPatrimTable() {
   var user = getUser(CU.id);
-  var map  = {movel:'bensMov', imovel:'bensImov', divida:'dividas'};
-  var colorMap = {movel:'#10b981', imovel:'#c9a84c', divida:'var(--red)'};
+  var map  = {invest:'investimentos', movel:'bensMov', imovel:'bensImov', divida:'dividas'};
+  var colorMap = {invest:'var(--blue)', movel:'#10b981', imovel:'#c9a84c', divida:'var(--red)'};
   var field = map[PATRIM_TAB];
   var color = colorMap[PATRIM_TAB];
   var items = user[field]||[];
@@ -2977,7 +3192,7 @@ function rPatrimAloc() {
       }
     });
 
-    // Custom legend
+    // Custom legend (removed)
     var leg = document.getElementById('patrimDonutLegend');
     if (leg) leg.innerHTML = donutLabels.map(function(l,i){
       return '<div class="patr-legend-item"><div class="patr-legend-dot" style="background:'+donutColors[i]+'"></div>'+l+'</div>';
