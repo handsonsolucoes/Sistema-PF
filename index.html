@@ -396,10 +396,10 @@ body.sb-hidden .main { margin-left:0; }
   .patr-kpi-row { grid-template-columns:1fr 1fr; }
 }
 #fInsight { grid-template-columns:repeat(4,1fr) !important; align-items:stretch; overflow:visible; }
-#fInsight .kpi-card { padding:10px 14px; box-sizing:border-box; overflow:visible; }
-#fInsight .kpi-val { font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-#fInsight .kpi-sub { font-size:10px; }
-#fInsight .kpi-label { font-size:9px; margin-bottom:4px; }
+#fInsight .kpi-card { overflow:visible; }
+#fInsight .kpi-val { font-size:22px; }
+#fInsight .kpi-label { font-size:10px; }
+#fInsight .kpi-sub { font-size:11px; }
 .kpi-info-icon{position:relative;display:inline-flex;align-items:center;cursor:help;margin-left:6px;opacity:.5;vertical-align:middle;transition:opacity .15s;}
 .kpi-info-icon:hover{opacity:1;}
 .kpi-info-icon .kpi-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a2640;border:1px solid var(--brd2);border-radius:6px;padding:8px 12px;font-size:11px;color:var(--tx);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4);}
@@ -526,11 +526,11 @@ body.sb-hidden .main { margin-left:0; }
       <div class="dash-chart-row">
         <div class="dash-chart-box">
           <div class="dash-chart-title" id="gChartTitle">Receitas × Despesas Mensais</div>
-          <canvas id="gMainChart" height="160" style="max-height:200px;"></canvas>
+          <canvas id="gMainChart" height="240" style="max-height:260px;"></canvas>
         </div>
         <div class="dash-chart-box">
           <div class="dash-chart-title">Composição de Despesas</div>
-          <canvas id="gCatChart" height="200"></canvas>
+          <canvas id="gCatChart" height="240"></canvas>
         </div>
       </div>
 
@@ -1466,11 +1466,11 @@ function rOrc(user) {
       // Vermelho: gastos, fica à direita do verde (come da direita para esquerda)
      +'  <div style="position:absolute;left:'+Math.max(0,pctRec-pctGasto)+'%;top:0;bottom:0;width:'+pctGasto+'%;background:var(--red);opacity:.9;transition:left .4s,width .4s;"></div>'
       // Traço azul: limite do investimento
-     +(pctInv>0 ? '  <div style="position:absolute;left:calc('+pctInv+'% - 1px);top:0;bottom:0;width:3px;background:var(--blue);z-index:2;opacity:.9;" title="Investimento: '+fmt(invVal)+'"></div>' : '')
+     +(pctInv>0 ? '  <div style="position:absolute;left:calc('+pctInv+'% - 2px);top:-4px;bottom:-4px;width:4px;background:#f5d842;z-index:2;border-radius:2px;box-shadow:0 0 6px rgba(245,216,66,.7);" title="Investimento: '+fmt(invVal)+'"></div>' : '')
      +'</div>'
      +'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--mu);">'
      +'  <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block;"></span>Gastos '+fmt(gastoMes)+'</span>'
-     +(pctInv>0?'  <span style="display:flex;align-items:center;gap:4px;"><span style="width:3px;height:10px;border-radius:1px;background:var(--blue);display:inline-block;"></span>Investir '+fmt(invVal)+'</span>':'')
+     +(pctInv>0?'  <span style="display:flex;align-items:center;gap:4px;"><span style="width:3px;height:10px;border-radius:1px;background:#f5d842;display:inline-block;border-radius:1px;"></span>Investir '+fmt(invVal)+'</span>':'')
      +'  <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block;"></span>Receita '+fmt(recMes)+' / '+fmt(rendaEsp)+'</span>'
      +'</div>';
   } else if (barEl) {
