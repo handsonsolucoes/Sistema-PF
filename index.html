@@ -269,7 +269,7 @@ body.sb-hidden .main { margin-left:0; }
 .as { background:var(--blue-dim);border:1px solid rgba(96,165,250,.18);color:var(--blue); }
 
 /* ═══ ORÇAMENTO ═════════════════════════════════ */
-.orc-split { display:grid;grid-template-columns:1fr 290px;gap:14px;align-items:start; }
+.orc-split { display:grid;grid-template-columns:1fr 270px;gap:12px;align-items:start; }
 .orc-lanc-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap; }
 .inst-badge { font-size:9px;padding:2px 7px;border-radius:4px;background:var(--warn-dim);color:var(--warn);font-weight:600;text-transform:uppercase;letter-spacing:.3px; }
 
@@ -367,7 +367,6 @@ body.sb-hidden .main { margin-left:0; }
   .ni { justify-content:center;padding:11px; }
   .ni.active { border-left:none;border-bottom:2px solid var(--gold); }
   .sb-user { padding:10px;display:flex;justify-content:center; }
-  .orc-split { grid-template-columns:1fr; }
   .dash-chart-row { grid-template-columns:1fr; }
   .chart-row { grid-template-columns:1fr; }
   .patr-kpi-row { grid-template-columns:repeat(3,1fr); }
@@ -402,10 +401,10 @@ body.sb-hidden .main { margin-left:0; }
 #fInsight .kpi-sub { font-size:11px; }
 .kpi-info-icon{position:relative;display:inline-flex;align-items:center;cursor:help;margin-left:6px;opacity:.5;vertical-align:middle;transition:opacity .15s;}
 .kpi-info-icon:hover{opacity:1;}
-.kpi-info-icon .kpi-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a2640;border:1px solid var(--brd2);border-radius:6px;padding:8px 12px;font-size:11px;color:var(--tx);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4);}
+.kpi-info-icon .kpi-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a2640;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 12px;font-size:11px;color:#dde6ef;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4);}
 .kpi-info-icon:hover .kpi-tooltip{opacity:1;}
 .kpi-tooltip-row{display:flex;justify-content:space-between;gap:16px;line-height:1.8;}
-.kpi-tooltip-row span:first-child{color:var(--mu);font-size:10px;}
+.kpi-tooltip-row span:first-child{color:#8fa3bf;font-size:10px;}
 .kpi-tooltip-row span:last-child{font-weight:600;}
 </style>
 </head>
@@ -428,6 +427,10 @@ body.sb-hidden .main { margin-left:0; }
       <div class="ni" onclick="sp('futuro')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span>Futuro</span></div>
       <div class="ni active" onclick="sp('orcamento')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Orçamento Mensal</div>
       <div id="adminNav" style="display:none">
+        <div class="ni" onclick="sp('voar')" id="ni-voar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <span>VOAR</span>
+        </div>
         <div class="ni" onclick="sp('clientes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clientes</div>
       </div>
     </div>
@@ -454,12 +457,12 @@ body.sb-hidden .main { margin-left:0; }
       <div class="ph">
         <div><h1 class="pt">Orçamento Mensal</h1><p class="psub" id="orcSub">Controle de receitas, gastos e lançamentos</p></div>
         <div style="display:flex;gap:8px;align-items:center">
-          <div class="msel"><select id="orcMonthSel" onchange="onOrcMonthChange()">
+          <select id="orcMonthSel" onchange="onOrcMonthChange()" style="background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;font-weight:500;padding:7px 12px;outline:none;cursor:pointer;">
             <option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option>
             <option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option>
             <option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option>
             <option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option>
-          </select></div>
+          </select>
           <button class="btn bp" onclick="openOrcModal()">⚙ Configurar</button>
         </div>
       </div>
@@ -481,13 +484,20 @@ body.sb-hidden .main { margin-left:0; }
           <!-- Lançamentos do mês -->
           <div class="sec">
             <div class="orc-lanc-header">
-              <span class="st">Lançamentos</span>
-              <div style="display:flex;gap:7px;align-items:center">
-                <select id="filtroTipo" onchange="rLanc()" style="background:var(--s2);border:1px solid var(--brd);color:var(--tx);padding:5px 9px;border-radius:var(--rs);font-size:12px;outline:none">
-                  <option value="">Todos</option><option value="Entrada">Entradas</option><option value="Saída">Saídas</option><option value="Transferência">Transf.</option><option value="Rendimento">Rendimentos</option>
-                </select>
-<button class="bs" onclick="document.getElementById('xlsxImportInput').click()" style="font-size:12px;padding:8px 14px;display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar XLSX</button><input type="file" id="xlsxImportInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="importLancXLSX(this)">
-<a id="dlTemplate" style="font-size:11px;color:var(--mu);text-decoration:none;cursor:pointer;white-space:nowrap;margin-left:4px;" title="Baixar modelo de planilha" onclick="downloadTemplate()">↓ modelo</a>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="st">Lançamentos</span>
+                <button onclick="document.getElementById('xlsxImportInput').click()" title="Importar XLSX" style="background:transparent;border:1px solid var(--brd2);border-radius:var(--rs);color:var(--mu);padding:3px 8px;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:3px;" onmouseenter="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseleave="this.style.borderColor='var(--brd2)';this.style.color='var(--mu)'"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Importar</button>
+                <a onclick="downloadTemplate()" style="font-size:11px;color:var(--mu);cursor:pointer;" onmouseenter="this.style.color='var(--gold)'" onmouseleave="this.style.color='var(--mu)'">↓ modelo</a>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <div class="toggle-pill" id="filtroTipoPill">
+                  <button class="active" onclick="setFiltroTipo(this,'')">Todos</button>
+                  <button onclick="setFiltroTipo(this,'Entrada')">Entradas</button>
+                  <button onclick="setFiltroTipo(this,'Saída')">Saídas</button>
+                  <button onclick="setFiltroTipo(this,'Rendimento')">Rendimentos</button>
+                  <button onclick="setFiltroTipo(this,'Transferência')">Transferências</button>
+                </div>
+                <input type="hidden" id="filtroTipo" value="">
                 <button class="btn bp bsm" onclick="openLancModal()">+ Lançamento</button>
               </div>
             </div>
@@ -623,7 +633,7 @@ body.sb-hidden .main { margin-left:0; }
               <span class="ctrl-label">Aposentadoria</span>
               <span id="fRetVal" title="Duplo clique para editar" ondblclick="makeEditable(this,'fRet','age')" style="font-size:13px;font-weight:700;color:var(--tx);cursor:pointer;border-bottom:1px dashed var(--tx);padding-bottom:1px;transition:opacity .15s;" onmouseenter="this.style.opacity='.7'" onmouseleave="this.style.opacity='1'">65 anos</span>
             </div>
-            <input type="range" id="fRet" min="45" max="80" value="65" oninput="rFuturo()" class="f-slider">
+            <input type="range" id="fRet" min="30" max="90" value="65" oninput="rFuturo()" class="f-slider">
           </div>
 
           <!-- Renda desejada -->
@@ -702,7 +712,7 @@ body.sb-hidden .main { margin-left:0; }
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;">
             <div>
               <label style="display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:7px;font-weight:600;">Taxa real — Acumulação (% a.a.)</label>
-              <input type="number" id="fRateAcumInp" step="0.1" min="0.5" max="20" value="5.5" style="width:100%;padding:10px 13px;background:var(--s2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:13px;outline:none;font-family:var(--fb);">
+              <input type="number" id="fRateAcumInp" step="0.1" min="0.5" max="20" value="4" style="width:100%;padding:10px 13px;background:var(--s2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:13px;outline:none;font-family:var(--fb);">
             </div>
             <div>
               <label style="display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:7px;font-weight:600;">Taxa real — Retirada (% a.a.)</label>
@@ -957,6 +967,94 @@ body.sb-hidden .main { margin-left:0; }
     </div>
 
     <!-- ══ CLIENTES ══ -->
+
+    <!-- ══ VOAR ══ -->
+    <div class="pg" id="page-voar">
+      <div class="ph">
+        <div>
+          <h1 class="pt">Metodologia VOAR</h1>
+          <p class="psub">Visão · Organização · Ação · Realização</p>
+        </div>
+      </div>
+
+      <!-- VOAR TABS -->
+      <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--brd);">
+        <button id="voarTab-v" onclick="setVoarTab('v')" style="padding:10px 22px;background:transparent;border:none;border-bottom:2px solid var(--gold);color:var(--tx);font-family:var(--f);font-size:13px;font-weight:600;cursor:pointer;">V — Visão</button>
+        <button id="voarTab-o" onclick="setVoarTab('o')" style="padding:10px 22px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--mu);font-family:var(--f);font-size:13px;font-weight:500;cursor:pointer;">O — Organização</button>
+        <button id="voarTab-a" onclick="setVoarTab('a')" style="padding:10px 22px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--mu);font-family:var(--f);font-size:13px;font-weight:500;cursor:pointer;">A — Ação</button>
+        <button id="voarTab-r" onclick="setVoarTab('r')" style="padding:10px 22px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--mu);font-family:var(--f);font-size:13px;font-weight:500;cursor:pointer;">R — Realização</button>
+      </div>
+
+      <!-- V: VISÃO -->
+      <div id="voar-v">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:3px;">Por quê?</div>
+            <div style="font-size:14px;color:var(--tx);">O propósito por trás de tudo. O que você quer de verdade para a sua vida?</div>
+          </div>
+          <button class="bp" onclick="openVoarModal('visao')">+ Nova Visão</button>
+        </div>
+        <div id="voar-visoes" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;"></div>
+      </div>
+
+      <!-- O: ORGANIZAÇÃO -->
+      <div id="voar-o" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:3px;">Como?</div>
+            <div style="font-size:14px;color:var(--tx);">Sua estratégia financeira. Como você vai organizar seus recursos para chegar onde quer?</div>
+          </div>
+          <button class="bp" onclick="openVoarModal('org')">+ Nova Prioridade</button>
+        </div>
+        <div id="voar-orgs" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+
+      <!-- A: AÇÃO -->
+      <div id="voar-a" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:3px;">O quê?</div>
+            <div style="font-size:14px;color:var(--tx);">Seus próximos passos concretos. O que você vai fazer agora para transformar sua visão em realidade?</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <select id="voarAcaoFiltro" onchange="rVoar()" style="background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:12px;padding:6px 10px;outline:none;">
+              <option value="all">Todas</option>
+              <option value="pendente">Pendentes</option>
+              <option value="andamento">Em andamento</option>
+              <option value="concluido">Concluídas</option>
+            </select>
+            <button class="bp" onclick="openVoarModal('acao')">+ Nova Ação</button>
+          </div>
+        </div>
+        <div id="voar-acoes" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+
+      <!-- R: REALIZAÇÃO -->
+      <div id="voar-r" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:3px;">Resultado</div>
+            <div style="font-size:14px;color:var(--tx);">Seu progresso real. Veja o que você já conquistou e quanto avançou no seu plano.</div>
+          </div>
+          <button class="bp" onclick="openVoarModal('realiz')">+ Registrar Marco</button>
+        </div>
+        <div id="voar-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;"></div>
+        <div id="voar-realizacoes" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+
+      <!-- MODAL VOAR -->
+      <div id="mVoar" class="mo" style="display:none;">
+        <div class="modal" style="width:480px;">
+          <div class="mt2" id="mVoarTit">Adicionar</div>
+          <div id="mVoarBody" style="display:flex;flex-direction:column;gap:12px;"></div>
+          <div class="ma">
+            <button class="bs" onclick="closeModal('mVoar')">Cancelar</button>
+            <button class="bp" onclick="confirmVoar()">Salvar</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
     <div class="pg" id="page-clientes">
       <div class="ph"><div><h1 class="pt">Clientes</h1><p class="psub">Gerencie os clientes de consultoria</p></div><button class="btn bp" onclick="openModal('mCli')">+ Novo Cliente</button></div>
       <div class="cli-grid" id="cliGrid"></div>
@@ -1339,6 +1437,7 @@ function sp(id) {
   if (id==='cadastro') rCad();
   if (id==='clientes') rCli();
   if (id==='orcamento') rOrcFull();
+  if (id==='voar') { setVoarTab('v'); }
 }
 
 function openModal(id) { document.getElementById(id).style.display='flex'; }
@@ -2584,7 +2683,7 @@ function resetFConfig() {
   var y30 = new Date(today.getFullYear()-30, today.getMonth(), today.getDate());
   document.getElementById('fBirth').value = y30.toISOString().split('T')[0];
   document.getElementById('fValInicial').value = 0;
-  document.getElementById('fRateAcumInp').value = 5.5;
+  document.getElementById('fRateAcumInp').value = 4;
   document.getElementById('fRateRetInp').value  = 3.5;
   document.getElementById('fVidaInp').value = 90;
   document.getElementById('fVidaVal').textContent = '90 anos';
@@ -2661,7 +2760,7 @@ function rFuturo() {
   var renda     = parseInt(rendaEl.value);
   var outras    = parseInt(outrasEl.value);
   var invMensal = parseInt(invEl.value) || 0;
-  var rateAcum  = parseFloat(acumEl ? acumEl.value : 5.5) || 5.5;
+  var rateAcum  = parseFloat(acumEl ? acumEl.value : 4) || 4;
   var rateRet   = parseFloat(retREl ? retREl.value : 3.5) || 3.5;
   var vidaAge   = parseInt(vidaEl ? vidaEl.value : 90) || 90;
   if (vidaAge <= retAge) vidaAge = retAge + 10;
@@ -2797,26 +2896,24 @@ function rFuturo() {
     }
   }
 
-  // ══ Cálculo exato: quando o patrimônio chega a zero
-  // Fórmula da anuidade: t = -ln(1 - P*r/W) / ln(1+r)
+  // ── Patrimônio Sustenta: fórmula exata da anuidade
+  // t = -ln(1 - P*r2/W) / ln(1+r2) → idade = retAge + t/12
   var sustentaParaSempre = false;
   if (rendaLiq <= 0) {
-    sustentaParaSempre = true;  // sem saque → para sempre
-  } else if (patrimonioNaRet > 0 && r2 > 0) {
-    var ratio = patrimonioNaRet * r2 / rendaLiq;
-    if (ratio >= 1) {
-      sustentaParaSempre = true;  // juro >= saque → para sempre
+    sustentaParaSempre = true;
+  } else if (patrimonioNaRet <= 0) {
+    acabaAge = retAge;  // sem patrimônio na aposent.
+  } else {
+    var _ratio = patrimonioNaRet * r2 / rendaLiq;
+    if (_ratio >= 1) {
+      sustentaParaSempre = true;
     } else {
-      var mesesAteZero = -Math.log(1 - ratio) / Math.log(1 + r2);
-      var idadeZero    = retAge + mesesAteZero / 12;
-      if (idadeZero < vidaAge) {
-        acabaAge = Math.round(idadeZero);
-      }
-      // se idadeZero >= vidaAge: dinheiro dura além da expectativa configurada
+      var _meses = -Math.log(1 - _ratio) / Math.log(1 + r2);
+      acabaAge = Math.round(retAge + _meses / 12);
     }
   }
 
-  // ── Análises
+// ── Análises
   var maxPatrim    = Math.max.apply(null, patrimProj);
   var maxPatrimIdx = patrimProj.indexOf(maxPatrim);           // 0-based, mês 1-based
   var maxPatrimAge = Math.floor(currentAgeExact + (maxPatrimIdx + 1) / 12);
@@ -3587,6 +3684,259 @@ function processImportRows(rows) {
   var msg = '✓ ' + added + ' lançamento(s) importado(s) com sucesso!';
   if (errors.length) msg += '\n\nAtenção — ' + errors.length + ' linha(s) ignorada(s):\n' + errors.slice(0,5).join('\n');
   alert(msg);
+}
+
+
+// ══════════════════════════════════════════════════════
+// METODOLOGIA VOAR
+// ══════════════════════════════════════════════════════
+
+var _voarTab    = 'v';
+var _voarField  = '';
+var _voarEditId = null;
+
+var VOAR_TAGS = ['Familia','Liberdade','Seguranca','Saude','Crescimento','Legado','Conforto'];
+var VOAR_ACAOCAT = ['Orçamento','Dívidas','Investimento','Conta bancária','Hábito','Reunião','Outro'];
+
+function setVoarTab(tab) {
+  _voarTab = tab;
+  ['v','o','a','r'].forEach(function(t) {
+    var el = document.getElementById('voar-'+t);
+    var btn = document.getElementById('voarTab-'+t);
+    if (el) el.style.display = t === tab ? '' : 'none';
+    if (btn) {
+      btn.style.borderBottomColor = t === tab ? 'var(--gold)' : 'transparent';
+      btn.style.color = t === tab ? 'var(--tx)' : 'var(--mu)';
+      btn.style.fontWeight = t === tab ? '600' : '500';
+    }
+  });
+  rVoar();
+}
+
+function rVoar() {
+  var user = getUser(CU.id);
+  var v = user.voar || { visoes:[], organizacao:[], acoes:[], realizacoes:[] };
+
+  var DQ = '"'; // double quote helper
+
+  function delBtn(field, id) {
+    return '<button onclick=' + DQ + 'delVoar(' + DQ + "'" + DQ + field + DQ + "'" + DQ + ',' + DQ + "'" + DQ + id + DQ + "'" + DQ + ')' + DQ
+      + ' style="background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:2px 4px;" '
+      + 'onmouseenter="this.style.color=\'var(--red)\'" onmouseleave="this.style.color=\'var(--mu)\'">×</button>';
+  }
+
+  // ── V: Visões
+  var vEl = document.getElementById('voar-visoes');
+  if (vEl) {
+    if (!v.visoes.length) {
+      vEl.innerHTML = '<div class="empty"><div class="ei">🎯</div><p>Nenhuma visão cadastrada ainda.<br>Comece definindo o que você quer para sua vida.</p></div>';
+    } else {
+      vEl.innerHTML = v.visoes.map(function(vi) {
+        return '<div style="background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh-sm);">'
+          +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">'
+          +'<div style="flex:1;">'
+          +'<div style="font-size:13px;font-weight:600;color:var(--tx);line-height:1.5;margin-bottom:8px;">'+vi.texto+'</div>'
+          +(vi.tag ? '<span style="font-size:10px;font-weight:600;background:var(--blue-dim);color:var(--blue);padding:2px 8px;border-radius:4px;text-transform:uppercase;">'+vi.tag+'</span>' : '')
+          +'</div>'
+          +delBtn('visao', vi.id)
+          +'</div>'
+          +(vi.prazo ? '<div style="margin-top:10px;font-size:11px;color:var(--mu);">📅 Prazo: '+vi.prazo+'</div>' : '')
+          +'<div style="height:2px;background:linear-gradient(90deg,var(--gold),transparent);border-radius:2px;margin-top:12px;"></div>'
+          +'</div>';
+      }).join('');
+    }
+  }
+
+  // ── O: Organização
+  var oEl = document.getElementById('voar-orgs');
+  if (oEl) {
+    if (!v.organizacao.length) {
+      oEl.innerHTML = '<div class="empty"><div class="ei">📋</div><p>Nenhuma prioridade definida.</p></div>';
+    } else {
+      var sorted = v.organizacao.slice().sort(function(a,b){return a.prioridade-b.prioridade;});
+      oEl.innerHTML = sorted.map(function(o,idx) {
+        return '<div style="background:var(--s1);border:1px solid var(--brd);border-radius:var(--rs);padding:13px 16px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh-sm);">'
+          +'<div style="width:26px;height:26px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gold);">'+(idx+1)+'</div>'
+          +'<div style="flex:1;">'
+          +'<div style="font-size:13px;font-weight:600;color:var(--tx);">'+o.descricao+'</div>'
+          +(o.pct ? '<div style="font-size:11px;color:var(--mu);margin-top:2px;">'+o.pct+'% da renda</div>' : '')
+          +'</div>'
+          +delBtn('org', o.id)
+          +'</div>';
+      }).join('');
+    }
+  }
+
+  // ── A: Ações
+  var aEl = document.getElementById('voar-acoes');
+  if (aEl) {
+    var filtro = (document.getElementById('voarAcaoFiltro')||{}).value || 'all';
+    var acoes = v.acoes.filter(function(a){ return filtro === 'all' || a.status === filtro; });
+    var statusColors = { pendente:'var(--warn)', andamento:'var(--blue)', concluido:'var(--green)' };
+    var statusLabels = { pendente:'Pendente', andamento:'Em andamento', concluido:'Concluida' };
+    if (!acoes.length) {
+      aEl.innerHTML = '<div class="empty"><div class="ei">✅</div><p>Nenhuma acao'+(filtro!=='all'?' com esse status':'')+'.</p></div>';
+    } else {
+      aEl.innerHTML = acoes.map(function(a) {
+        var done = a.status === 'concluido';
+        var advBtn = a.status !== 'concluido'
+          ? '<button onclick="avancarAcao(' + DQ + a.id + DQ + ')" style="background:var(--s2);border:1px solid var(--brd2);color:var(--tx);border-radius:var(--rs);font-size:11px;padding:4px 10px;cursor:pointer;margin-right:4px;">→</button>'
+          : '';
+        return '<div style="background:var(--s1);border:1px solid var(--brd);border-left:3px solid '+(statusColors[a.status]||'var(--brd)')+';border-radius:var(--rs);padding:13px 16px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh-sm);">'
+          +'<div style="flex:1;">'
+          +'<div style="font-size:13px;font-weight:500;color:var(--tx);'+(done?'text-decoration:line-through;opacity:.6;':'')+'">'+a.descricao+'</div>'
+          +'<div style="display:flex;gap:10px;margin-top:5px;flex-wrap:wrap;">'
+          +(a.categoria?'<span style="font-size:10px;color:var(--mu);">'+a.categoria+'</span>':'')
+          +(a.prazo?'<span style="font-size:10px;color:var(--mu);">📅 '+a.prazo+'</span>':'')
+          +'<span style="font-size:10px;font-weight:600;color:'+(statusColors[a.status]||'var(--mu)')+';">'+(statusLabels[a.status]||a.status)+'</span>'
+          +'</div></div>'
+          +'<div style="display:flex;gap:4px;">'+advBtn+delBtn('acao',a.id)+'</div>'
+          +'</div>';
+      }).join('');
+    }
+  }
+
+  // ── R: Realização
+  var kpiEl = document.getElementById('voar-kpis');
+  if (kpiEl) {
+    var total  = v.acoes.length;
+    var done2  = v.acoes.filter(function(a){return a.status==='concluido';}).length;
+    var marcos = v.realizacoes.length;
+    var pct    = total > 0 ? Math.round(done2/total*100) : 0;
+    kpiEl.innerHTML =
+      '<div class="kpi-card rec"><div class="kpi-label">Acoes Concluidas</div><div class="kpi-val g">'+done2+' / '+total+'</div><div class="kpi-sub">'+pct+'% do plano</div></div>'
+      +'<div class="kpi-card saldo-pos"><div class="kpi-label">Marcos Atingidos</div><div class="kpi-val b">'+marcos+'</div><div class="kpi-sub">momentos registrados</div></div>'
+      +'<div class="kpi-card inv"><div class="kpi-label">Visoes Definidas</div><div class="kpi-val b">'+v.visoes.length+'</div><div class="kpi-sub">objetivos de vida</div></div>'
+      +'<div class="kpi-card"><div class="kpi-label">Prioridades</div><div class="kpi-val">'+v.organizacao.length+'</div><div class="kpi-sub">itens organizados</div></div>';
+  }
+
+  var rEl = document.getElementById('voar-realizacoes');
+  if (rEl) {
+    if (!v.realizacoes.length) {
+      rEl.innerHTML = '<div class="empty"><div class="ei">🏆</div><p>Nenhum marco registrado ainda.</p></div>';
+    } else {
+      var sorted2 = v.realizacoes.slice().reverse();
+      var tipos = { conquista:'🏆', aprendizado:'💡', superacao:'💪', celebracao:'🎉' };
+      rEl.innerHTML = sorted2.map(function(r) {
+        return '<div style="background:var(--s1);border:1px solid var(--brd);border-radius:var(--rs);padding:13px 16px;display:flex;align-items:flex-start;gap:14px;box-shadow:var(--sh-sm);">'
+          +'<div style="font-size:22px;flex-shrink:0;">'+(tipos[r.tipo]||'✓')+'</div>'
+          +'<div style="flex:1;">'
+          +'<div style="font-size:13px;font-weight:600;color:var(--tx);">'+r.descricao+'</div>'
+          +(r.data?'<div style="font-size:11px;color:var(--mu);margin-top:3px;">'+r.data+'</div>':'')
+          +'</div>'
+          +delBtn('realiz',r.id)
+          +'</div>';
+      }).join('');
+    }
+  }
+}
+
+function openVoarModal(field) {
+  _voarField = field;
+  _voarEditId = null;
+  var titles = {'visao':'Nova Visao', 'org':'Nova Prioridade', 'acao':'Nova Acao', 'realiz':'Registrar Marco'};
+  document.getElementById('mVoarTit').textContent = titles[field]||'Adicionar';
+
+  var body = '';
+  if (field === 'visao') {
+    body = '<div class="ig"><label>Descrição da visão</label><textarea id="vTxt" rows="3" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;resize:vertical;" placeholder="Ex: Quero me aposentar aos 60 anos sem depender de ninguém"></textarea></div>'
+      +'<div class="ir c2">'
+      +'<div class="ig"><label>Prazo estimado</label><input type="text" id="vPrazo" placeholder="Ex: 2030 / 5 anos" style="width:100%;"></div>'
+      +'<div class="ig"><label>Categoria</label><select id="vTag" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"><option value="">Selecione</option>'+VOAR_TAGS.map(function(t){return'<option>'+t+'</option>';}).join('')+'</select></div>'
+      +'</div>';
+  } else if (field === 'org') {
+    body = '<div class="ig"><label>Descrição da prioridade</label><input type="text" id="oDesc" placeholder="Ex: Quitar cartão de crédito" style="width:100%;"></div>'
+      +'<div class="ir c2">'
+      +'<div class="ig"><label>Prioridade (1 = mais importante)</label><input type="number" id="oPrio" min="1" max="20" value="1" style="width:100%;"></div>'
+      +'<div class="ig"><label>% da renda (opcional)</label><input type="number" id="oPct" min="0" max="100" placeholder="Ex: 30" style="width:100%;"></div>'
+      +'</div>';
+  } else if (field === 'acao') {
+    body = '<div class="ig"><label>Descrição da ação</label><input type="text" id="aDesc" placeholder="Ex: Cancelar plano de TV até dia 10" style="width:100%;"></div>'
+      +'<div class="ir c2">'
+      +'<div class="ig"><label>Prazo</label><input type="text" id="aPrazo" placeholder="Ex: 10/08/2026" style="width:100%;"></div>'
+      +'<div class="ig"><label>Categoria</label><select id="aCat" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"><option value="">Selecione</option>'+VOAR_ACAOCAT.map(function(t){return'<option>'+t+'</option>';}).join('')+'</select></div>'
+      +'</div>';
+  } else if (field === 'realiz') {
+    body = '<div class="ig"><label>Descreva o marco alcançado</label><input type="text" id="rDesc" placeholder="Ex: Primeiro mês sem dívida no cartão" style="width:100%;"></div>'
+      +'<div class="ir c2">'
+      +'<div class="ig"><label>Data</label><input type="text" id="rData" placeholder="Ex: Julho 2026" style="width:100%;"></div>'
+      +'<div class="ig"><label>Tipo</label><select id="rTipo" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"><option value="conquista">🏆 Conquista</option><option value="superacao">💪 Superação</option><option value="aprendizado">💡 Aprendizado</option><option value="celebracao">🎉 Celebração</option></select></div>'
+      +'</div>';
+  }
+  document.getElementById('mVoarBody').innerHTML = body;
+  openModal('mVoar');
+  var first = document.querySelector('#mVoarBody input, #mVoarBody textarea');
+  if (first) setTimeout(function(){first.focus();},120);
+}
+
+function confirmVoar() {
+  var user = getUser(CU.id);
+  if (!user.voar) user.voar = {visoes:[],organizacao:[],acoes:[],realizacoes:[]};
+  var v = user.voar;
+
+  if (_voarField === 'visao') {
+    var txt = (document.getElementById('vTxt')||{}).value||'';
+    if (!txt.trim()) { document.getElementById('vTxt').style.borderColor='var(--red)'; return; }
+    v.visoes.push({ id:uid(), texto:txt.trim(),
+      prazo:(document.getElementById('vPrazo')||{}).value||'',
+      tag:(document.getElementById('vTag')||{}).value||'' });
+  } else if (_voarField === 'org') {
+    var desc = (document.getElementById('oDesc')||{}).value||'';
+    if (!desc.trim()) { document.getElementById('oDesc').style.borderColor='var(--red)'; return; }
+    v.organizacao.push({ id:uid(), descricao:desc.trim(),
+      prioridade:parseInt((document.getElementById('oPrio')||{}).value)||99,
+      pct:(document.getElementById('oPct')||{}).value||'' });
+  } else if (_voarField === 'acao') {
+    var desc2 = (document.getElementById('aDesc')||{}).value||'';
+    if (!desc2.trim()) { document.getElementById('aDesc').style.borderColor='var(--red)'; return; }
+    v.acoes.push({ id:uid(), descricao:desc2.trim(),
+      prazo:(document.getElementById('aPrazo')||{}).value||'',
+      categoria:(document.getElementById('aCat')||{}).value||'',
+      status:'pendente' });
+  } else if (_voarField === 'realiz') {
+    var desc3 = (document.getElementById('rDesc')||{}).value||'';
+    if (!desc3.trim()) { document.getElementById('rDesc').style.borderColor='var(--red)'; return; }
+    v.realizacoes.push({ id:uid(), descricao:desc3.trim(),
+      data:(document.getElementById('rData')||{}).value||'',
+      tipo:(document.getElementById('rTipo')||{}).value||'conquista' });
+  }
+
+  saveUser(user); CU = getUser(user.id);
+  closeModal('mVoar');
+  rVoar();
+}
+
+function delVoar(field, id) {
+  var user = getUser(CU.id);
+  if (!user.voar) return;
+  var mapKey = {visao:'visoes',org:'organizacao',acao:'acoes',realiz:'realizacoes'};
+  var key = mapKey[field];
+  if (!key) return;
+  user.voar[key] = user.voar[key].filter(function(x){ return x.id !== id; });
+  saveUser(user); CU = getUser(user.id);
+  rVoar();
+}
+
+function avancarAcao(id) {
+  var user = getUser(CU.id);
+  if (!user.voar) return;
+  var flow = ['pendente','andamento','concluido'];
+  user.voar.acoes = user.voar.acoes.map(function(a) {
+    if (a.id === id) {
+      var idx = flow.indexOf(a.status);
+      a.status = flow[Math.min(idx+1, flow.length-1)];
+    }
+    return a;
+  });
+  saveUser(user); CU = getUser(user.id);
+  rVoar();
+}
+
+function setFiltroTipo(btn, val) {
+  document.getElementById("filtroTipo").value = val;
+  document.querySelectorAll("#filtroTipoPill button").forEach(function(b){ b.classList.remove("active"); });
+  btn.classList.add("active");
+  rLanc();
 }
 
 function toggleTheme() {
