@@ -277,7 +277,8 @@ body.sb-hidden .main { margin-left:0; }
 .cad-sl { font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:8px; }
 .cad-sl::before { content:'';width:3px;height:13px;background:var(--navy);border-radius:2px;display:inline-block;flex-shrink:0; }
 .cad-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px; }
-.cad-col { background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-sm);min-width:0; }
+.cad-col { background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-sm);min-width:0;display:flex;flex-direction:column; }
+.cad-items { flex:1; }
 .cad-ch { padding:13px 15px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;background:var(--s2); }
 .cad-ct { display:flex;align-items:center;gap:8px; }
 .cad-ic { width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0; }
@@ -301,7 +302,8 @@ body.sb-hidden .main { margin-left:0; }
 .patr-kpi-row { display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px; }
 .patr-section { margin-top:24px; }
 .patr-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;width:100%; }
-.patr-col { background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-sm);min-width:0; }
+.patr-col { background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-sm);min-width:0;display:flex;flex-direction:column; }
+.patr-items { flex:1; }
 .patr-col-head { padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--brd);background:var(--s2); }
 .patr-col-icon { width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0; }
 .patr-col-title { font-size:12px;font-weight:600;color:var(--tx);margin-left:8px; }
@@ -457,6 +459,7 @@ body.sb-hidden .main { margin-left:0; }
       <div class="ph">
         <div><h1 class="pt">Orçamento Mensal</h1><p class="psub" id="orcSub">Controle de receitas, gastos e lançamentos</p></div>
         <div style="display:flex;gap:8px;align-items:center">
+          <select id="orcAnoSel" onchange="onOrcMonthChange()" style="background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;font-weight:500;padding:7px 12px;outline:none;cursor:pointer;"></select>
           <select id="orcMonthSel" onchange="onOrcMonthChange()" style="background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;font-weight:500;padding:7px 12px;outline:none;cursor:pointer;">
             <option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option>
             <option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option>
@@ -522,9 +525,47 @@ body.sb-hidden .main { margin-left:0; }
       </div>
     </div>
 
-    <!-- ══ GESTÃO ANUAL ══ -->
+    
+        <!-- Modal: escolha de escopo para parcelado/recorrente -->
+        <div id="mLancEscopo" class="mo" style="display:none;">
+          <div class="modal" style="width:420px;">
+            <div class="mt2" id="mLancEscopoTit">Lançamento parcelado</div>
+            <p style="font-size:13px;color:var(--mu);margin-bottom:20px;" id="mLancEscopoDesc">Este lançamento faz parte de uma série. O que deseja fazer?</p>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button id="mLancEscopoBtn1" onclick="execLancEscopo('only')"
+                style="padding:12px 16px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;cursor:pointer;text-align:left;transition:border-color .15s;"
+                onmouseenter="this.style.borderColor='var(--gold)'" onmouseleave="this.style.borderColor='var(--brd2)'">
+                <div style="font-weight:600;">Apenas este lançamento</div>
+                <div style="font-size:11px;color:var(--mu);margin-top:3px;" id="mLancEscopoSub1"></div>
+              </button>
+              <button id="mLancEscopoBtn2" onclick="execLancEscopo('forward')"
+                style="padding:12px 16px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;cursor:pointer;text-align:left;transition:border-color .15s;"
+                onmouseenter="this.style.borderColor='var(--red)'" onmouseleave="this.style.borderColor='var(--brd2)'">
+                <div style="font-weight:600;">Este e todos os seguintes</div>
+                <div style="font-size:11px;color:var(--mu);margin-top:3px;" id="mLancEscopoSub2"></div>
+              </button>
+            </div>
+            <div class="ma" style="margin-top:16px;">
+              <button class="bs" onclick="closeModal('mLancEscopo')">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+<!-- ══ GESTÃO ANUAL ══ -->
     <div class="pg" id="page-gestao">
-      <div class="ph"><div><div class="pt">Gestão Anual</div><div class="psub" id="gSub">Visão consolidada do ano</div></div></div>
+      <div class="ph">
+        <div><div class="pt">Gestão Anual</div><div class="psub" id="gSub">Visão consolidada do ano</div></div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <select id="gAno" onchange="rGestao()" style="background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;font-weight:500;padding:7px 12px;outline:none;cursor:pointer;">
+          </select>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:11px;color:var(--mu);white-space:nowrap;">Meses futuros</span>
+            <button id="gFuturoBtn" onclick="toggleGFuturo(this)" style="width:36px;height:20px;background:var(--s3);border:1px solid var(--brd2);border-radius:10px;cursor:pointer;position:relative;transition:background .2s;padding:0;">
+              <span id="gFuturoThumb" style="position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--mu);transition:left .2s;display:block;"></span>
+            </button>
+          </div>
+        </div>
+      </div>
 
 
 
@@ -745,12 +786,16 @@ body.sb-hidden .main { margin-left:0; }
 
     <!-- ══ ALOCAÇÃO ══ -->
     <div class="pg" id="page-alocacao">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);font-weight:600;">Alocação Patrimonial</div>
+        <select id="alocAnoSel" onchange="rAloc()" style="background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;font-weight:500;padding:7px 12px;outline:none;cursor:pointer;"></select>
+      </div>
       <div class="ph"><div><h1 class="pt">Alocação</h1><p class="psub">Saldo das contas e composição do patrimônio</p></div></div>
       <div class="cg" id="alocCards"></div>
       <div class="chart-row" style="grid-template-columns:1fr 280px;align-items:stretch;">
         <div class="chart-box">
           <div class="chart-title">Patrimônio Mês a Mês</div>
-          <canvas id="chartPatrim" height="220"></canvas>
+          <canvas id="chartPatrim" height="176"></canvas>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;">
           <div class="chart-box" style="background:var(--s2);">
@@ -798,7 +843,19 @@ body.sb-hidden .main { margin-left:0; }
 
     <!-- ══ CADASTROS ══ -->
     <div class="pg" id="page-cadastro">
-      <div class="ph"><div><h1 class="pt">Cadastros</h1><p class="psub">Categorias e contas — refletem em todo o sistema</p></div></div>
+      <div class="ph">
+        <div><h1 class="pt">Cadastros</h1><p class="psub">Categorias e contas — refletem em todo o sistema</p></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:10px;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;">Período</span>
+          <input type="number" id="cfgAnoInicial" min="2020" max="2040"
+            onchange="saveCfgAnos()"
+            style="width:70px;padding:5px 8px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:12px;outline:none;text-align:center;">
+          <span style="font-size:11px;color:var(--mu);">→</span>
+          <input type="number" id="cfgAnoFinal" min="2020" max="2040"
+            onchange="saveCfgAnos()"
+            style="width:70px;padding:5px 8px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:12px;outline:none;text-align:center;">
+        </div>
+      </div>
       <p class="cad-sl">Categorias e Contas</p>
       <div class="cad-grid" style="grid-template-columns:repeat(4,1fr);">
         <div class="cad-col">
@@ -1091,6 +1148,17 @@ body.sb-hidden .main { margin-left:0; }
         <div class="rg" id="pgMode">
           <label><input type="radio" name="pgmode" value="vista" checked onchange="onPgMode()"> À vista</label>
           <label><input type="radio" name="pgmode" value="parcelado" onchange="onPgMode()"> Parcelado</label>
+          <label><input type="radio" name="pgmode" value="recorrente" onchange="onPgMode()"> Recorrente</label>
+        </div>
+      </div>
+      <div id="recOpts" style="display:none;margin-top:8px;">
+        <div class="ir c2">
+          <div class="ig"><label>Por quantos meses</label>
+            <input type="number" id="recMeses" min="1" max="120" value="12" placeholder="Ex: 12" style="width:100%;">
+          </div>
+          <div class="ig" style="padding-top:26px;">
+            <p style="font-size:11px;color:var(--mu);line-height:1.5;">O valor será replicado integralmente em cada mês.</p>
+          </div>
         </div>
       </div>
       <div id="parcOpts" style="display:none">
@@ -1410,7 +1478,7 @@ function initApp() {
   document.getElementById('adminNav').style.display = CU.role==='admin' ? 'block' : 'none';
   rCad();
   updateSbUser();
-  initFuturoDefaults();
+  initFuturoDefaults(); initOrcAno();
   rCadPatrim();
   rPatrimAloc();
   rOrcFull();
@@ -1431,12 +1499,12 @@ function sp(id) {
   document.querySelectorAll('.ni').forEach(function(n){
     if ((n.getAttribute('onclick')||'').indexOf("'"+id+"'") >= 0) n.classList.add('active');
   });
-  if (id==='gestao') rGestao();
-  if (id==='futuro') { initFuturoDefaults(); rFuturo(); }
-  if (id==='alocacao') rAloc();
-  if (id==='cadastro') rCad();
+  if (id==='gestao') { initGAno(); rGestao(); }
+  if (id==='futuro') { initFuturoDefaults(); initOrcAno(); rFuturo(); }
+  if (id==='alocacao') { initAlocAno(); rAloc(); }
+  if (id==='cadastro') { rCad(); loadCfgAnos(); }
   if (id==='clientes') rCli();
-  if (id==='orcamento') rOrcFull();
+  if (id==='orcamento') { initOrcAno(); rOrcFull(); }
   if (id==='voar') { setVoarTab('v'); }
 }
 
@@ -1448,21 +1516,35 @@ function badgeFor(tipo) {
   return '<span class="badge '+(map[tipo]||'')+'">'+tipo+'</span>';
 }
 
-function byMonth(user, m) {
-  return user.lancamentos.filter(function(l){
-    return new Date(l.data+'T12:00:00').getMonth() === m;
+function byMonth(user, m, y) {
+  var yr = y !== undefined ? y : (OY || new Date().getFullYear());
+  return (user.lancamentos||[]).filter(function(l){
+    var d = new Date(l.data+'T12:00:00');
+    return d.getMonth() === m && d.getFullYear() === yr;
   });
 }
 
 // ══════════════════════════════════════════════════════
 // SALDO CONTA
 // ══════════════════════════════════════════════════════
-function saldoConta(user, contaNome, upToMonth) {
-  var conta = user.contas.find(function(c){ return c.nome===contaNome; });
+// saldoConta(user, nome, month, year)
+// Retorna saldo ACUMULADO até o fim do mês M do ano Y.
+// Inclui saldoInicial + todos os lançamentos até aquela data.
+// Se year for omitido, usa TODOS os anos até o mês (comportamento legado).
+function saldoConta(user, contaNome, upToMonth, upToYear) {
+  var conta = (user.contas||[]).find(function(c){ return c.nome===contaNome; });
   var saldo = conta ? (conta.saldoInicial||0) : 0;
-  user.lancamentos.forEach(function(l) {
-    var lm = new Date(l.data+'T12:00:00').getMonth();
-    if (upToMonth !== undefined && lm > upToMonth) return;
+  (user.lancamentos||[]).forEach(function(l) {
+    var ld = new Date(l.data+'T12:00:00');
+    var lm = ld.getMonth();
+    var ly = ld.getFullYear();
+    // Filtro temporal: incluir apenas lançamentos até (upToYear, upToMonth)
+    if (upToYear !== undefined) {
+      if (ly > upToYear) return;
+      if (ly === upToYear && upToMonth !== undefined && lm > upToMonth) return;
+    } else {
+      if (upToMonth !== undefined && lm > upToMonth) return;
+    }
     if (l.tipo === 'Transferência') {
       if (l.contaOrigem === contaNome) saldo -= l.valor;
       if (l.contaDest === contaNome) saldo += l.valor;
@@ -1478,8 +1560,68 @@ function saldoConta(user, contaNome, upToMonth) {
 // ══════════════════════════════════════════════════════
 // ORÇAMENTO MENSAL (página principal)
 // ══════════════════════════════════════════════════════
+
+// ══ CONFIGURAÇÃO TEMPORAL ══
+function saveCfgAnos() {
+  var user = getUser(CU.id);
+  if (!user.config) user.config = {};
+  var ini = parseInt(document.getElementById('cfgAnoInicial').value);
+  var fim = parseInt(document.getElementById('cfgAnoFinal').value);
+  if (ini) user.config.anoInicial = ini;
+  if (fim && fim >= (ini||ini)) user.config.anoFinal = fim;
+  saveUser(user); CU = getUser(user.id);
+  // Reinit all year selectors
+  populateAnoSel('orcAnoSel');
+  populateAnoSel('gAno');
+  populateAnoSel('alocAnoSel');
+}
+
+function getAnoRange() {
+  var user = CU ? getUser(CU.id) : null;
+  var cfg  = user && user.config ? user.config : {};
+  var now  = new Date().getFullYear();
+  return {
+    ini: cfg.anoInicial || now,
+    fim: cfg.anoFinal   || now
+  };
+}
+
+function populateAnoSel(selId) {
+  var sel = document.getElementById(selId);
+  if (!sel) return;
+  var range   = getAnoRange();
+  var current = parseInt(sel.value) || new Date().getFullYear();
+  sel.innerHTML = '';
+  for (var y = range.ini; y <= range.fim; y++) {
+    var opt = document.createElement('option');
+    opt.value = y; opt.textContent = y;
+    if (y === current) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  // Ensure value is set
+  if (!sel.value || isNaN(parseInt(sel.value))) {
+    sel.value = range.fim;
+  }
+}
+
+function loadCfgAnos() {
+  var user = CU ? getUser(CU.id) : null;
+  var cfg  = user && user.config ? user.config : {};
+  var now  = new Date().getFullYear();
+  var iniEl = document.getElementById('cfgAnoInicial');
+  var fimEl = document.getElementById('cfgAnoFinal');
+  if (iniEl) iniEl.value = cfg.anoInicial || now;
+  if (fimEl) fimEl.value = cfg.anoFinal   || now;
+}
+
+function initAlocAno() { populateAnoSel('alocAnoSel'); }
+
+function initOrcAno() { populateAnoSel('orcAnoSel'); }
+
 function onOrcMonthChange() {
   OM = parseInt(document.getElementById('orcMonthSel').value);
+  var anoEl = document.getElementById('orcAnoSel');
+  if (anoEl) OY = parseInt(anoEl.value);
   LM = OM;
   rOrcFull();
 }
@@ -1496,19 +1638,30 @@ function rOrcFull() {
 
 function rOrcCards(user) {
   var lancs = byMonth(user, OM);
-  var rec = lancs.filter(function(l){ return l.tipo==='Entrada'||l.tipo==='Rendimento'; }).reduce(function(s,l){ return s+l.valor; },0);
+  var rec  = lancs.filter(function(l){ return l.tipo==='Entrada'; }).reduce(function(s,l){ return s+l.valor; },0);
+  var rend = lancs.filter(function(l){ return l.tipo==='Rendimento'; }).reduce(function(s,l){ return s+l.valor; },0);
+  var recTotal = rec + rend;  // receita total = entradas + rendimentos
   var desp = lancs.filter(function(l){ return l.tipo==='Saída'; }).reduce(function(s,l){ return s+l.valor; },0);
-  var saldo = rec - desp;
+  var saldo = recTotal - desp;
   var orc = user.orcamento[OM] || {};
-  var pct = orc.renda ? Math.min(100, Math.round(desp/orc.renda*100)) : 0;
-  var pctColor = pct>80?'var(--red)':pct>60?'var(--warn)':'var(--teal3)';
+  var _compBase = compUseProj ? (orc&&orc.renda ? orc.renda : (rec||1)) : (recTotal||1);
+  var pct = _compBase > 0 ? Math.min(999, Math.round(desp/_compBase*100)) : 0;
+  var pctColor = pct>100?'var(--red)':pct>80?'var(--red)':pct>60?'var(--warn)':'var(--teal3)';
   var el = document.getElementById('orcCards');
   if (!el) return;
   el.innerHTML =
     '<div class="card"><div class="cl">Receitas</div><div class="cv g">'+fmt(rec)+'</div><div class="csub">'+lancs.filter(function(l){return l.tipo==='Entrada';}).length+' lançamentos</div></div>'
    +'<div class="card"><div class="cl">Despesas</div><div class="cv r">'+fmt(desp)+'</div><div class="csub">'+lancs.filter(function(l){return l.tipo==='Saída';}).length+' lançamentos</div></div>'
+   +'<div class="card"><div class="cl">Rendimentos</div><div class="cv" style="color:var(--purp)">'+fmt(rend)+'</div><div class="csub">'+lancs.filter(function(l){return l.tipo==='Rendimento';}).length+' lançamentos</div></div>'
    +'<div class="card"><div class="cl">Saldo do Mês</div><div class="cv '+(saldo>=0?'g':'r')+'">'+fmt(saldo)+'</div><div class="csub">'+(saldo>=0?'✓ Positivo':'⚠ Negativo')+'</div></div>'
-   +'<div class="card"><div class="cl">Comprometido</div><div class="cv" style="color:'+pctColor+'">'+pct+'%</div><div class="cbar"><div class="cbf" style="width:'+pct+'%;background:'+pctColor+'"></div></div></div>';
+   +'<div class="card">'
+   +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
+   +'<span class="cl" style="margin-bottom:0;">Comprometido</span>'
+   +'<button id="compBaseBtn" onclick="toggleCompBase(this)" style="background:transparent;border:none;font-size:9px;font-weight:600;color:var(--gold);cursor:pointer;padding:0;text-transform:uppercase;letter-spacing:.5px;">'+(compUseProj?'Esperado':'Recebido')+'</button>'
+   +'</div>'
+   +'<div class="cv" style="color:'+pctColor+';">'+pct+'%</div>'
+   +'<div class="cbar"><div class="cbf" style="width:'+Math.min(100,pct)+'%;background:'+pctColor+';"></div></div>'
+   +'</div>';
 }
 
 function rOrcTopGastos(user) {
@@ -1734,12 +1887,34 @@ function onTipoChange() {
 
 function onPgMode() {
   var v = document.querySelector('input[name="pgmode"]:checked').value;
-  document.getElementById('parcOpts').style.display = v==='parcelado' ? 'block' : 'none';
+  document.getElementById('parcOpts').style.display  = v==='parcelado'  ? '' : 'none';
+  var recEl = document.getElementById('recOpts');
+  if (recEl) recEl.style.display = v==='recorrente' ? '' : 'none';
 }
 
 function openLancModal(editId) {
   var user = getUser(CU.id);
   var isEdit = !!editId;
+  if (isEdit) {
+    var lEdit = user.lancamentos.find(function(l){ return l.id===editId; });
+    var isSerieEdit = lEdit && (lEdit.pgMode==='parcelado' || lEdit.pgMode==='recorrente');
+    var siblEdit = isSerieEdit ? user.lancamentos.filter(function(l) {
+      return l.id !== editId && (l.groupId===editId || l.groupId===lEdit.groupId || (lEdit.groupId && l.id===lEdit.groupId));
+    }) : [];
+    var modalEl = document.getElementById('mLancEscopo');
+    if (isSerieEdit && siblEdit.length > 0 && modalEl) {
+      _escopoCtx = { action: 'edit', id: editId, lancamento: lEdit };
+      var t2=document.getElementById('mLancEscopoTit'), d2=document.getElementById('mLancEscopoDesc');
+      var s12=document.getElementById('mLancEscopoSub1'), s22=document.getElementById('mLancEscopoSub2');
+      if (t2) t2.textContent = lEdit.pgMode==='parcelado' ? 'Editar Parcelado' : 'Editar Recorrente';
+      if (d2) d2.textContent = 'Este lançamento faz parte de uma série. O que deseja editar?';
+      if (s12) s12.textContent = 'Altera apenas este mês.';
+      if (s22) s22.textContent = 'Altera este e todos os seguintes da série.';
+      openModal('mLancEscopo');
+      return;
+    }
+  }
+
   document.getElementById('editLId').value = editId || '';
   document.getElementById('mLancTit').textContent = isEdit ? 'Editar Lançamento' : 'Novo Lançamento';
   if (!isEdit) {
@@ -1839,15 +2014,35 @@ function saveLanc() {
     }
   } else {
     user.lancamentos.push(baseLanc);
-    if (tipo==='Saída' && pgMode==='parcelado' && parcTotal>parcAtual) {
+    // Recorrente: replica o lançamento nos meses seguintes com o MESMO valor
+    if (tipo==='Saída' && pgMode==='recorrente') {
+      var recMeses = parseInt(document.getElementById('recMeses').value)||1;
+      var baseDate2 = new Date(baseData+'T12:00:00');
+      for (var rm = 1; rm < recMeses; rm++) {
+        var rDate = new Date(baseDate2);
+        rDate.setMonth(rDate.getMonth() + rm);
+        user.lancamentos.push({
+          id:uid(), data:rDate.toISOString().slice(0,10),
+          desc:baseDesc, tipo:tipo, cat:baseLanc.cat, conta:baseLanc.conta,
+          valor:baseValor, obs:'recorrente',
+          pgMode:'recorrente', groupId:baseLanc.id
+        });
+      }
+    }
+    if (tipo==='Saída' && pgMode==='parcelado' && parcTotal>1) {
       var baseDate = new Date(baseData+'T12:00:00');
-      for (var p=parcAtual+1; p<=parcTotal; p++) {
+      var valorParc = Math.round(baseValor / parcTotal * 100) / 100;
+      // Update the first parcel value too
+      baseLanc.valor = valorParc;
+      user.lancamentos[user.lancamentos.length-1].valor = valorParc;
+      for (var p=2; p<=parcTotal; p++) {
         var pDate = new Date(baseDate);
         pDate.setMonth(pDate.getMonth()+(p-parcAtual));
         user.lancamentos.push({
           id:uid(), data:pDate.toISOString().slice(0,10),
-          desc:baseDesc, tipo:tipo, cat:baseLanc.cat, conta:baseLanc.conta,
-          valor:baseValor, obs:'parcela '+p+'/'+parcTotal,
+          desc:baseDesc+' ('+p+'/'+parcTotal+')', tipo:tipo,
+          cat:baseLanc.cat, conta:baseLanc.conta,
+          valor:valorParc, obs:'parcela '+p+'/'+parcTotal,
           pgMode:'parcelado', parcAtual:p, parcTotal:parcTotal, groupId:baseLanc.id
         });
       }
@@ -1856,10 +2051,61 @@ function saveLanc() {
   saveUser(user); CU=getUser(user.id); closeModal('mLanc'); rOrcFull();
 }
 
+// ── Escopo context for parcelado/recorrente actions
+var _escopoCtx = { action: '', id: '', lancamento: null };
+
 function delLanc(id) {
-  if (!confirm('Excluir este lançamento?')) return;
   var user = getUser(CU.id);
-  user.lancamentos = user.lancamentos.filter(function(l){ return l.id!==id; });
+  var lanc = user.lancamentos.find(function(l){ return l.id===id; });
+  if (!lanc) { return; }
+  var isSerie = (lanc.pgMode==='parcelado' || lanc.pgMode==='recorrente');
+  var siblings = user.lancamentos.filter(function(l) {
+    return l.id !== id && (l.groupId === id || l.groupId === lanc.groupId || (lanc.groupId && l.id === lanc.groupId));
+  });
+  var modal = document.getElementById('mLancEscopo');
+  if (isSerie && siblings.length > 0 && modal) {
+    _escopoCtx = { action: 'delete', id: id, lancamento: lanc };
+    var tit = document.getElementById('mLancEscopoTit');
+    var desc = document.getElementById('mLancEscopoDesc');
+    var s1 = document.getElementById('mLancEscopoSub1');
+    var s2 = document.getElementById('mLancEscopoSub2');
+    if (tit) tit.textContent = lanc.pgMode==='parcelado' ? 'Lançamento Parcelado' : 'Lançamento Recorrente';
+    if (desc) desc.textContent = 'Este lançamento faz parte de uma série. O que deseja excluir?';
+    if (s1) s1.textContent = 'Remove apenas este mês.';
+    if (s2) s2.textContent = 'Remove este e todos os seguintes da série.';
+    openModal('mLancEscopo');
+  } else {
+    if (!confirm('Excluir este lançamento?')) return;
+    _execDelLanc(id, user, 'only');
+  }
+}
+
+function execLancEscopo(scope) {
+  closeModal('mLancEscopo');
+  var user = getUser(CU.id);
+  if (_escopoCtx.action === 'delete') {
+    _execDelLanc(_escopoCtx.id, user, scope);
+  } else if (_escopoCtx.action === 'edit') {
+    _escopoCtx.editScope = scope;
+    openModal('mLanc');
+  }
+}
+
+function _execDelLanc(id, user, scope) {
+  var lanc = user.lancamentos.find(function(l){ return l.id===id; });
+  if (!lanc) return;
+  if (scope === 'only') {
+    user.lancamentos = user.lancamentos.filter(function(l){ return l.id!==id; });
+  } else {
+    // Remove this and all FOLLOWING in the same group
+    var groupId = lanc.groupId || id;
+    var lancDate = new Date(lanc.data+'T12:00:00').getTime();
+    user.lancamentos = user.lancamentos.filter(function(l) {
+      if (l.id === id) return false;
+      if (l.groupId !== groupId && l.id !== groupId) return true;
+      return new Date(l.data+'T12:00:00').getTime() < lancDate;
+    });
+  }
   saveUser(user); CU=getUser(user.id); rOrcFull();
 }
 
@@ -1984,10 +2230,28 @@ function rGestao() {
     MN.forEach(function(m,i){ filterEl.add(new Option(m, i)); });
   }
 
-  var months = filterM === -1 ? MN.map(function(_,i){return i;}) : [filterM];
-  var recArr = MN.map(function(_,m){ return byMonth(user,m).filter(function(l){return l.tipo==='Entrada';}).reduce(function(s,l){return s+l.valor;},0); });
-  var despArr = MN.map(function(_,m){ return byMonth(user,m).filter(function(l){return l.tipo==='Saída';}).reduce(function(s,l){return s+l.valor;},0); });
-  var rendArr = MN.map(function(_,m){ return byMonth(user,m).filter(function(l){return l.tipo==='Rendimento';}).reduce(function(s,l){return s+l.valor;},0); });
+  // ── Ano e filtro de meses futuros
+  initGAno();  // ensure selector is populated before reading
+  var gAnoEl = document.getElementById('gAno');
+  var gAnoVal = (gAnoEl && !isNaN(parseInt(gAnoEl.value)))
+    ? parseInt(gAnoEl.value)
+    : new Date().getFullYear();
+  var nowDate = new Date();
+  var nowM2 = nowDate.getMonth();
+  var nowY2 = nowDate.getFullYear();
+
+  // Meses visíveis: se GA_SHOW_FUTURE=false e estamos no ano atual, oculta meses futuros
+  var visibleMonths = MN.map(function(_,i){return i;}).filter(function(m){
+    if (GA_SHOW_FUTURE) return true;
+    if (gAnoVal < nowY2) return true;   // ano passado: mostra tudo
+    if (gAnoVal > nowY2) return false;  // ano futuro: oculta tudo sem toggle
+    return m <= nowM2;                  // ano atual: só até o mês corrente
+  });
+
+  var months = filterM === -1 ? visibleMonths : (visibleMonths.indexOf(filterM) >= 0 ? [filterM] : []);
+  var recArr  = MN.map(function(_,m){ return byMonth(user,m,gAnoVal).filter(function(l){return l.tipo==='Entrada';}).reduce(function(s,l){return s+l.valor;},0); });
+  var despArr = MN.map(function(_,m){ return byMonth(user,m,gAnoVal).filter(function(l){return l.tipo==='Saída';}).reduce(function(s,l){return s+l.valor;},0); });
+  var rendArr = MN.map(function(_,m){ return byMonth(user,m,gAnoVal).filter(function(l){return l.tipo==='Rendimento';}).reduce(function(s,l){return s+l.valor;},0); });
 
   var totRec = months.reduce(function(s,m){return s+recArr[m];},0);
   var totDesp = months.reduce(function(s,m){return s+despArr[m];},0);
@@ -2012,8 +2276,8 @@ function rGestao() {
   if (gMainChart) { try{gMainChart.destroy();}catch(e){} gMainChart=null; }
   var mc = document.getElementById('gMainChart');
   if (mc) {
-    var labels = filterM===-1 ? MS : [MN[filterM]];
-    var recData = months.map(function(m){return recArr[m];});
+    var labels = filterM===-1 ? months.map(function(m){return MS[m];}) : [MN[filterM]];
+    var recData  = months.map(function(m){return recArr[m];});
     var despData = months.map(function(m){return despArr[m];});
     var rendData = months.map(function(m){return rendArr[m];});
     var datasets = [
@@ -2100,7 +2364,7 @@ function rGestao() {
   if (cc) {
     var byCat = {};
     months.forEach(function(m){
-      byMonth(user,m).filter(function(l){return l.tipo==='Saída';}).forEach(function(l){
+      byMonth(user,m,gAnoVal).filter(function(l){return l.tipo==='Saída';}).forEach(function(l){
         byCat[l.cat]=(byCat[l.cat]||0)+l.valor;
       });
     });
@@ -2131,7 +2395,7 @@ function rGestao() {
   function buildTableG(cats, tipo) {
     var refTotal = tipo==='Saída' ? totDesp : tipo==='Entrada' ? totRec : totRend;
     var cd = cats.map(function(cat){
-      var v = MN.map(function(_,m){ return byMonth(user,m).filter(function(l){return l.cat===cat&&l.tipo===tipo;}).reduce(function(s,l){return s+l.valor;},0); });
+      var v = MN.map(function(_,m){ return byMonth(user,m,gAnoVal).filter(function(l){return l.cat===cat&&l.tipo===tipo;}).reduce(function(s,l){return s+l.valor;},0); });
       var filtered = months.map(function(m){return v[m];});
       return {cat:cat,v:v,t:filtered.reduce(function(s,x){return s+x;},0)};
     }).filter(function(d){return d.t>0;}).filter(function(d){ return !filterCat || d.cat===filterCat; }).sort(function(a,b){ if(sortBy==='nome') return a.cat.localeCompare(b.cat); if(sortBy==='pct') return b.t-a.t; return b.t-a.t; });
@@ -2198,7 +2462,7 @@ function rGestao() {
         var cells = activeMths.map(function(m){
           var orc = tipoOrc==='Sa\u00edda' && user.orcamento&&user.orcamento[m]&&user.orcamento[m].cats
             ? (user.orcamento[m].cats[cat]||0) : 0;
-          var real  = byMonth(user,m).filter(function(l){return l.tipo===tipoOrc&&l.cat===cat;}).reduce(function(s,l){return s+l.valor;},0);
+          var real  = byMonth(user,m,gAnoVal).filter(function(l){return l.tipo===tipoOrc&&l.cat===cat;}).reduce(function(s,l){return s+l.valor;},0);
           var recM  = recArr[m];
           var ok    = real<=orc&&orc>0;
           var over  = real>orc&&orc>0;
@@ -2218,7 +2482,7 @@ function rGestao() {
         }).join('');
         if (!hasData) return '';
         var totReal = activeMths.reduce(function(s,m){
-          return s+byMonth(user,m).filter(function(l){return l.tipo==='Saída'&&l.cat===cat;}).reduce(function(s2,l){return s2+l.valor;},0);
+          return s+byMonth(user,m,gAnoVal).filter(function(l){return l.tipo==='Saída'&&l.cat===cat;}).reduce(function(s2,l){return s2+l.valor;},0);
         },0);
         var totStr = G_ORC_VIEW==='pct'
           ? (totRec>0?(totReal/totRec*100).toFixed(1)+'%':'-')
@@ -2240,14 +2504,17 @@ function rGestao() {
 // ALOCAÇÃO
 // ══════════════════════════════════════════════════════
 function rAloc() {
+  initAlocAno();
   var user = getUser(CU.id);
   var contas = user.contas||[];
   var filterEl = document.getElementById('alocFilterM');
   var filterM = filterEl ? parseInt(filterEl.value) : -1;
+  var alocAnoEl = document.getElementById('alocAnoSel');
+  var ALOC_YEAR = alocAnoEl ? parseInt(alocAnoEl.value) : new Date().getFullYear();
   var currentM = new Date().getMonth();
   var displayM = filterM===-1 ? currentM : filterM;
 
-  var totalAtual = contas.reduce(function(s,c){ return s+saldoConta(user,c.nome,displayM); },0);
+  var totalAtual = contas.reduce(function(s,c){ return s+saldoConta(user,c.nome,displayM,ALOC_YEAR); },0);
   var totalInicial = contas.reduce(function(s,c){ return s+(c.saldoInicial||0); },0);
   var diff = totalAtual-totalInicial;
 
@@ -2263,7 +2530,7 @@ function rAloc() {
   if (chartDonut) { try{chartDonut.destroy();}catch(e){} chartDonut=null; }
   var donutCanvas = document.getElementById('chartDonut');
   if (donutCanvas && contas.length) {
-    var donutData = contas.map(function(c){ return Math.max(0,saldoConta(user,c.nome,displayM)); });
+    var donutData = contas.map(function(c){ return Math.max(0,saldoConta(user,c.nome,displayM,ALOC_YEAR)); });
     window.chartDonut = new Chart(donutCanvas.getContext('2d'), {
       type:'doughnut',
       data:{labels:contas.map(function(c){return c.nome;}),datasets:[{data:donutData,backgroundColor:PALETTE,borderWidth:0,hoverOffset:8}]},
@@ -2276,7 +2543,7 @@ function rAloc() {
     var txClr = getComputedStyle(document.documentElement).getPropertyValue('--tx').trim()||'#c8d8ec';
     var muClr = getComputedStyle(document.documentElement).getPropertyValue('--mu').trim()||'#3d5470';
     var rankData = contas.map(function(c,i) {
-      return { label: c.nome, value: Math.max(0, saldoConta(user, c.nome, displayM)), color: PALETTE[i%PALETTE.length] };
+      return { label: c.nome, value: Math.max(0, saldoConta(user,c.nome,displayM,ALOC_YEAR)), color: PALETTE[i%PALETTE.length] };
     }).sort(function(a,b){ return b.value - a.value; });
     window.chartRankContas = new Chart(rankCtx.getContext('2d'), {
       type:'bar',
@@ -2303,14 +2570,14 @@ function rAloc() {
   if (patrimCanvas) {
     // Calcular total por mês (soma de todas as contas)
     var monthTotals = MN.map(function(_,m){
-      return contas.reduce(function(s,c){ return s + Math.max(0,saldoConta(user,c.nome,m)); }, 0);
+      return contas.reduce(function(s,c){ return s + Math.max(0,saldoConta(user,c.nome,m,ALOC_YEAR)); }, 0);
     });
 
     chartPatrim = new Chart(patrimCanvas.getContext('2d'), {
       type:'bar',
       data:{
         labels:MS,
-        datasets:contas.map(function(c,i){ return {label:c.nome,data:MN.map(function(_,m){return Math.max(0,saldoConta(user,c.nome,m));}),backgroundColor:PALETTE[i%PALETTE.length]+'cc',borderRadius:4}; })
+        datasets:contas.map(function(c,i){ return {label:c.nome,data:MN.map(function(_,m){return Math.max(0,saldoConta(user,c.nome,m,ALOC_YEAR));}),backgroundColor:PALETTE[i%PALETTE.length]+'cc',borderRadius:4}; })
       },
       options:{
         responsive:true,maintainAspectRatio:true,
@@ -2371,7 +2638,7 @@ function rAloc() {
   var rows='';
   contas.forEach(function(c) {
     var cells = MN.map(function(_,m){
-      var v=saldoConta(user,c.nome,m);
+      var v=saldoConta(user,c.nome,m,ALOC_YEAR);
       var col=v<0?'var(--red)':v>0?'var(--teal3)':'var(--mu)';
       return '<td style="font-size:12px;color:'+col+'">'+fmt(v)+'</td>';
     }).join('');
@@ -3938,6 +4205,33 @@ function setFiltroTipo(btn, val) {
   btn.classList.add("active");
   rLanc();
 }
+
+var compUseProj = false;
+var OY = new Date().getFullYear();  // orçamento year
+function toggleCompBase(btn) {
+  compUseProj = !compUseProj;
+  btn.textContent = compUseProj ? 'Esperado' : 'Recebido';
+  rOrcFull();
+}
+
+
+// ══ GESTÃO ANUAL — Ano + Futuros ══
+var GA_SHOW_FUTURE = false;
+
+function toggleGFuturo(btn) {
+  GA_SHOW_FUTURE = !GA_SHOW_FUTURE;
+  var thumb = document.getElementById('gFuturoThumb');
+  if (GA_SHOW_FUTURE) {
+    btn.style.background = 'var(--gold)';
+    if (thumb) { thumb.style.left = '18px'; thumb.style.background = '#fff'; }
+  } else {
+    btn.style.background = 'var(--s3)';
+    if (thumb) { thumb.style.left = '2px'; thumb.style.background = 'var(--mu)'; }
+  }
+  rGestao();
+}
+
+function initGAno() { populateAnoSel('gAno'); }
 
 function toggleTheme() {
   var html = document.documentElement;
