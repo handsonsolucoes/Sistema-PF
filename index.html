@@ -449,12 +449,13 @@ body.sb-hidden .main { margin-left:0; }
           </div>
           <button class="btn-out" onclick="logout()">Sair</button>
         </div>
-      </div>
   </nav>
 
   <main class="main">
 
     <!-- ══ ORÇAMENTO MENSAL (página principal) ══ -->
+    <!-- ══ DASHBOARD ══ -->
+
     <div class="pg active" id="page-orcamento">
       <div class="ph">
         <div><h1 class="pt">Orçamento Mensal</h1><p class="psub" id="orcSub">Controle de receitas, gastos e lançamentos</p></div>
@@ -615,7 +616,7 @@ body.sb-hidden .main { margin-left:0; }
       </div>
 
       <!-- INSIGHT CARD -->
-      <div id="fInsight" class="kpi-grid" style="margin-bottom:16px;grid-template-columns:repeat(4,1fr);"></div>
+      <div id="fInsight" class="kpi-grid" style="margin-bottom:16px;grid-template-columns:repeat(3,1fr);"></div>
 
 
       <!-- MAIN CONTENT -->
@@ -817,6 +818,88 @@ body.sb-hidden .main { margin-left:0; }
       <div class="sec"><div class="sh"><span class="st">Saldo por Conta / Mês</span></div>
         <div style="overflow-x:auto"><table class="tbl"><thead id="alocTh"></thead><tbody id="alocTb"></tbody></table></div>
       </div>
+      <!-- ══ PROJETOS ══ -->
+      <div style="margin-top:20px;">
+        <div class="sh" style="margin-bottom:14px;">
+          <div>
+            <span class="st">Projetos</span>
+            <p style="font-size:11px;color:var(--mu);margin-top:2px;">Vincule lançamentos a projetos para acompanhar o progresso</p>
+          </div>
+          <button class="bp bsm" onclick="openProjetoModal()">+ Novo Projeto</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="toggle-pill" id="pjFiltro">
+            <button class="active" onclick="setPjFiltro(this,'all')">Todos</button>
+            <button onclick="setPjFiltro(this,'curto')">🟢 Curto</button>
+            <button onclick="setPjFiltro(this,'medio')">🟡 Médio</button>
+            <button onclick="setPjFiltro(this,'longo')">🔵 Longo</button>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="bs bsm" onclick="openProjetoTransfModal()">⇄ Transferir</button>
+            <button class="bs bsm" onclick="openProjetoRendModal()">+ Rendimento</button>
+          </div>
+        </div>
+        <div id="projetosGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;"></div>
+      </div>
+
+      <!-- Modal Projeto -->
+      <div id="mProjeto" class="mo" style="display:none;">
+        <div class="modal" style="width:460px;">
+          <div class="mt2">Novo Projeto</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="ig"><label>Nome do Projeto</label><input type="text" id="pjNome" placeholder="Ex: Viagem Europa, Carro Novo" style="width:100%;"></div>
+            <div class="ir c2">
+              <div class="ig"><label>Meta (R$)</label><input type="number" id="pjMeta" placeholder="0" style="width:100%;"></div>
+              <div class="ig"><label>Prazo</label>
+                <select id="pjPrazo" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;">
+                  <option value="curto">🟢 Curto prazo (1-2 anos)</option>
+                  <option value="medio">🟡 Médio prazo (3-4 anos)</option>
+                  <option value="longo">🔵 Longo prazo (5+ anos)</option>
+                </select>
+              </div>
+            </div>
+            <div class="ig"><label>Descrição (opcional)</label><input type="text" id="pjDesc" placeholder="Descreva o objetivo" style="width:100%;"></div>
+          </div>
+          <div class="ma">
+            <button class="bs" onclick="closeModal('mProjeto')">Cancelar</button>
+            <button class="bp" onclick="saveProjeto()">Salvar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Transferência entre Projetos -->
+      <div id="mPjTransf" class="mo" style="display:none;">
+        <div class="modal" style="width:420px;">
+          <div class="mt2">Transferência entre Projetos</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="ir c2">
+              <div class="ig"><label>De</label><select id="pjTransfDe" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"></select></div>
+              <div class="ig"><label>Para</label><select id="pjTransfPara" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"></select></div>
+            </div>
+            <div class="ir c2">
+              <div class="ig"><label>Valor (R$)</label><input type="number" id="pjTransfVal" placeholder="0" style="width:100%;"></div>
+              <div class="ig"><label>Data</label><input type="date" id="pjTransfData" style="width:100%;"></div>
+            </div>
+          </div>
+          <div class="ma"><button class="bs" onclick="closeModal('mPjTransf')">Cancelar</button><button class="bp" onclick="savePjTransf()">Transferir</button></div>
+        </div>
+      </div>
+      <!-- Modal Rendimento de Projeto -->
+      <div id="mPjRend" class="mo" style="display:none;">
+        <div class="modal" style="width:420px;">
+          <div class="mt2">Registrar Rendimento</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="ig"><label>Projeto</label><select id="pjRendProjeto" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"></select></div>
+            <div class="ir c2">
+              <div class="ig"><label>Valor (R$)</label><input type="number" id="pjRendVal" placeholder="0" style="width:100%;"></div>
+              <div class="ig"><label>Data</label><input type="date" id="pjRendData" style="width:100%;"></div>
+            </div>
+            <div class="ig"><label>Descrição</label><input type="text" id="pjRendDesc" placeholder="Ex: Rendimento CDI agosto" style="width:100%;"></div>
+          </div>
+          <div class="ma"><button class="bs" onclick="closeModal('mPjRend')">Cancelar</button><button class="bp" onclick="savePjRend()">Salvar</button></div>
+        </div>
+      </div>
+
       <!-- ══ PATRIMÔNIO CONSOLIDADO ══ -->
       <div style="margin-top:28px;">
         <div class="sh" style="margin-bottom:14px;"><span class="st" style="font-size:14px;">Patrimônio Consolidado</span></div>
@@ -836,7 +919,7 @@ body.sb-hidden .main { margin-left:0; }
           </div>
           <div id="patrimTblContent" style="overflow-x:auto;margin-top:10px;"></div>
         </div>
-        </div>
+
       </div>
 
     </div>
@@ -1169,7 +1252,7 @@ body.sb-hidden .main { margin-left:0; }
         <div class="alert aw" style="font-size:12px">Parcelas seguintes criadas automaticamente.</div>
       </div>
     </div>
-    <div class="ir"><div class="ig"><label>Observação</label><input type="text" id="lObs" placeholder="Opcional..."></div></div>
+    <div class="ir"><div class="ig"><label>Observação</label><input type="text" id="lObs" placeholder="Opcional..."></div><div class="ig" id="lancProjetoWrap" style="display:none;"><label>Vincular a Projeto</label><select id="lancProjeto" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"><option value="">— Nenhum —</option></select></div></div>
     <div class="ma"><button class="btn bgh" onclick="closeModal('mLanc')">Cancelar</button><button class="btn bp" onclick="saveLanc()">Salvar</button></div>
   </div>
 </div>
@@ -1863,6 +1946,8 @@ function rLanc(user) {
 }
 
 function onTipoChange() {
+  var tipo = (document.getElementById('lTipo')||{}).value||'';
+  populateLancProjeto(tipo);
   var user = getUser(CU.id);
   var t = document.getElementById('lTipo').value;
   var isT = t==='Transferência';
@@ -1917,6 +2002,7 @@ function openLancModal(editId) {
 
   document.getElementById('editLId').value = editId || '';
   document.getElementById('mLancTit').textContent = isEdit ? 'Editar Lançamento' : 'Novo Lançamento';
+  setTimeout(function(){ populateLancProjeto((document.getElementById('lTipo')||{}).value||''); }, 50);
   if (!isEdit) {
     var now = new Date(); var yr = now.getFullYear();
     var d = new Date(yr, OM, now.getDate());
@@ -1993,6 +2079,9 @@ function saveLanc() {
     pgMode:tipo==='Saída'?pgMode:undefined
   };
   if (tipo==='Saída'&&pgMode==='parcelado') { baseLanc.parcAtual=parcAtual; baseLanc.parcTotal=parcTotal; }
+  var _pjSel = document.getElementById('lancProjeto');
+  if (_pjSel && _pjSel.value && tipo==='Saída') baseLanc.projetoId = _pjSel.value;
+  else delete baseLanc.projetoId;
 
   if (id) {
     var orig = user.lancamentos.find(function(l){ return l.id===id; });
@@ -2025,7 +2114,8 @@ function saveLanc() {
           id:uid(), data:rDate.toISOString().slice(0,10),
           desc:baseDesc, tipo:tipo, cat:baseLanc.cat, conta:baseLanc.conta,
           valor:baseValor, obs:'recorrente',
-          pgMode:'recorrente', groupId:baseLanc.id
+          pgMode:'recorrente', groupId:baseLanc.id,
+          projetoId:baseLanc.projetoId||undefined
         });
       }
     }
@@ -2043,7 +2133,8 @@ function saveLanc() {
           desc:baseDesc+' ('+p+'/'+parcTotal+')', tipo:tipo,
           cat:baseLanc.cat, conta:baseLanc.conta,
           valor:valorParc, obs:'parcela '+p+'/'+parcTotal,
-          pgMode:'parcelado', parcAtual:p, parcTotal:parcTotal, groupId:baseLanc.id
+          pgMode:'parcelado', parcAtual:p, parcTotal:parcTotal, groupId:baseLanc.id,
+          projetoId:baseLanc.projetoId||undefined
         });
       }
     }
@@ -2645,6 +2736,7 @@ function rAloc() {
     rows+='<tr><td><strong>'+c.nome+'</strong></td><td style="color:var(--mu)">'+fmt(c.saldoInicial)+'</td>'+cells+'</tr>';
   });
   alocTb.innerHTML=rows;
+  rProjetos(user);
   rPatrimAloc();
 }
 
@@ -3233,27 +3325,64 @@ function rFuturo() {
   // ── KPI cards
   var fi = document.getElementById('fInsight');
 
+  // Cálculos extras
+  var gap = C - patrimonioNaRet;
+  var anosAteRet = Math.max(0, Math.round(retAge - currentAgeExact));
+  var anoRet = new Date().getFullYear() + anosAteRet;
+
   if (fi) fi.innerHTML =
-    '<div class="kpi-card '+(metaOk?'saldo-pos':'saldo-neg')+'">'
-    +'<div class="kpi-label">Patrimônio Ideal</div>'
-    +'<div class="kpi-val '+(metaOk?'b':'r')+'" >R$ '+Math.round(C).toLocaleString('pt-BR')+'</div>'
-    +'<div class="kpi-sub">Capital alvo aos '+retAge+' anos</div>'
+    '<div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;margin-bottom:4px;">'
+    +'<div style="height:1px;flex:1;background:var(--brd2);"></div>'
+    +'<span style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu);font-weight:600;">O Objetivo</span>'
+    +'<div style="height:1px;flex:1;background:var(--brd2);"></div>'
     +'</div>'
-    +'<div class="kpi-card '+(invMensal>=invNecessario?'rec':'desp')+'">'
-    +'<div class="kpi-label">Aporte Necessário</div>'
-    +'<div class="kpi-val '+(invMensal>=invNecessario?'g':'r')+'">R$ '+Math.round(invNecessario).toLocaleString('pt-BR')+'<span style="font-size:9px;opacity:.7;">/mês</span></div>'
-    +'<div class="kpi-sub">'+(invMensal>=invNecessario?'✓ Você já investe o suficiente':'Falta R$ '+Math.round(invNecessario-invMensal).toLocaleString('pt-BR')+'/mês')+'</div>'
+    +'<div class="kpi-card '+(metaOk?'saldo-pos':'saldo-neg')+'">'
+    +'<div class="kpi-label">🎯 Patrimônio Ideal</div>'
+    +'<div class="kpi-val '+(metaOk?'b':'r')+'">R$ '+Math.round(C).toLocaleString('pt-BR')+'</div>'
+    +'<div class="kpi-sub">Capital para aposentar aos '+retAge+'a e viver até os '+vidaAge+'a</div>'
+    +'</div>'
+    +'<div class="kpi-card rec">'
+    +'<div class="kpi-label">💸 Renda Desejada</div>'
+    +'<div class="kpi-val g">'+fmt(rendaLiq)+'<span style="font-size:9px;opacity:.6;">/mês</span></div>'
+    +'<div class="kpi-sub">'+(outras>0?'Renda bruta '+fmt(renda)+' — outras fontes '+fmt(outras):'Renda líquida mensal na aposentadoria')+'</div>'
+    +'</div>'
+    +'<div class="kpi-card inv">'
+    +'<div class="kpi-label">🗓 Aposentadoria Planejada</div>'
+    +'<div class="kpi-val b">'+retAge+' anos</div>'
+    +'<div class="kpi-sub">Em '+anosAteRet+' anos · em '+anoRet+' · '+( vidaAge-retAge)+' anos de aposentadoria</div>'
+    +'</div>'
+    +'<div class="kpi-card '+(invMensal>=invNecessario?'rec':'saldo-neg')+'">'
+    +'<div class="kpi-label">💰 Aporte Necessário</div>'
+    +'<div class="kpi-val '+(invMensal>=invNecessario?'g':'r')+'">R$ '+Math.round(invNecessario).toLocaleString('pt-BR')+'<span style="font-size:9px;opacity:.6;">/mês</span></div>'
+    +'<div class="kpi-sub">'+(invMensal>=invNecessario?'✓ Aporte atual R$ '+Math.round(invMensal).toLocaleString('pt-BR')+' já é suficiente':'Você investe R$ '+Math.round(invMensal).toLocaleString('pt-BR')+' — falta R$ '+Math.round(invNecessario-invMensal).toLocaleString('pt-BR'))+'</div>'
+    +'</div>'
+    +'<div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;margin-bottom:4px;margin-top:6px;">'
+    +'<div style="height:1px;flex:1;background:var(--brd2);"></div>'
+    +'<span style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu);font-weight:600;">Com o Comportamento Atual</span>'
+    +'<div style="height:1px;flex:1;background:var(--brd2);"></div>'
     +'</div>'
     +'<div class="kpi-card '+(patrimonioNaRet>=C?'rec':'desp')+'">'
-    +'<div class="kpi-label">Patrimônio Projetado <span class="kpi-info-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="kpi-tooltip"><div class="kpi-tooltip-row"><span>Renda possível</span><span>'+fmt(Math.round(rendaPossivel))+'/mês</span></div><div class="kpi-tooltip-row"><span>Aposentadoria possível</span><span>'+(idadePossivel!==null?idadePossivel+' anos':'inviável')+'</span></div></div></span></div>'
-    +'<div class="kpi-val '+(patrimonioNaRet>=C?'g':'r')+'" >R$ '+Math.round(patrimonioNaRet).toLocaleString('pt-BR')+'</div>'
-    +'<div class="kpi-sub">Estimado aos '+retAge+' anos</div>'
+    +'<div class="kpi-label">📈 Patrimônio Projetado</div>'
+    +'<div class="kpi-val '+(patrimonioNaRet>=C?'g':'r')+'">R$ '+Math.round(patrimonioNaRet).toLocaleString('pt-BR')+'</div>'
+    +'<div class="kpi-sub">Estimado aos '+retAge+'a — '+(gap>0?'falta R$ '+Math.round(gap).toLocaleString('pt-BR')+' para o ideal':'✓ supera o patrimônio ideal')+'</div>'
+    +'</div>'
+    +'<div class="kpi-card '+(rendaPossivel>=rendaLiq?'rec':'desp')+'">'
+    +'<div class="kpi-label">💸 Renda Possível</div>'
+    +'<div class="kpi-val '+(rendaPossivel>=rendaLiq?'g':'r')+'">'+fmt(Math.round(rendaPossivel))+'<span style="font-size:9px;opacity:.6;">/mês</span></div>'
+    +'<div class="kpi-sub">'+(rendaPossivel>=rendaLiq?'✓ supera a renda desejada':'Renda desejada '+fmt(rendaLiq)+' — falta '+fmt(Math.round(Math.max(0,rendaLiq-rendaPossivel))))+'</div>'
+    +'</div>'
+    +'<div class="kpi-card '+(idadePossivel!==null&&idadePossivel<=retAge?'rec':'inv')+'">'
+    +'<div class="kpi-label">🗓 Aposentadoria Possível</div>'
+    +'<div class="kpi-val '+(idadePossivel!==null&&idadePossivel<=retAge?'g':'b')+'">'+(idadePossivel!==null?idadePossivel+' anos':'Inviável')+'</div>'
+    +'<div class="kpi-sub">'+(idadePossivel!==null?(idadePossivel<=retAge?'✓ dentro do planejado':(idadePossivel-retAge)+' anos além do planejado'):'Aumente o aporte para viabilizar')+'</div>'
     +'</div>'
     +'<div class="kpi-card '+(sustentaParaSempre?'rec':acabaAge?'saldo-neg':'inv')+'">'
-    +'<div class="kpi-label">Patrimônio Sustenta</div>'
+    +'<div class="kpi-label">⏳ Patrimônio Sustenta</div>'
     +'<div class="kpi-val '+(sustentaParaSempre?'g':acabaAge?'r':'b')+'">'+(sustentaParaSempre?'Para sempre ∞':acabaAge?'até os '+acabaAge+' anos':'além dos '+vidaAge+' anos')+'</div>'
-    +'<div class="kpi-sub">'+(sustentaParaSempre?'✓ Rendimento cobre o saque indefinidamente':acabaAge?'⚠ Saldo zerado antes da expectativa':'✓ Sustenta além da expectativa configurada')+'</div>'
+    +'<div class="kpi-sub">'+(sustentaParaSempre?'Rendimento mensal cobre o saque':acabaAge?'⚠ Esgota '+(acabaAge-retAge)+' anos após aposentar':'✓ Dura além da expectativa configurada')+'</div>'
     +'</div>';
+
+
 
   // ── Chart
   if (fChart) { try{fChart.destroy();}catch(e){} fChart=null; }
@@ -4233,77 +4362,362 @@ function toggleGFuturo(btn) {
 
 function initGAno() { populateAnoSel('gAno'); }
 
+
+
+// ══════════════════════════════════════════════════════
+// PROJETOS — Metas financeiras com prazo
+// ══════════════════════════════════════════════════════
+var PRAZO_CONFIG = {
+  curto: { label: 'Curto prazo', sub: '1-2 anos', color: 'var(--green)', emoji: '🟢' },
+  medio: { label: 'Médio prazo', sub: '3-4 anos', color: 'var(--warn)',  emoji: '🟡' },
+  longo: { label: 'Longo prazo', sub: '5+ anos',  color: 'var(--blue)',  emoji: '🔵' }
+};
+
+function openProjetoModal(editId) {
+  var nm = document.getElementById('pjNome');
+  var mt = document.getElementById('pjMeta');
+  var pz = document.getElementById('pjPrazo');
+  var ds = document.getElementById('pjDesc');
+  if (editId) {
+    var user = getUser(CU.id);
+    var pj = (user.projetos||[]).find(function(p){ return p.id===editId; });
+    if (!pj) return;
+    if (nm) nm.value = pj.nome;
+    if (mt) mt.value = pj.meta;
+    if (pz) pz.value = pj.prazo;
+    if (ds) ds.value = pj.desc||'';
+    document.getElementById('mProjeto').dataset.editId = editId;
+  } else {
+    if (nm) nm.value = '';
+    if (mt) mt.value = '';
+    if (pz) pz.value = 'curto';
+    if (ds) ds.value = '';
+    delete document.getElementById('mProjeto').dataset.editId;
+  }
+  openModal('mProjeto');
+  setTimeout(function(){ if (nm) nm.focus(); }, 120);
+}
+
+function saveProjeto() {
+  var nome  = (document.getElementById('pjNome')||{}).value||'';
+  var meta  = parseFloat((document.getElementById('pjMeta')||{}).value)||0;
+  var prazo = (document.getElementById('pjPrazo')||{}).value||'curto';
+  var desc  = (document.getElementById('pjDesc')||{}).value||'';
+  if (!nome.trim()) { document.getElementById('pjNome').style.borderColor='var(--red)'; return; }
+  var user = getUser(CU.id);
+  if (!user.projetos) user.projetos = [];
+  var editId = document.getElementById('mProjeto').dataset.editId;
+  if (editId) {
+    user.projetos = user.projetos.map(function(p){
+      return p.id===editId ? Object.assign(p,{nome:nome.trim(),meta:meta,prazo:prazo,desc:desc}) : p;
+    });
+  } else {
+    user.projetos.push({ id:uid(), nome:nome.trim(), meta:meta, prazo:prazo, desc:desc, criado:new Date().toISOString().slice(0,10) });
+  }
+  saveUser(user); CU=getUser(user.id);
+  closeModal('mProjeto');
+  rAloc();
+}
+
+function delProjeto(id) {
+  if (!confirm('Excluir este projeto?')) return;
+  var user = getUser(CU.id);
+  user.projetos = (user.projetos||[]).filter(function(p){ return p.id!==id; });
+  // Remove project reference from lancamentos
+  (user.lancamentos||[]).forEach(function(l){ if (l.projetoId===id) delete l.projetoId; });
+  saveUser(user); CU=getUser(user.id);
+  rAloc();
+}
+
+// ══ PROJETOS — filtro, transferência, rendimento ══
+
+var _pjFiltro = 'all';
+
+function setPjFiltro(btn, val) {
+  _pjFiltro = val;
+  document.querySelectorAll('#pjFiltro button').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  var user = getUser(CU.id);
+  rProjetos(user);
+}
+
+// ── aportado total: lançamentos + rendimentos + transferências recebidas - transferências enviadas
+function calcAportadoProjeto(user, pjId) {
+  var movs = user.projetoMovs || [];
+  // From lancamentos tagged to this project
+  var desp = (user.lancamentos||[])
+    .filter(function(l){ return l.projetoId === pjId && l.tipo === 'Saída'; })
+    .reduce(function(s,l){ return s + Math.abs(l.valor); }, 0);
+  // From project-specific movements (rendimentos + transfers)
+  var extra = movs.filter(function(m){ return m.projetoId === pjId; })
+    .reduce(function(s,m){
+      if (m.tipo === 'rendimento') return s + m.valor;
+      if (m.tipo === 'transf_in')  return s + m.valor;
+      if (m.tipo === 'transf_out') return s - m.valor;
+      return s;
+    }, 0);
+  return Math.max(0, desp + extra);
+}
+
+function openProjetoTransfModal() {
+  var user = getUser(CU.id);
+  var projetos = user.projetos || [];
+  var selDe   = document.getElementById('pjTransfDe');
+  var selPara = document.getElementById('pjTransfPara');
+  if (!selDe || !selPara) return;
+  var opts = projetos.map(function(p){
+    var emoji = {curto:'🟢',medio:'🟡',longo:'🔵'}[p.prazo]||'';
+    return '<option value="'+p.id+'">'+emoji+' '+p.nome+'</option>';
+  }).join('');
+  selDe.innerHTML = opts;
+  selPara.innerHTML = opts;
+  var today = new Date().toISOString().slice(0,10);
+  var dataEl = document.getElementById('pjTransfData');
+  if (dataEl) dataEl.value = today;
+  openModal('mPjTransf');
+}
+
+function savePjTransf() {
+  var deId  = (document.getElementById('pjTransfDe')||{}).value;
+  var paraId= (document.getElementById('pjTransfPara')||{}).value;
+  var val   = parseFloat((document.getElementById('pjTransfVal')||{}).value)||0;
+  var data  = (document.getElementById('pjTransfData')||{}).value || new Date().toISOString().slice(0,10);
+  if (!deId || !paraId || deId===paraId || val<=0) {
+    alert('Verifique os campos: projetos devem ser diferentes e valor maior que zero.');
+    return;
+  }
+  var user = getUser(CU.id);
+  if (!user.projetoMovs) user.projetoMovs = [];
+  var gid = uid();
+  user.projetoMovs.push({ id:gid+'_out', projetoId:deId,   tipo:'transf_out', valor:val, data:data, desc:'Transferência para '+paraId, destId:paraId });
+  user.projetoMovs.push({ id:gid+'_in',  projetoId:paraId, tipo:'transf_in',  valor:val, data:data, desc:'Transferência de '+deId,    origemId:deId });
+  saveUser(user); CU=getUser(user.id);
+  closeModal('mPjTransf');
+  rAloc();
+}
+
+function openProjetoRendModal() {
+  var user = getUser(CU.id);
+  var projetos = user.projetos || [];
+  var sel = document.getElementById('pjRendProjeto');
+  if (!sel) return;
+  sel.innerHTML = projetos.map(function(p){
+    var emoji = {curto:'🟢',medio:'🟡',longo:'🔵'}[p.prazo]||'';
+    return '<option value="'+p.id+'">'+emoji+' '+p.nome+'</option>';
+  }).join('');
+  var today = new Date().toISOString().slice(0,10);
+  var dataEl = document.getElementById('pjRendData');
+  if (dataEl) dataEl.value = today;
+  openModal('mPjRend');
+}
+
+function savePjRend() {
+  var pjId  = (document.getElementById('pjRendProjeto')||{}).value;
+  var val   = parseFloat((document.getElementById('pjRendVal')||{}).value)||0;
+  var data  = (document.getElementById('pjRendData')||{}).value || new Date().toISOString().slice(0,10);
+  var desc  = (document.getElementById('pjRendDesc')||{}).value || 'Rendimento';
+  if (!pjId || val<=0) { alert('Preencha o valor.'); return; }
+  var user = getUser(CU.id);
+  if (!user.projetoMovs) user.projetoMovs = [];
+  user.projetoMovs.push({ id:uid(), projetoId:pjId, tipo:'rendimento', valor:val, data:data, desc:desc });
+  saveUser(user); CU=getUser(user.id);
+  closeModal('mPjRend');
+  rAloc();
+}
+
+
+function rProjetos(user) {
+  var el = document.getElementById('projetosGrid');
+  if (!el) return;
+  var projetos = user.projetos||[];
+
+  if (!projetos.length) {
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--mu);font-size:13px;">Nenhum projeto cadastrado.<br><span style="font-size:11px;">Crie projetos e vincule lançamentos de despesas para acompanhar o progresso.</span></div>';
+    return;
+  }
+
+  // Apply filter
+  var projetosFilt = _pjFiltro === 'all' ? projetos : projetos.filter(function(p){ return p.prazo===_pjFiltro; });
+  if (!projetosFilt.length && projetos.length) {
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--mu);font-size:12px;">Nenhum projeto nesta categoria.</div>';
+    return;
+  }
+  projetos = projetosFilt;
+  var PRAZO_COLORS = { curto:'var(--green)', medio:'var(--warn)', longo:'var(--blue)' };
+  var PRAZO_LABELS = { curto:'🟢 Curto prazo', medio:'🟡 Médio prazo', longo:'🔵 Longo prazo' };
+
+  // Max meta para escala das barras
+  var maxMeta = Math.max.apply(null, projetos.map(function(p){ return p.meta||1; }));
+  var BAR_H = 160; // altura máxima da barra em px
+
+  el.style.gridTemplateColumns = 'repeat('+Math.min(projetos.length,4)+',1fr)';
+
+  el.innerHTML = projetos.map(function(pj) {
+    var color  = PRAZO_COLORS[pj.prazo]||'var(--blue)';
+    var label  = PRAZO_LABELS[pj.prazo]||pj.prazo;
+    var meta   = pj.meta||0;
+
+    // Aportado = lançamentos + rendimentos + transferências
+    var aportado = calcAportadoProjeto(user, pj.id);
+
+    var pct   = meta > 0 ? Math.min(100, Math.round(aportado/meta*100)) : 0;
+    var falta = Math.max(0, meta - aportado);
+
+    // Altura proporcional à meta
+    var colH  = meta > 0 ? Math.round((meta/maxMeta)*BAR_H) : BAR_H;
+    var fillH = Math.round((pct/100)*colH);
+
+    return '<div style="background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);padding:16px;box-shadow:var(--sh-sm);display:flex;flex-direction:column;align-items:center;gap:10px;">'
+      // Label
+      +'<div style="text-align:center;width:100%;">'
+        +'<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:'+color+';font-weight:700;margin-bottom:3px;">'+label+'</div>'
+        +'<div style="font-size:13px;font-weight:600;color:var(--tx);">'+pj.nome+'</div>'
+        +(pj.desc?'<div style="font-size:10px;color:var(--mu);margin-top:2px;">'+pj.desc+'</div>':'')
+      +'</div>'
+      // Coluna visual
+      +'<div style="position:relative;width:64px;height:'+BAR_H+'px;background:var(--s3);border-radius:8px;overflow:hidden;border:1px solid var(--brd2);" title="Meta: R$ '+Math.round(meta).toLocaleString('pt-BR')+'">'
+        +'<div style="position:absolute;bottom:0;left:0;right:0;height:'+fillH+'px;background:'+color+';border-radius:0 0 7px 7px;transition:height .5s;opacity:.85;"></div>'
+        // Linha de meta
+        +'<div style="position:absolute;top:'+(BAR_H-colH)+'px;left:0;right:0;height:1px;background:'+color+';opacity:.4;"></div>'
+        // Texto % no centro
+        +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">'
+          +'<span style="font-size:16px;font-weight:700;color:var(--tx);text-shadow:0 1px 4px rgba(0,0,0,.5);">'+pct+'%</span>'
+        +'</div>'
+      +'</div>'
+      // Valores
+      +'<div style="width:100%;display:flex;flex-direction:column;gap:5px;">'
+        +'<div style="display:flex;justify-content:space-between;font-size:11px;">'
+          +'<span style="color:var(--mu);">Meta</span>'
+          +'<span style="font-weight:600;color:var(--tx);">'+fmt(meta)+'</span>'
+        +'</div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:11px;">'
+          +'<span style="color:var(--mu);">Alocado</span>'
+          +'<span style="font-weight:600;color:'+color+';">'+fmt(aportado)+'</span>'
+        +'</div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:11px;">'
+          +'<span style="color:var(--mu);">Falta</span>'
+          +'<span style="font-weight:600;color:'+(falta===0?'var(--green)':'var(--mu)')+';">'+(falta===0?'✓ Meta!':fmt(falta))+'</span>'
+        +'</div>'
+      +'</div>'
+      // Actions
+      +'<div style="display:flex;gap:6px;width:100%;">'
+        +'<button onclick="openProjetoModal(\''+pj.id+'\')" style="flex:1;padding:6px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--mu);font-size:11px;cursor:pointer;">Editar</button>'
+        +'<button onclick="delProjeto(\''+pj.id+'\')" style="padding:6px 10px;background:transparent;border:1px solid var(--red-dim);border-radius:var(--rs);color:var(--red);font-size:11px;cursor:pointer;">×</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════
+// TEMA (dark/light toggle)
+// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// LOGOUT — retorna à visão do Administrador
+// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// SIDEBAR — colapsar (desktop) / abrir-fechar (mobile)
+// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// SIDEBAR USER — atualiza avatar/nome/cargo
+// ══════════════════════════════════════════════════════
+function updateSbUser() {
+  var av = document.getElementById('sbAvatar');
+  var nm = document.getElementById('sbNome');
+  var rl = document.getElementById('sbRole');
+  if (!CU) return;
+  if (av) av.textContent = (CU.nome||'?').charAt(0).toUpperCase();
+  if (nm) nm.textContent = CU.nome || 'Usuário';
+  if (rl) rl.textContent = CU.role==='admin' ? 'Administrador' : 'Cliente';
+}
+
+// ══════════════════════════════════════════════════════
+// FUTURO — valores padrão na primeira visita
+// ══════════════════════════════════════════════════════
+function initFuturoDefaults() {
+  var birthEl = document.getElementById('fBirth');
+  if (birthEl && !birthEl.value) {
+    var d = new Date();
+    d.setFullYear(d.getFullYear() - 30);
+    birthEl.value = d.toISOString().slice(0,10);
+  }
+}
+
+function toggleSidebar() {
+  var isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    var sb = document.getElementById('mainSidebar');
+    var ov = document.getElementById('sbOverlay');
+    if (sb) sb.classList.toggle('mobile-open');
+    if (ov) ov.classList.toggle('active');
+  } else {
+    var hidden = document.body.classList.toggle('sb-hidden');
+    localStorage.setItem('sbHidden', hidden ? '1' : '0');
+  }
+}
+
+function closeSidebarMobile() {
+  var sb = document.getElementById('mainSidebar');
+  var ov = document.getElementById('sbOverlay');
+  if (sb) sb.classList.remove('mobile-open');
+  if (ov) ov.classList.remove('active');
+}
+
+function applySidebarState() {
+  if (localStorage.getItem('sbHidden') === '1') {
+    document.body.classList.add('sb-hidden');
+  }
+}
+
+function applyTheme() {
+  var saved = localStorage.getItem('themePref') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+}
+
+function logout() {
+  var db = getDB();
+  var admin = db.users.find(function(u){ return u.role==='admin'; });
+  if (admin) { CU = admin; initApp(); sp('orcamento'); }
+}
+
 function toggleTheme() {
   var html = document.documentElement;
   var isDark = html.getAttribute('data-theme') === 'dark';
   var next = isDark ? 'light' : 'dark';
   html.setAttribute('data-theme', next);
-  localStorage.setItem('hoTheme', next);
-  document.getElementById('thDark').classList.toggle('active', next==='dark');
-  document.getElementById('thLight').classList.toggle('active', next==='light');
-}
-
-// Set default birth date (30 years ago) if not set
-function initFuturoDefaults() {
-  var b = document.getElementById('fBirth');
-  if (b && !b.value) {
-    var d = new Date(); d.setFullYear(d.getFullYear()-30);
-    b.value = d.toISOString().split('T')[0];
+  localStorage.setItem('themePref', next);
+  document.querySelectorAll('.theme-toggle-opt').forEach(function(o){
+    o.classList.toggle('active', o.textContent.trim().toLowerCase() === (next==='dark'?'escuro':'claro'));
+  });
+  // Re-render current page charts to pick up new colors
+  var activePg = document.querySelector('.pg.active');
+  if (activePg) {
+    var id = activePg.id.replace('page-','');
+    if (id==='orcamento') rOrcFull();
+    if (id==='gestao') rGestao();
+    if (id==='futuro') rFuturo();
+    if (id==='alocacao') rAloc();
   }
 }
-
-
 
 // ══════════════════════════════════════════════════════
-// SIDEBAR TOGGLE
+// PROJETOS — popula dropdown no modal de lançamento
 // ══════════════════════════════════════════════════════
-function toggleSidebar() {
-  var sb   = document.getElementById("mainSidebar");
-  var body = document.body;
-  if (!sb) return;
-  var w = window.innerWidth;
-  if (w <= 768) {
-    var open = sb.classList.toggle("mobile-open");
-    document.getElementById("sbOverlay").classList.toggle("active", open);
-  } else {
-    var isHidden = sb.classList.toggle("hidden");
-    body.classList.toggle("sb-hidden", isHidden);
-    localStorage.setItem("sbHidden", isHidden ? "1" : "0");
-  }
-}
-function closeSidebarMobile() {
-  var sb = document.getElementById("mainSidebar");
-  if (sb) sb.classList.remove("mobile-open");
-  var ov = document.getElementById("sbOverlay");
-  if (ov) ov.classList.remove("active");
-}
-
-function applySidebarState() {
-  if (localStorage.getItem('sbHidden') === '1') {
-    var sb = document.getElementById('mainSidebar');
-    if (sb) { sb.classList.add('hidden'); document.body.classList.add('sb-hidden'); }
-  }
-}
-
-function applyTheme() {
-  var saved = localStorage.getItem('hoTheme') || 'dark';
-  document.documentElement.setAttribute('data-theme', saved);
-  var dEl = document.getElementById('thDark');
-  var lEl = document.getElementById('thLight');
-  if (dEl) dEl.classList.toggle('active', saved==='dark');
-  if (lEl) lEl.classList.toggle('active', saved==='light');
-}
-
-window.addEventListener('resize', syncFuturoChartHeight);
-
-function updateSbUser() {
-  if (!CU) return;
-  var av = document.getElementById('sbAvatar');
-  var nm = document.getElementById('sbNome');
-  var rl = document.getElementById('sbRole');
-  if (av) av.textContent = (CU.nome||'U').charAt(0).toUpperCase();
-  if (nm) nm.textContent = CU.nome || 'Usuário';
-  if (rl) rl.textContent = CU.role === 'admin' ? 'Administrador' : 'Cliente';
+function populateLancProjeto(tipo) {
+  var wrap = document.getElementById('lancProjetoWrap');
+  var sel  = document.getElementById('lancProjeto');
+  if (!wrap || !sel) return;
+  wrap.style.display = tipo==='Saída' ? '' : 'none';
+  if (tipo !== 'Saída') return;
+  var user = getUser(CU.id);
+  var projetos = user.projetos||[];
+  sel.innerHTML = '<option value="">— Nenhum —</option>';
+  var PRAZO_EMOJI = { curto:'🟢', medio:'🟡', longo:'🔵' };
+  projetos.forEach(function(pj){
+    var opt = document.createElement('option');
+    opt.value = pj.id;
+    opt.textContent = (PRAZO_EMOJI[pj.prazo]||'') + ' ' + pj.nome;
+    sel.appendChild(opt);
+  });
 }
 
 </script>
