@@ -264,18 +264,30 @@ body.sb-hidden .main { margin-left:0; }
 .kpi-card { background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden;box-shadow:var(--sh-sm);transition:transform .2s var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease); }
 
 /* Kanban VOAR: 4 colunas, cada uma com letra grande no topo */
-.voar-col { background:var(--s2);border:1px solid var(--brd);border-radius:var(--r);padding:14px;min-width:0;display:flex;flex-direction:column;max-height:calc(100vh - 220px);overflow:hidden; }
-.voar-col-head { border-top:4px solid; margin:-14px -14px 12px; padding:16px 14px 12px; text-align:center; }
-.voar-col-letter { font-size:52px;font-weight:800;line-height:1;font-family:var(--fh);letter-spacing:-2px; }
-.voar-col-name { font-size:13px;font-weight:700;color:var(--tx);margin-top:2px; }
-.voar-col-sub { font-size:10.5px;color:var(--mu);margin-top:2px; }
-.voar-col-list { display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;min-height:80px; }
+#voarKanban { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start; }
+.voar-col { background:var(--s2);border:1px solid var(--brd);border-radius:var(--r);padding:12px;min-width:0;display:flex;flex-direction:column;height:calc(100vh - 220px);overflow:hidden; }
+.voar-col-head { margin:-12px -12px 12px; padding:16px 12px 14px; text-align:center; border-radius:var(--r) var(--r) 0 0; }
+.voar-col-letter { font-size:44px;font-weight:800;line-height:1;font-family:var(--fh);letter-spacing:-2px; }
+.voar-col-name { font-size:12.5px;font-weight:700;color:var(--tx);margin-top:2px; }
+.voar-col-sub { font-size:10px;color:var(--mu);margin-top:2px; }
+.voar-col-list { display:flex;flex-direction:column;gap:6px;overflow-y:auto;flex:1;min-height:80px; }
+.voar-visao-filtros { display:flex; }
+.voar-mobile-tabs { display:none; }
 @media (max-width:1100px) {
   #voarKanban { grid-template-columns:repeat(2,1fr); }
-  .voar-col { max-height:none; }
+  .voar-col { height:auto; }
 }
 @media (max-width:640px) {
+  .voar-mobile-tabs { display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px; }
+  .voar-mobile-tab-btn { background:var(--s2);border:2px solid;border-radius:var(--rs);padding:10px 0;font-size:22px;font-weight:800;font-family:var(--fh);cursor:pointer;opacity:.45;transition:opacity .15s var(--ease); }
+  .voar-mobile-tab-btn.active { opacity:1; }
   #voarKanban { grid-template-columns:1fr; }
+  #voarKanban .voar-col { display:none; }
+  #voarKanban.voar-active-v [data-voar-col="v"] { display:flex; }
+  #voarKanban.voar-active-o [data-voar-col="o"] { display:flex; }
+  #voarKanban.voar-active-a [data-voar-col="a"] { display:flex; }
+  #voarKanban.voar-active-r [data-voar-col="r"] { display:flex; }
+  #voarVisaoFiltros.voar-filtros-hidden-mobile { display:none; }
 }
 .kpi-card:hover { transform:translateY(-2px);box-shadow:var(--sh);border-color:var(--brd2); }
 .kpi-card::after { content:'';position:absolute;bottom:0;left:0;right:0;height:2px;opacity:.9; }
@@ -1203,13 +1215,14 @@ button:disabled, input:disabled, select:disabled { opacity:.45;cursor:not-allowe
             <div class="ig"><label>Nome do Projeto</label><input type="text" id="pjNome" placeholder="Ex: Viagem Europa, Carro Novo" style="width:100%;"></div>
             <div class="ir c2">
               <div class="ig"><label>Meta (R$)</label><input type="text" inputmode="decimal" id="pjMeta" placeholder="R$ 0,00" oninput="maskMoeda(this)" style="width:100%;"></div>
-              <div class="ig"><label>Prazo</label>
-                <select id="pjPrazo" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;">
-                  <option value="curto">🟢 Curto prazo (1-2 anos)</option>
-                  <option value="medio">🟡 Médio prazo (3-4 anos)</option>
-                  <option value="longo">🔵 Longo prazo (5+ anos)</option>
-                </select>
-              </div>
+              <div class="ig"><label>Saldo inicial (R$)</label><input type="text" inputmode="decimal" id="pjSaldoInicial" placeholder="R$ 0,00 (se já tinha algo guardado)" oninput="maskMoeda(this)" style="width:100%;"></div>
+            </div>
+            <div class="ig"><label>Prazo</label>
+              <select id="pjPrazo" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;">
+                <option value="curto">🟢 Curto prazo (1-2 anos)</option>
+                <option value="medio">🟡 Médio prazo (3-4 anos)</option>
+                <option value="longo">🔵 Longo prazo (5+ anos)</option>
+              </select>
             </div>
             <div class="ig"><label>Descrição (opcional)</label><input type="text" id="pjDesc" placeholder="Descreva o objetivo" style="width:100%;"></div>
             <div class="ig"><label>Previsão de conclusão</label><input type="month" id="pjData" style="width:100%;"></div>
@@ -1547,60 +1560,65 @@ button:disabled, input:disabled, select:disabled { opacity:.45;cursor:not-allowe
         </div>
       </div>
 
-      <!-- KANBAN VOAR: as 4 colunas ficam visíveis ao mesmo tempo -->
-      <div id="voarKanban" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start;">
+      <!-- Abas — só aparecem no celular, pra navegar entre as 4 letras uma de cada vez -->
+      <div class="voar-mobile-tabs" id="voarMobileTabs">
+        <button class="voar-mobile-tab-btn active" data-tab="v" onclick="setVoarMobileTab('v')" style="color:#60a5fa;border-color:#60a5fa;">V</button>
+        <button class="voar-mobile-tab-btn" data-tab="o" onclick="setVoarMobileTab('o')" style="color:#fbbf24;border-color:#fbbf24;">O</button>
+        <button class="voar-mobile-tab-btn" data-tab="a" onclick="setVoarMobileTab('a')" style="color:#fb7185;border-color:#fb7185;">A</button>
+        <button class="voar-mobile-tab-btn" data-tab="r" onclick="setVoarMobileTab('r')" style="color:#34d399;border-color:#34d399;">R</button>
+      </div>
+
+      <!-- Filtros da Visão — ficam fora das colunas, acima de todo o kanban -->
+      <div id="voarVisaoFiltros" class="voar-visao-filtros" style="gap:8px;margin-bottom:14px;max-width:420px;">
+        <select id="voarVisaoFiltroTipo" onchange="rVoar()" style="flex:1;min-width:0;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:12px;padding:7px 10px;outline:none;">
+          <option value="all">Todos os tipos</option>
+        </select>
+        <select id="voarVisaoFiltroPrazo" onchange="rVoar()" style="flex:1;min-width:0;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:12px;padding:7px 10px;outline:none;">
+          <option value="all">Todos os prazos</option>
+        </select>
+      </div>
+
+      <!-- KANBAN VOAR: no desktop as 4 colunas ficam visíveis ao mesmo tempo;
+           no celular só a coluna da aba ativa aparece (ver CSS + setVoarMobileTab) -->
+      <div id="voarKanban" class="voar-active-v">
 
         <!-- V: VISÃO -->
-        <div class="voar-col">
-          <div class="voar-col-head" style="border-top-color:#60a5fa;">
+        <div class="voar-col" data-voar-col="v">
+          <div class="voar-col-head" style="background:#60a5fa22;">
             <div class="voar-col-letter" style="color:#60a5fa;">V</div>
             <div class="voar-col-name">Visão</div>
             <div class="voar-col-sub">O que você quer para sua vida</div>
-          </div>
-          <div style="display:flex;gap:6px;margin-bottom:10px;">
-            <select id="voarVisaoFiltroTipo" onchange="rVoar()" style="flex:1;min-width:0;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:11px;padding:6px 8px;outline:none;">
-              <option value="all">Todos os tipos</option>
-            </select>
-            <select id="voarVisaoFiltroPrazo" onchange="rVoar()" style="flex:1;min-width:0;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:11px;padding:6px 8px;outline:none;">
-              <option value="all">Todos os prazos</option>
-            </select>
           </div>
           <button class="bp" style="width:100%;margin-bottom:10px;" onclick="openVoarModal('visao')">+ Nova Visão</button>
           <div id="voar-visoes" class="voar-col-list"></div>
         </div>
 
         <!-- O: ORGANIZAÇÃO -->
-        <div class="voar-col">
-          <div class="voar-col-head" style="border-top-color:#34d399;">
-            <div class="voar-col-letter" style="color:#34d399;">O</div>
+        <div class="voar-col" data-voar-col="o">
+          <div class="voar-col-head" style="background:#fbbf2422;">
+            <div class="voar-col-letter" style="color:#fbbf24;">O</div>
             <div class="voar-col-name">Organização</div>
             <div class="voar-col-sub">Sua estratégia para chegar lá</div>
           </div>
-          <button class="bp" style="width:100%;margin-bottom:10px;" onclick="openVoarModal('org')">+ Nova Prioridade</button>
+          <button class="bp" style="width:100%;margin-bottom:10px;" onclick="openVoarModal('org')">+ Nova Estratégia</button>
           <div id="voar-orgs" class="voar-col-list"></div>
         </div>
 
         <!-- A: AÇÃO -->
-        <div class="voar-col">
-          <div class="voar-col-head" style="border-top-color:#fbbf24;">
-            <div class="voar-col-letter" style="color:#fbbf24;">A</div>
+        <div class="voar-col" data-voar-col="a">
+          <div class="voar-col-head" style="background:#fb718522;">
+            <div class="voar-col-letter" style="color:#fb7185;">A</div>
             <div class="voar-col-name">Ação</div>
             <div class="voar-col-sub">Seus próximos passos</div>
           </div>
-          <select id="voarAcaoFiltro" onchange="rVoar()" style="width:100%;margin-bottom:8px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:11px;padding:6px 8px;outline:none;">
-            <option value="all">Todas</option>
-            <option value="pendente">Pendentes</option>
-            <option value="andamento">Em andamento</option>
-            <option value="concluido">Concluídas</option>
-          </select>
           <button class="bp" style="width:100%;margin-bottom:10px;" onclick="openVoarModal('acao')">+ Nova Meta</button>
           <div id="voar-acoes" class="voar-col-list"></div>
         </div>
 
         <!-- R: REALIZAÇÃO -->
-        <div class="voar-col">
-          <div class="voar-col-head" style="border-top-color:#f472b6;">
-            <div class="voar-col-letter" style="color:#f472b6;">R</div>
+        <div class="voar-col" data-voar-col="r">
+          <div class="voar-col-head" style="background:#34d39922;">
+            <div class="voar-col-letter" style="color:#34d399;">R</div>
             <div class="voar-col-name">Realização</div>
             <div class="voar-col-sub">O que você já conquistou</div>
           </div>
@@ -2167,7 +2185,7 @@ function sp(id) {
     if (id==='cadastro') { rCad(); loadCfgAnos(); }
     if (id==='clientes') rCli();
     if (id==='orcamento') { initOrcAno(); rOrcFull(); }
-    if (id==='voar') { rVoar(); }
+    if (id==='voar') { setVoarMobileTab('v'); rVoar(); }
   } catch(e) { console.error('sp render error:', e); }
 }
 
@@ -2425,7 +2443,7 @@ function sortOrcTable(col) {
 }
 
 function rOrcTopGastos(user) {
-  var lancs = byMonthOrc(user, OM);
+  var lancs = onlyReal(byMonthOrc(user, OM));
   var byCat = {};
   lancs.filter(function(l){ return l.tipo==='Saída'; }).forEach(function(l){
     byCat[l.cat] = (byCat[l.cat]||0) + l.valor;
@@ -2747,7 +2765,7 @@ function renderOrcCatDonut(user, orc) {
 function rOrc(user) {
   if (!user) user = getUser(CU.id);
   var orc = user.orcamento[OM] || {};
-  var lancs = byMonthOrc(user, OM);
+  var lancs = onlyReal(byMonthOrc(user, OM));
   var ml = document.getElementById('orcML');
   if (ml) ml.textContent = MN[OM];
   rOrcCockpit(user, orc);
@@ -2770,8 +2788,8 @@ function rOrc(user) {
 
   // ── Barra de progresso orçamento (Esperado vs Realizado) ──
   var barEl = document.getElementById('orcProgressBar');
-  var recMesReal = byMonthOrc(user, OM).filter(function(l){ return l.tipo==='Entrada'; }).reduce(function(s,l){ return s+l.valor; },0);
-  var gastoMes   = byMonthOrc(user, OM).filter(function(l){ return l.tipo==='Sa\u00edda'; }).reduce(function(s,l){ return s+l.valor; },0);
+  var recMesReal = lancs.filter(function(l){ return l.tipo==='Entrada'; }).reduce(function(s,l){ return s+l.valor; },0);
+  var gastoMes   = lancs.filter(function(l){ return l.tipo==='Saída'; }).reduce(function(s,l){ return s+l.valor; },0);
   var rendaBase  = (window._orcBarView === 'realizado') ? recMesReal : (orc.renda||0);
   if (barEl && rendaBase > 0) {
     var pctRec    = Math.min(100, recMesReal/rendaBase*100);
@@ -3175,11 +3193,11 @@ function onPgMode() {
   if (recEl) recEl.style.display = v==='recorrente' ? '' : 'none';
 }
 
-function openLancModal(editId) {
+function openLancModal(editId, skipEscopoCheck) {
   var user = getUser(CU.id);
   var isEdit = !!editId;
   if (isEdit) { _lancOrigemCtx = null; } // edição sempre preserva a origem original do lançamento
-  if (isEdit) {
+  if (isEdit && !skipEscopoCheck) {
     var lEdit = user.lancamentos.find(function(l){ return l.id===editId; });
     var isSerieEdit = lEdit && (lEdit.pgMode==='parcelado' || lEdit.pgMode==='recorrente');
     var siblEdit = isSerieEdit ? user.lancamentos.filter(function(l) {
@@ -3359,12 +3377,14 @@ function saveLanc() {
   var pgMode = tipo==='Saída' ? (document.querySelector('input[name="pgmode"]:checked').value||'vista') : 'vista';
   var parcAtual = parseInt(document.getElementById('lParcAtual').value)||1;
   var parcTotal = parseInt(document.getElementById('lParcTotal').value)||1;
+  var _origParaGroupId = id ? user.lancamentos.find(function(x){return x.id===id;}) : null;
   var baseLanc = {
     id:id||uid(), data:baseData, desc:baseDesc, tipo:tipo,
     cat:document.getElementById('lCat').value,
     conta:document.getElementById('lConta').value,
     valor:baseValor, obs:document.getElementById('lObs').value,
     pgMode:tipo==='Saída'?pgMode:undefined,
+    groupId: _origParaGroupId ? _origParaGroupId.groupId : undefined,
     origem: id ? (function(){ var o=user.lancamentos.find(function(x){return x.id===id;}); return o?o.origem:_lancOrigemCtx; })() : (_lancOrigemCtx||undefined)
   };
   if (tipo==='Saída'&&pgMode==='parcelado') { baseLanc.parcAtual=parcAtual; baseLanc.parcTotal=parcTotal; }
@@ -3415,12 +3435,14 @@ function saveLanc() {
 
   if (id) {
     var orig = user.lancamentos.find(function(l){ return l.id===id; });
-    var isParc = orig && orig.pgMode==='parcelado';
+    var isSerieSave = orig && (orig.pgMode==='parcelado' || orig.pgMode==='recorrente');
     var groupId = (orig&&orig.groupId)||id;
-    var siblings = user.lancamentos.filter(function(l){ return (l.groupId===groupId||l.id===groupId)&&l.id!==id&&l.pgMode==='parcelado'; });
-    if (isParc && siblings.length>0) {
-      var choice = confirm('Lançamento parcelado ('+orig.parcAtual+'/'+orig.parcTotal+').\n\nOK = alterar TODAS as parcelas\nCancelar = apenas esta parcela');
-      if (choice) {
+    var siblings = user.lancamentos.filter(function(l){ return (l.groupId===groupId||l.id===groupId)&&l.id!==id&&l.pgMode===orig.pgMode; });
+    // O escopo (só esta / todas) já foi escolhido no modal "mLancEscopo"
+    // antes mesmo do formulário abrir — não perguntamos de novo aqui.
+    var escopoJaEscolhido = _escopoCtx.action === 'edit' && _escopoCtx.id === id ? _escopoCtx.editScope : null;
+    if (isSerieSave && siblings.length>0 && escopoJaEscolhido) {
+      if (escopoJaEscolhido === 'forward') {
         user.lancamentos = user.lancamentos.map(function(l) {
           if (l.id===id||(l.groupId===groupId||l.id===groupId)) return Object.assign({},l,{desc:baseDesc,cat:baseLanc.cat,conta:baseLanc.conta,valor:baseValor,obs:baseLanc.obs});
           return l;
@@ -3428,6 +3450,7 @@ function saveLanc() {
       } else {
         user.lancamentos = user.lancamentos.map(function(l){ return l.id===id?baseLanc:l; });
       }
+      _escopoCtx = { action: '', id: '', lancamento: null }; // reseta pra não vazar pro próximo salvamento
     } else {
       user.lancamentos = user.lancamentos.map(function(l){ return l.id===id?baseLanc:l; });
     }
@@ -3512,7 +3535,7 @@ function execLancEscopo(scope) {
     _execDelLanc(_escopoCtx.id, user, scope);
   } else if (_escopoCtx.action === 'edit') {
     _escopoCtx.editScope = scope;
-    openModal('mLanc');
+    openLancModal(_escopoCtx.id, true); // true = já escolhemos o escopo, não perguntar de novo
   }
 }
 
@@ -5256,7 +5279,7 @@ function rAloc() {
           var ld=new Date(mv.data+'T12:00:00');
           return mv.projetoId===p.id&&(ld.getFullYear()<ALOC_YEAR||(ld.getFullYear()===ALOC_YEAR&&ld.getMonth()<=m));
         }).reduce(function(s,mv){return mv.tipo==='rendimento'?s+mv.valor:mv.tipo==='transf_in'?s+mv.valor:mv.tipo==='transf_out'?s-mv.valor:s;},0);
-        total+=Math.max(0,pv+pm);
+        total+=Math.max(0,(p.valorInicial||0)+pv+pm);
       });
       if (_patrimMods.invest)(user.investimentos||[]).forEach(function(inv){ if(_inc('invest:'+inv.id)) total+=(inv.valor||0); });
       if (_patrimMods.imob) total+=_imobVal;
@@ -5303,7 +5326,7 @@ function rAloc() {
         },
         scales:{
           x:{grid:{color:'rgba(148,178,220,.06)'},ticks:{color:mu,font:{size:10}}},
-          y:{grid:{color:'rgba(148,178,220,.06)'},ticks:{color:mu,font:{size:10},callback:function(v){return v>=1000000?'R$'+(v/1000000).toFixed(1)+'M':v>=1000?'R$'+(v/1000).toFixed(v>=10000?0:1)+'k':'R$'+Math.round(v);}}}
+          y:{min:0,grid:{color:'rgba(148,178,220,.06)'},ticks:{color:mu,font:{size:10},callback:function(v){return v>=1000000?'R$'+(v/1000000).toFixed(1)+'M':v>=1000?'R$'+(v/1000).toFixed(v>=10000?0:1)+'k':'R$'+Math.round(v);}}}
         }
       },
       plugins: _patrimShowLabels ? [{
@@ -7216,6 +7239,19 @@ var _voarTab    = 'v';
 var _voarField  = '';
 var _voarEditId = null;
 
+// Alterna qual das 4 colunas aparece no celular (no desktop o CSS ignora isso
+// e mostra as 4 juntas — ver media query max-width:640px).
+function setVoarMobileTab(tab) {
+  _voarTab = tab;
+  var kanban = document.getElementById('voarKanban');
+  if (kanban) kanban.className = 'voar-active-' + tab;
+  document.querySelectorAll('.voar-mobile-tab-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+  var filtros = document.getElementById('voarVisaoFiltros');
+  if (filtros) filtros.classList.toggle('voar-filtros-hidden-mobile', tab !== 'v');
+}
+
 var VOAR_TAGS = ['Familia','Liberdade','Seguranca','Saude','Crescimento','Legado','Conforto'];
 var VOAR_TAG_COLORS = {
   Familia:'#f472b6', Liberdade:'#60a5fa', Seguranca:'#34d399', Saude:'#fb7185',
@@ -7231,13 +7267,13 @@ function rVoar() {
   var DQ = '"'; // double quote helper
 
   function delBtn(field, id) {
-    return '<button onclick=' + DQ + 'delVoar(' + DQ + "'" + DQ + field + DQ + "'" + DQ + ',' + DQ + "'" + DQ + id + DQ + "'" + DQ + ')' + DQ
-      + ' title="Excluir" style="background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:2px 4px;" '
+    return '<button onclick="delVoar(\'' + field + '\',\'' + id + '\')" '
+      + 'title="Excluir" style="background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:2px 4px;" '
       + 'onmouseenter="this.style.color=\'var(--red)\'" onmouseleave="this.style.color=\'var(--mu)\'">×</button>';
   }
   function editBtn(field, id) {
-    return '<button onclick=' + DQ + 'openVoarModal(' + DQ + "'" + DQ + field + DQ + "'" + DQ + ',' + DQ + "'" + DQ + id + DQ + "'" + DQ + ')' + DQ
-      + ' title="Editar" style="background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:12px;padding:2px 4px;" '
+    return '<button onclick="openVoarModal(\'' + field + '\',\'' + id + '\')" '
+      + 'title="Editar" style="background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:12px;padding:2px 4px;" '
       + 'onmouseenter="this.style.color=\'var(--tx)\'" onmouseleave="this.style.color=\'var(--mu)\'">✎</button>';
   }
 
@@ -7269,15 +7305,15 @@ function rVoar() {
     } else {
       vEl.innerHTML = visoesFiltradas.map(function(vi) {
         var cor = VOAR_TAG_COLORS[vi.tag] || 'var(--blue)';
-        return '<div style="background:var(--s1);border:1px solid var(--brd);border-left:3px solid '+cor+';border-radius:var(--rs);padding:14px 16px;box-shadow:var(--sh-sm);">'
-          +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">'
+        return '<div style="background:var(--s1);border:1px solid var(--brd);border-left:3px solid '+cor+';border-radius:var(--rs);padding:9px 11px;box-shadow:var(--sh-sm);">'
+          +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;">'
           +'<div style="flex:1;">'
-          +'<div style="font-size:13px;font-weight:600;color:var(--tx);line-height:1.5;margin-bottom:8px;">'+vi.texto+'</div>'
-          +(vi.tag ? '<span style="font-size:10px;font-weight:600;background:'+cor+'22;color:'+cor+';padding:2px 8px;border-radius:4px;text-transform:uppercase;">'+vi.tag+'</span>' : '')
+          +'<div style="font-size:12px;font-weight:600;color:var(--tx);line-height:1.4;margin-bottom:5px;">'+vi.texto+'</div>'
+          +(vi.tag ? '<span style="font-size:9px;font-weight:600;background:'+cor+'22;color:'+cor+';padding:1px 6px;border-radius:4px;text-transform:uppercase;">'+vi.tag+'</span>' : '')
           +'</div>'
-          +'<div style="display:flex;gap:2px;flex-shrink:0;">'+editBtn('visao', vi.id)+delBtn('visao', vi.id)+'</div>'
+          +'<div style="display:flex;gap:0;flex-shrink:0;">'+editBtn('visao', vi.id)+delBtn('visao', vi.id)+'</div>'
           +'</div>'
-          +(vi.prazo ? '<div style="margin-top:10px;font-size:11px;color:var(--mu);">📅 Prazo: '+vi.prazo+'</div>' : '')
+          +(vi.prazo ? '<div style="margin-top:6px;font-size:10px;color:var(--mu);">📅 '+vi.prazo+'</div>' : '')
           +'</div>';
       }).join('');
     }
@@ -7287,21 +7323,21 @@ function rVoar() {
   var oEl = document.getElementById('voar-orgs');
   if (oEl) {
     if (!v.organizacao.length) {
-      oEl.innerHTML = '<div class="empty"><div class="ei">📋</div><p>Nenhuma prioridade definida.</p></div>';
+      oEl.innerHTML = '<div class="empty"><div class="ei">📋</div><p>Nenhuma estratégia definida.</p></div>';
     } else {
       var sorted = v.organizacao.slice().sort(function(a,b){return a.prioridade-b.prioridade;});
       oEl.innerHTML = sorted.map(function(o,idx) {
         var visaoPai = v.visoes.find(function(vi){ return vi.id === o.visaoId; });
         var corPai = visaoPai ? (VOAR_TAG_COLORS[visaoPai.tag]||'var(--blue)') : 'var(--mu)';
-        return '<div style="background:var(--s1);border:1px solid var(--brd);border-radius:var(--rs);padding:13px 16px;box-shadow:var(--sh-sm);">'
-          +'<div style="display:flex;align-items:center;gap:12px;">'
-          +'<div style="width:24px;height:24px;flex-shrink:0;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--gold);">'+(idx+1)+'</div>'
+        return '<div style="background:var(--s1);border:1px solid var(--brd);border-radius:var(--rs);padding:8px 11px;box-shadow:var(--sh-sm);">'
+          +'<div style="display:flex;align-items:center;gap:8px;">'
+          +'<div style="width:18px;height:18px;flex-shrink:0;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--gold);">'+(idx+1)+'</div>'
           +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:13px;font-weight:600;color:var(--tx);">'+o.descricao+'</div>'
-          +(o.pct ? '<div style="font-size:11px;color:var(--mu);margin-top:2px;">'+o.pct+'% da renda</div>' : '')
-          +(visaoPai ? '<div style="font-size:10px;color:'+corPai+';margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">↳ '+visaoPai.texto+'</div>' : '<div style="font-size:10px;color:var(--warn);margin-top:4px;">⚠ sem visão vinculada</div>')
+          +'<div style="font-size:12px;font-weight:600;color:var(--tx);">'+o.descricao+'</div>'
+          +(o.pct ? '<div style="font-size:10px;color:var(--mu);margin-top:1px;">'+o.pct+'% da renda</div>' : '')
+          +(visaoPai ? '<div style="font-size:9.5px;color:'+corPai+';margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">↳ '+visaoPai.texto+'</div>' : '<div style="font-size:9.5px;color:var(--warn);margin-top:2px;">⚠ sem visão vinculada</div>')
           +'</div>'
-          +'<div style="display:flex;gap:2px;flex-shrink:0;">'+editBtn('org', o.id)+delBtn('org', o.id)+'</div>'
+          +'<div style="display:flex;gap:0;flex-shrink:0;">'+editBtn('org', o.id)+delBtn('org', o.id)+'</div>'
           +'</div>'
           +'</div>';
       }).join('');
@@ -7324,31 +7360,31 @@ function rVoar() {
         var pctMeta = temMeta ? Math.min(100, Math.round((a.atual||0)/a.meta*100)) : 0;
         var orgPai = v.organizacao.find(function(o){ return o.id === a.organizacaoId; });
         var advBtn = !done
-          ? '<button onclick="avancarAcao(' + DQ + a.id + DQ + ')" title="Avançar status" style="background:var(--s2);border:1px solid var(--brd2);color:var(--tx);border-radius:var(--rs);font-size:11px;padding:4px 8px;cursor:pointer;">→</button>'
+          ? '<button onclick="avancarAcao(\'' + a.id + '\')" title="Avançar status" style="background:var(--s2);border:1px solid var(--brd2);color:var(--tx);border-radius:var(--rs);font-size:10px;padding:3px 6px;cursor:pointer;">→</button>'
           : '';
         var progBtn = (temMeta && !done)
-          ? '<button onclick="atualizarProgressoAcao(' + DQ + a.id + DQ + ')" title="Atualizar progresso" style="background:var(--s2);border:1px solid var(--brd2);color:var(--gold);border-radius:var(--rs);font-size:11px;padding:4px 8px;cursor:pointer;">✎ R$</button>'
+          ? '<button onclick="atualizarProgressoAcao(\'' + a.id + '\')" title="Atualizar progresso" style="background:var(--s2);border:1px solid var(--brd2);color:var(--gold);border-radius:var(--rs);font-size:10px;padding:3px 6px;cursor:pointer;">✎ R$</button>'
           : '';
         var barraHTML = temMeta
-          ? '<div style="margin-top:8px;">'
-            +'<div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+pctMeta+'%;background:'+(done?'var(--green)':'var(--gold)')+';border-radius:3px;transition:width .3s;"></div></div>'
-            +'<div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:var(--mu);"><span>'+fmt(a.atual||0)+' de '+fmt(a.meta)+'</span><span style="font-weight:600;color:'+(done?'var(--green)':'var(--gold)')+';">'+pctMeta+'%</span></div>'
+          ? '<div style="margin-top:6px;">'
+            +'<div style="height:5px;background:var(--s3);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+pctMeta+'%;background:'+(done?'var(--green)':'var(--gold)')+';border-radius:3px;transition:width .3s;"></div></div>'
+            +'<div style="display:flex;justify-content:space-between;margin-top:3px;font-size:9.5px;color:var(--mu);"><span>'+fmt(a.atual||0)+' de '+fmt(a.meta)+'</span><span style="font-weight:600;color:'+(done?'var(--green)':'var(--gold)')+';">'+pctMeta+'%</span></div>'
             +'</div>'
           : '';
-        return '<div style="background:var(--s1);border:1px solid var(--brd);border-left:3px solid '+(statusColors[a.status]||'var(--brd)')+';border-radius:var(--rs);padding:13px 16px;box-shadow:var(--sh-sm);">'
-          +'<div style="display:flex;align-items:flex-start;gap:10px;">'
+        return '<div style="background:var(--s1);border:1px solid var(--brd);border-left:3px solid '+(statusColors[a.status]||'var(--brd)')+';border-radius:var(--rs);padding:8px 11px;box-shadow:var(--sh-sm);">'
+          +'<div style="display:flex;align-items:flex-start;gap:6px;">'
           +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:13px;font-weight:500;color:var(--tx);'+(done?'text-decoration:line-through;opacity:.6;':'')+'">'+(done?'🏅 ':'')+a.descricao+'</div>'
-          +'<div style="display:flex;gap:8px;margin-top:5px;flex-wrap:wrap;">'
-          +(a.categoria?'<span style="font-size:10px;color:var(--mu);">'+a.categoria+'</span>':'')
-          +(a.prazo?'<span style="font-size:10px;color:var(--mu);">📅 '+a.prazo+'</span>':'')
-          +'<span style="font-size:10px;font-weight:600;color:'+(statusColors[a.status]||'var(--mu)')+';">'+(statusLabels[a.status]||a.status)+'</span>'
+          +'<div style="font-size:12px;font-weight:500;color:var(--tx);'+(done?'text-decoration:line-through;opacity:.6;':'')+'">'+(done?'🏅 ':'')+a.descricao+'</div>'
+          +'<div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap;">'
+          +(a.categoria?'<span style="font-size:9.5px;color:var(--mu);">'+a.categoria+'</span>':'')
+          +(a.prazo?'<span style="font-size:9.5px;color:var(--mu);">📅 '+a.prazo+'</span>':'')
+          +'<span style="font-size:9.5px;font-weight:600;color:'+(statusColors[a.status]||'var(--mu)')+';">'+(statusLabels[a.status]||a.status)+'</span>'
           +'</div>'
-          +(orgPai ? '<div style="font-size:10px;color:var(--mu);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">↳ '+orgPai.descricao+'</div>' : '<div style="font-size:10px;color:var(--warn);margin-top:4px;">⚠ sem organização vinculada</div>')
+          +(orgPai ? '<div style="font-size:9.5px;color:var(--mu);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">↳ '+orgPai.descricao+'</div>' : '<div style="font-size:9.5px;color:var(--warn);margin-top:2px;">⚠ sem organização vinculada</div>')
           +'</div>'
-          +'<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;align-items:flex-end;">'
-          +'<div style="display:flex;gap:2px;">'+editBtn('acao',a.id)+delBtn('acao',a.id)+'</div>'
-          +'<div style="display:flex;gap:4px;">'+progBtn+advBtn+'</div>'
+          +'<div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;align-items:flex-end;">'
+          +'<div style="display:flex;gap:0;">'+editBtn('acao',a.id)+delBtn('acao',a.id)+'</div>'
+          +'<div style="display:flex;gap:3px;">'+progBtn+advBtn+'</div>'
           +'</div>'
           +'</div>'
           +barraHTML
@@ -7365,8 +7401,8 @@ function rVoar() {
     var marcos = v.realizacoes.length;
     var pct    = total > 0 ? Math.round(done2/total*100) : 0;
     kpiEl.innerHTML =
-      '<div class="card"><div class="cl">Ações Concluídas</div><div class="cv g">'+done2+' / '+total+'</div><div class="csub">'+pct+'% do plano</div></div>'
-      +'<div class="card"><div class="cl">Marcos Atingidos</div><div class="cv b">'+marcos+'</div><div class="csub">momentos registrados</div></div>';
+      '<div class="card" style="padding:8px 11px;"><div class="cl" style="font-size:9px;margin-bottom:2px;">Ações Concluídas</div><div class="cv g" style="font-size:16px;">'+done2+' / '+total+'</div><div class="csub" style="font-size:9.5px;">'+pct+'% do plano</div></div>'
+      +'<div class="card" style="padding:8px 11px;"><div class="cl" style="font-size:9px;margin-bottom:2px;">Marcos Atingidos</div><div class="cv b" style="font-size:16px;">'+marcos+'</div><div class="csub" style="font-size:9.5px;">momentos registrados</div></div>';
   }
 
   var rEl = document.getElementById('voar-realizacoes');
@@ -7377,11 +7413,11 @@ function rVoar() {
       var sorted2 = v.realizacoes.slice().reverse();
       var tipos = { conquista:'🏆', aprendizado:'💡', superacao:'💪', celebracao:'🎉' };
       rEl.innerHTML = sorted2.map(function(r) {
-        return '<div style="background:var(--s1);border:1px solid var(--brd);border-radius:var(--rs);padding:13px 16px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--sh-sm);">'
-          +'<div style="font-size:20px;flex-shrink:0;">'+(tipos[r.tipo]||'✓')+'</div>'
+        return '<div style="background:var(--s1);border:1px solid var(--brd);border-radius:var(--rs);padding:8px 11px;display:flex;align-items:flex-start;gap:8px;box-shadow:var(--sh-sm);">'
+          +'<div style="font-size:16px;flex-shrink:0;">'+(tipos[r.tipo]||'✓')+'</div>'
           +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:13px;font-weight:600;color:var(--tx);">'+r.descricao+'</div>'
-          +(r.data?'<div style="font-size:11px;color:var(--mu);margin-top:3px;">'+r.data+'</div>':'')
+          +'<div style="font-size:12px;font-weight:600;color:var(--tx);">'+r.descricao+'</div>'
+          +(r.data?'<div style="font-size:10px;color:var(--mu);margin-top:2px;">'+r.data+'</div>':'')
           +'</div>'
           +'<div style="display:flex;gap:2px;flex-shrink:0;">'+editBtn('realiz', r.id)+delBtn('realiz',r.id)+'</div>'
           +'</div>';
@@ -7396,8 +7432,8 @@ function openVoarModal(field, editId) {
   var user = getUser(CU.id);
   var voar = user.voar || {visoes:[],organizacao:[],acoes:[],realizacoes:[]};
   var isEdit = !!editId;
-  var titlesNovo = {'visao':'Nova Visão', 'org':'Nova Prioridade', 'acao':'Nova Meta', 'realiz':'Registrar Marco'};
-  var titlesEdit = {'visao':'Editar Visão', 'org':'Editar Prioridade', 'acao':'Editar Meta', 'realiz':'Editar Marco'};
+  var titlesNovo = {'visao':'Nova Visão', 'org':'Nova Estratégia', 'acao':'Nova Meta', 'realiz':'Registrar Marco'};
+  var titlesEdit = {'visao':'Editar Visão', 'org':'Editar Estratégia', 'acao':'Editar Meta', 'realiz':'Editar Marco'};
   document.getElementById('mVoarTit').textContent = (isEdit ? titlesEdit[field] : titlesNovo[field]) || 'Adicionar';
 
   var body = '';
@@ -7411,21 +7447,21 @@ function openVoarModal(field, editId) {
   } else if (field === 'org') {
     var o = isEdit ? voar.organizacao.find(function(x){return x.id===editId;}) : null;
     if (!voar.visoes.length) {
-      body = '<div style="font-size:12.5px;color:var(--warn);background:var(--s2);border-radius:var(--rs);padding:10px 12px;">⚠ Crie uma Visão antes — toda prioridade de Organização precisa estar vinculada a uma.</div>';
+      body = '<div style="font-size:12.5px;color:var(--warn);background:var(--s2);border-radius:var(--rs);padding:10px 12px;">⚠ Crie uma Visão antes — toda Estratégia precisa estar vinculada a uma.</div>';
     } else {
       body = '<div class="ig"><label>Vinculada à visão</label><select id="oVisaoId" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"><option value="">Selecione a visão</option>'+voar.visoes.map(function(v2){return '<option value="'+v2.id+'"'+(o&&o.visaoId===v2.id?' selected':'')+'>'+v2.texto.slice(0,60)+'</option>';}).join('')+'</select></div>'
-        +'<div class="ig"><label>Descrição da prioridade</label><input type="text" id="oDesc" value="'+(o?o.descricao:'')+'" placeholder="Ex: Quitar cartão de crédito" style="width:100%;"></div>'
+        +'<div class="ig"><label>Descrição da estratégia</label><input type="text" id="oDesc" value="'+(o?o.descricao:'')+'" placeholder="Ex: Quitar cartão de crédito" style="width:100%;"></div>'
         +'<div class="ir c2">'
-        +'<div class="ig"><label>Prioridade (1 = mais importante)</label><input type="number" id="oPrio" min="1" max="20" value="'+(o?o.prioridade:1)+'" style="width:100%;"></div>'
+        +'<div class="ig"><label>Ordem de importância (1 = mais importante)</label><input type="number" id="oPrio" min="1" max="20" value="'+(o?o.prioridade:1)+'" style="width:100%;"></div>'
         +'<div class="ig"><label>% da renda (opcional)</label><input type="number" id="oPct" min="0" max="100" value="'+(o?o.pct||'':'')+'" placeholder="Ex: 30" style="width:100%;"></div>'
         +'</div>';
     }
   } else if (field === 'acao') {
     var a = isEdit ? voar.acoes.find(function(x){return x.id===editId;}) : null;
     if (!voar.organizacao.length) {
-      body = '<div style="font-size:12.5px;color:var(--warn);background:var(--s2);border-radius:var(--rs);padding:10px 12px;">⚠ Crie uma Organização antes — toda Ação precisa estar vinculada a uma prioridade.</div>';
+      body = '<div style="font-size:12.5px;color:var(--warn);background:var(--s2);border-radius:var(--rs);padding:10px 12px;">⚠ Crie uma Organização antes — toda Ação precisa estar vinculada a uma Estratégia.</div>';
     } else {
-      body = '<div class="ig"><label>Vinculada à organização</label><select id="aOrgId" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"><option value="">Selecione a prioridade</option>'+voar.organizacao.map(function(o2){return '<option value="'+o2.id+'"'+(a&&a.organizacaoId===o2.id?' selected':'')+'>'+o2.descricao.slice(0,60)+'</option>';}).join('')+'</select></div>'
+      body = '<div class="ig"><label>Vinculada à organização</label><select id="aOrgId" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"><option value="">Selecione a estratégia</option>'+voar.organizacao.map(function(o2){return '<option value="'+o2.id+'"'+(a&&a.organizacaoId===o2.id?' selected':'')+'>'+o2.descricao.slice(0,60)+'</option>';}).join('')+'</select></div>'
         +'<div class="ig"><label>Descrição da meta</label><input type="text" id="aDesc" value="'+(a?a.descricao:'')+'" placeholder="Ex: Juntar para a reserva de emergência" style="width:100%;"></div>'
         +'<div class="ir c2">'
         +'<div class="ig"><label>Prazo</label><input type="text" id="aPrazo" value="'+(a?a.prazo||'':'')+'" placeholder="Ex: Dez/2026" style="width:100%;"></div>'
@@ -7480,9 +7516,9 @@ function confirmVoar() {
       }
     } else if (_voarField === 'org') {
       var visaoIdSel = (document.getElementById('oVisaoId')||{}).value||'';
-      if (!visaoIdSel) { var elVis=document.getElementById('oVisaoId'); if(elVis) elVis.style.borderColor='var(--red)'; alert('Toda prioridade precisa estar vinculada a uma Visão.'); return; }
+      if (!visaoIdSel) { var elVis=document.getElementById('oVisaoId'); if(elVis) elVis.style.borderColor='var(--red)'; alert('Toda Estratégia precisa estar vinculada a uma Visão.'); return; }
       var desc = (document.getElementById('oDesc')||{}).value||'';
-      if (!desc.trim()) { document.getElementById('oDesc').style.borderColor='var(--red)'; alert('Descreva a prioridade antes de salvar.'); return; }
+      if (!desc.trim()) { document.getElementById('oDesc').style.borderColor='var(--red)'; alert('Descreva a estratégia antes de salvar.'); return; }
       var dadosOrg = { descricao:desc.trim(), visaoId:visaoIdSel,
         prioridade:parseInt((document.getElementById('oPrio')||{}).value)||99,
         pct:(document.getElementById('oPct')||{}).value||'' };
@@ -7613,6 +7649,7 @@ var PRAZO_CONFIG = {
 function openProjetoModal(editId) {
   var nm = document.getElementById('pjNome');
   var mt = document.getElementById('pjMeta');
+  var si = document.getElementById('pjSaldoInicial');
   var pz = document.getElementById('pjPrazo');
   var ds = document.getElementById('pjDesc');
   if (editId) {
@@ -7621,6 +7658,7 @@ function openProjetoModal(editId) {
     if (!pj) return;
     if (nm) nm.value = pj.nome;
     if (mt) setMoedaValue('pjMeta', pj.meta);
+    if (si) setMoedaValue('pjSaldoInicial', pj.valorInicial||0);
     if (pz) pz.value = pj.prazo;
     if (ds) ds.value = pj.desc||'';
     var da = document.getElementById('pjData'); if (da) da.value = pj.dataAlvo||'';
@@ -7628,6 +7666,7 @@ function openProjetoModal(editId) {
   } else {
     if (nm) nm.value = '';
     if (mt) mt.value = '';
+    if (si) si.value = '';
     if (pz) pz.value = 'curto';
     if (ds) ds.value = '';
     delete document.getElementById('mProjeto').dataset.editId;
@@ -7639,6 +7678,7 @@ function openProjetoModal(editId) {
 function saveProjeto() {
   var nome  = (document.getElementById('pjNome')||{}).value||'';
   var meta  = parseMoeda((document.getElementById('pjMeta')||{}).value)||0;
+  var saldoInicial = parseMoeda((document.getElementById('pjSaldoInicial')||{}).value)||0;
   var prazo = (document.getElementById('pjPrazo')||{}).value||'curto';
   var desc  = (document.getElementById('pjDesc')||{}).value||'';
   var data  = (document.getElementById('pjData')||{}).value||'';
@@ -7648,10 +7688,10 @@ function saveProjeto() {
   var editId = document.getElementById('mProjeto').dataset.editId;
   if (editId) {
     user.projetos = user.projetos.map(function(p){
-      return p.id===editId ? Object.assign(p,{nome:nome.trim(),meta:meta,prazo:prazo,desc:desc,dataAlvo:data}) : p;
+      return p.id===editId ? Object.assign(p,{nome:nome.trim(),meta:meta,valorInicial:saldoInicial,prazo:prazo,desc:desc,dataAlvo:data}) : p;
     });
   } else {
-    user.projetos.push({ id:uid(), nome:nome.trim(), meta:meta, prazo:prazo, desc:desc, dataAlvo:data, criado:new Date().toISOString().slice(0,10) });
+    user.projetos.push({ id:uid(), nome:nome.trim(), meta:meta, valorInicial:saldoInicial, prazo:prazo, desc:desc, dataAlvo:data, criado:new Date().toISOString().slice(0,10) });
   }
   saveUser(user); CU=getUser(user.id);
   closeModal('mProjeto');
@@ -7680,9 +7720,11 @@ function setPjFiltro(btn, val) {
   rProjetos(user);
 }
 
-// ── aportado total: lançamentos + rendimentos + transferências recebidas - transferências enviadas
+// ── aportado total: saldo inicial + lançamentos + rendimentos + transferências recebidas - transferências enviadas
 function calcAportadoProjeto(user, pjId) {
   var movs = user.projetoMovs || [];
+  var proj = (user.projetos||[]).find(function(p){ return p.id===pjId; });
+  var inicial = (proj && proj.valorInicial) || 0;
   // From lancamentos tagged to this project
   var desp = (user.lancamentos||[])
     .filter(function(l){ return l.projetoId === pjId && l.tipo === 'Saída' && isRealizado(l); })
@@ -7697,7 +7739,7 @@ function calcAportadoProjeto(user, pjId) {
     }, 0);
   // Pode ficar negativo: se o projeto gastou mais do que tinha guardado
   // (ex: juntou R$10 mil, gastou R$12 mil na viagem), fica devendo R$2 mil a repor.
-  return desp + extra;
+  return inicial + desp + extra;
 }
 
 // ── Abre o lançamento universal (mLanc) já com o tipo pré-selecionado.
