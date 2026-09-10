@@ -261,6 +261,7 @@ body.sb-hidden .main { margin-left:0; }
 
 /* ═══ KPI GRID ══════════════════════════════════ */
 .kpi-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:16px; }
+#fInsight { display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px; }
 .kpi-card { background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden;box-shadow:var(--sh-sm);transition:transform .2s var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease); }
 
 /* Kanban VOAR: 4 colunas, cada uma com letra grande no topo */
@@ -464,10 +465,10 @@ body.sb-hidden .main { margin-left:0; }
   .c2,.c3 { grid-template-columns:1fr; }
   .pt { font-size:18px; }
   .modal { padding:22px; }
-  .cockpit-grid { grid-template-columns:repeat(5,1fr); gap:4px; }
-  .cockpit-card { padding:5px 2px 7px; }
-  .cockpit-card-nome { font-size:8px; }
-  .cockpit-card-vals { font-size:7.5px; }
+  .cockpit-grid { grid-template-columns:repeat(2,1fr); gap:10px; }
+  .cockpit-card { padding:10px 6px 12px; }
+  .cockpit-card-nome { font-size:11px; }
+  .cockpit-card-vals { font-size:10.5px; }
   .sb-toggle-btn {
     display:flex !important;
     position:fixed; top:14px; left:14px;
@@ -491,9 +492,10 @@ body.sb-hidden .main { margin-left:0; }
   .patr-grid,.cad-grid { grid-template-columns:1fr; }
   .patr-kpi-row { grid-template-columns:1fr 1fr; }
 }
-#fInsight { grid-template-columns:repeat(4,1fr); align-items:stretch; overflow:visible; }
+#fInsight { align-items:stretch; overflow:visible; }
 #fInsight .kpi-card { overflow:visible; }
 #gKpis .kpi-card { overflow:visible; }
+#gSaldoFormulaWrapCardOrc { overflow:visible; }
 #fInsight .kpi-val { font-size:22px; }
 #fInsight .kpi-label { font-size:10px; }
 #fInsight .kpi-sub { font-size:11px; }
@@ -660,11 +662,18 @@ button:disabled, input:disabled, select:disabled { opacity:.45;cursor:not-allowe
             <div><div class="un" id="sbNome">Usuário</div><div class="ur" id="sbRole">Administrador</div></div>
           </div>
           <button class="btn-out" id="btnVoltarAdmin" style="display:none;margin-bottom:6px;background:var(--blue-dim);border-color:var(--blue);color:var(--blue);" onclick="voltarParaAdmin()">← Voltar ao Admin</button>
+          <button class="btn-out" id="btnPrivacidadeGeral" onclick="togglePrivacidadeGeral()" style="margin-bottom:6px;" title="Quando ativa, o consultor/administrador não consegue ver nada dos seus dados.">🔒 Ativar Privacidade</button>
           <button class="btn-out" onclick="logout()">Sair</button>
         </div>
   </nav>
 
   <main class="main">
+    <div id="privacidadeBloqueioOverlay" style="display:none;height:70vh;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;">
+      <div style="font-size:56px;">🔒</div>
+      <div style="font-size:20px;font-weight:700;color:var(--tx);">Privacidade ativada</div>
+      <div style="font-size:14px;color:var(--mu);max-width:380px;line-height:1.6;">Esse usuário ativou a privacidade geral. Nenhum dado financeiro dele pode ser visualizado enquanto essa opção estiver ligada.</div>
+      <button class="btn bp" onclick="voltarParaAdmin()" style="margin-top:6px;">← Voltar ao Admin</button>
+    </div>
 
     <!-- ══ ORÇAMENTO MENSAL (página principal) ══ -->
     <!-- ══ DASHBOARD ══ -->
@@ -2078,9 +2087,23 @@ function toggleGSaldoFormula(evt) {
 document.addEventListener('click', function(e){
   var pop = document.getElementById('gSaldoFormulaPopover');
   if (!pop || pop.style.display === 'none') return;
-  var isGear = e.target.closest && (e.target.closest('#gSaldoFormulaBtn') || e.target.closest('#gSaldoKpiGearBtn'));
+  var isGear = e.target.closest && (e.target.closest('#gSaldoFormulaBtn') || e.target.closest('[id^="gSaldoKpiGearBtn"]'));
   if (!pop.contains(e.target) && !isGear) pop.style.display = 'none';
 });
+
+function resetGSaldoFormula() {
+  _gSaldoFormula = { rec:true, rend:false, desp:true, invPlan:true, invReal:false };
+  localStorage.setItem('gSaldoFormula', JSON.stringify(_gSaldoFormula));
+  var mapaCheckbox = { gSaldoFRec:'rec', gSaldoFRend:'rend', gSaldoFDesp:'desp', gSaldoFInvPlan:'invPlan', gSaldoFInvReal:'invReal' };
+  Object.keys(mapaCheckbox).forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.checked = _gSaldoFormula[mapaCheckbox[id]];
+  });
+  var resumoEl = document.getElementById('gSaldoFormulaResumo');
+  if (resumoEl) resumoEl.textContent = _gSaldoFormulaResumoTxt();
+  try { rGestao(); } catch(e) {}
+  try { rOrcCards(getUser(CU.id)); } catch(e) {}
+}
 
 function onGSaldoFormulaChange() {
   _gSaldoFormula = {
@@ -2091,7 +2114,10 @@ function onGSaldoFormulaChange() {
     invReal: document.getElementById('gSaldoFInvReal').checked
   };
   localStorage.setItem('gSaldoFormula', JSON.stringify(_gSaldoFormula));
-  rGestao();
+  // Atualiza os dois lugares que usam essa fórmula — não custa nada re-renderizar
+  // o que não está na tela ativa no momento, os elementos existem sempre no DOM.
+  try { rGestao(); } catch(e) {}
+  try { rOrcCards(getUser(CU.id)); } catch(e) {}
 }
 
 function _gSaldoFormulaResumoTxt() {
@@ -2154,8 +2180,13 @@ function initApp() {
   if (adminNav) adminNav.style.display = (CU.role==='admin' && !_adminViewMode) ? 'block' : 'none';
   var btnVoltar = document.getElementById('btnVoltarAdmin');
   if (btnVoltar) btnVoltar.style.display = _adminViewMode ? 'block' : 'none';
-  try { rCad(); } catch(e) { console.warn('rCad',e); }
+  var btnPriv = document.getElementById('btnPrivacidadeGeral');
+  if (btnPriv) btnPriv.style.display = (CU.role!=='admin') ? 'block' : 'none';
   updateSbUser();
+  updatePrivacidadeGeralBtn();
+  // Privacidade geral ativada: pula os renders (nada de dados dele passa nem por debaixo do overlay)
+  if (_adminViewMode && CU.privacidadeGeral) { sp('orcamento'); return; }
+  try { rCad(); } catch(e) { console.warn('rCad',e); }
   initFuturoDefaults(); initOrcAno();
   try { rCadPatrim(); rPatrimAloc(); } catch(e) { console.warn('patrim',e); }
   try { rOrcFull(); } catch(e) { console.warn('orc',e); }
@@ -2169,6 +2200,16 @@ function initApp() {
 // NAVIGATION
 // ══════════════════════════════════════════════════════
 function sp(id) {
+  // Privacidade geral: se o admin está vendo um cliente que ativou a privacidade,
+  // bloqueia TODAS as telas — não só os lançamentos, tudo mesmo.
+  var overlay = document.getElementById('privacidadeBloqueioOverlay');
+  if (_adminViewMode && CU && CU.privacidadeGeral) {
+    document.querySelectorAll('.pg').forEach(function(p){ p.classList.remove('active'); });
+    if (overlay) overlay.style.display = 'flex';
+    document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('active'); });
+    return;
+  }
+  if (overlay) overlay.style.display = 'none';
   document.querySelectorAll('.pg').forEach(function(p){ p.classList.remove('active'); });
   document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('active'); });
   var pg = document.getElementById('page-'+id);
@@ -2400,11 +2441,18 @@ function rOrcCards(user) {
   var rendPrev = sumBy(prev, 'Rendimento');
   var despPrev = sumBy(prev, 'Saída');
 
-  var recTotal = rec + rend;
-  var saldo = recTotal - desp;
-  var saldoProj = (recTotal + recPrev + rendPrev) - (desp + despPrev);
-
   var orc = user.orcamento[OM] || {};
+  var invPlanejado = orc.invMode==='pct' ? (orc.renda||0)*(orc.invPct||0)/100 : (orc.invVal||0);
+  var investido = calcInvestidoMes(user, OM, OY);
+
+  // Saldo do Mês usa a MESMA fórmula configurável do gráfico "Saldo do Mês" (Visão Anual)
+  var f = _gSaldoFormula;
+  var saldoFormula = 0;
+  if (f.rec) saldoFormula += rec;
+  if (f.rend) saldoFormula += rend;
+  if (f.desp) saldoFormula -= desp;
+  if (f.invPlan) saldoFormula -= invPlanejado;
+  if (f.invReal) saldoFormula -= investido;
 
   // Subtítulo: mostra pendências quando existirem
   function sub(qtd, valorPrev) {
@@ -2418,17 +2466,17 @@ function rOrcCards(user) {
     '<div class="card"><div class="cl">Receitas</div><div class="cv g">'+fmt(rec)+'</div><div class="csub">'+sub(real.filter(function(l){return l.tipo==='Entrada';}).length, recPrev)+'</div></div>'
    +'<div class="card"><div class="cl">Despesas</div><div class="cv r">'+fmt(desp)+'</div><div class="csub">'+sub(real.filter(function(l){return l.tipo==='Saída';}).length, despPrev)+'</div></div>'
    +(function(){
-      // Contabilizador de Investimentos do Mês — ver calcInvestidoMes() para a regra completa.
-      var investido = calcInvestidoMes(user, OM, OY);
-      // % do planejado: investido / valor de investimento planejado no orçamento do mês
-      var invPlanejado = orc.invMode==='pct' ? (orc.renda||0)*(orc.invPct||0)/100 : (orc.invVal||0);
       var pctGuardado = invPlanejado > 0 ? (investido / invPlanejado * 100) : 0;
       return '<div class="card"><div class="cl">Investido no Mês</div>'
         +'<div class="cv" style="color:'+(investido<0?'var(--red)':'var(--gold)')+'">'+fmt(investido)+'</div>'
         +'<div class="csub">'+(investido!==0?pctGuardado.toFixed(1)+'% do planejado':'nenhuma transferência ainda')+'</div></div>';
     })()
    +'<div class="card"><div class="cl">Rendimentos</div><div class="cv" style="color:var(--blue)">'+fmt(rend)+'</div><div class="csub">'+sub(real.filter(function(l){return l.tipo==='Rendimento';}).length, rendPrev)+'</div></div>'
-   +'<div class="card"><div class="cl">Saldo do Mês</div><div class="cv '+(saldo>=0?'g':'r')+'">'+fmt(saldo)+'</div><div class="csub">'+(prev.length ? '<span style="color:var(--warn)">projetado '+fmt(saldoProj)+'</span>' : (saldo>=0?'✓ Positivo':'⚠ Negativo'))+'</div></div>';
+   +'<div class="card" id="gSaldoFormulaWrapCardOrc" style="position:relative;">'
+     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;"><div class="cl">Saldo do Mês</div><button id="gSaldoKpiGearBtnOrc" onclick="toggleGSaldoFormula(event)" title="Montar minha própria conta" style="background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:12px;padding:0;line-height:1;">⚙</button></div>'
+     +'<div class="cv '+(saldoFormula>=0?'g':'r')+'">'+(saldoFormula<0?'-':'')+fmt(Math.abs(saldoFormula))+'</div>'
+     +'<div class="csub">'+(prev.length ? '<span style="color:var(--warn)">projetado '+fmt(saldoFormula+recPrev+rendPrev-despPrev)+'</span>' : (saldoFormula>=0?'✓ Positivo':'⚠ Negativo'))+'</div>'
+   +'</div>';
 }
 
 
@@ -2961,11 +3009,49 @@ function onlyReal(lancs) {
   return (lancs||[]).filter(isRealizado);
 }
 
+// Aplica (apply=true) ou reverte (apply=false) o efeito de um lançamento sobre
+// o saldo armazenado de investimento/bem — usado quando a pessoa marca/desmarca
+// o "OK" de um Rendimento ou Transferência depois de já criado. Sem isso, desmarcar
+// não tirava o valor de onde ele já tinha sido somado.
+function _toggleLancBalanceEffect(user, l, apply) {
+  var sign = apply ? 1 : -1;
+  if (l.tipo==='Transferência') {
+    if (l.destTipo==='invest') {
+      var di=(user.investimentos||[]).findIndex(function(i){return i.id===l.destRef;});
+      if(di>=0) user.investimentos[di].valor = Math.max(0,(user.investimentos[di].valor||0)+sign*l.valor);
+    }
+    if (l.origemTipo==='invest') {
+      var oi=(user.investimentos||[]).findIndex(function(i){return i.id===l.origemRef;});
+      if(oi>=0) user.investimentos[oi].valor = Math.max(0,(user.investimentos[oi].valor||0)-sign*l.valor);
+    }
+    if (l.destTipo==='bensMov'||l.destTipo==='bensImov') {
+      var bd=(user[l.destTipo]||[]).find(function(b){return b.id===l.destRef;});
+      if(bd) bd.valor = Math.max(0,(bd.valor||0)+sign*l.valor);
+    }
+    if (l.origemTipo==='bensMov'||l.origemTipo==='bensImov') {
+      var bo=(user[l.origemTipo]||[]).find(function(b){return b.id===l.origemRef;});
+      if(bo) bo.valor = Math.max(0,(bo.valor||0)-sign*l.valor);
+    }
+  } else if (l.tipo==='Rendimento') {
+    if (l.rendInvestId) {
+      var ri=(user.investimentos||[]).findIndex(function(i){return i.id===l.rendInvestId;});
+      if(ri>=0) user.investimentos[ri].valor = Math.max(0,(user.investimentos[ri].valor||0)+sign*l.valor);
+    }
+    if (l.rendBemId && l.rendBemField) {
+      var rb=(user[l.rendBemField]||[]).find(function(b){return b.id===l.rendBemId;});
+      if(rb) rb.valor = Math.max(0,(rb.valor||0)+sign*l.valor);
+    }
+  }
+}
+
 function toggleRealizado(id) {
   var user = getUser(CU.id);
   var l = (user.lancamentos||[]).find(function(x){ return x.id===id; });
   if (!l) return;
-  l.realizado = !isRealizado(l);
+  var estavaRealizado = isRealizado(l);
+  l.realizado = !estavaRealizado;
+  // Virou "OK" agora → aplica o efeito no saldo. Virou "previsto" agora → reverte.
+  _toggleLancBalanceEffect(user, l, !estavaRealizado);
   saveUser(user); CU = getUser(user.id);
   rOrcFull();
 }
@@ -3262,7 +3348,16 @@ function openLancModal(editId, skipEscopoCheck) {
         if (_chkExclInvEdit) _chkExclInvEdit.checked = !!l.excluirDoInvestido;
       } else {
         if (l.cat) document.getElementById('lCat').value = l.cat;
-        if (l.conta) document.getElementById('lConta').value = l.conta;
+        if (l.conta) {
+          // Rendimento numa conta bancária simples guarda só o nome puro (sem
+          // prefixo), mas as opções do select usam "conta:Nome" — se não tiver
+          // nenhum outro vínculo (projeto/invest/bem), é conta bancária mesmo.
+          var contaParaRestaurar = l.conta;
+          if (l.tipo === 'Rendimento' && !l.rendProjetoId && !l.rendInvestId && !l.rendBemId && contaParaRestaurar.indexOf(':') === -1) {
+            contaParaRestaurar = 'conta:' + contaParaRestaurar;
+          }
+          document.getElementById('lConta').value = contaParaRestaurar;
+        }
         if (l.tipo === 'Saída') {
           // Garante que as opções já existem antes de selecionar — não dá pra
           // confiar no setTimeout(50ms) lá de cima, que pode rodar depois deste.
@@ -3410,7 +3505,11 @@ function saveLanc() {
       if (_oldRend) _reverseLancEffects(user, _oldRend);
     }
     var contaVal = baseLanc.conta||'';
-    if (contaVal.indexOf('projeto:')===0) {
+    if (contaVal.indexOf('conta:')===0) {
+      // Conta bancária normal: guarda só o nome puro, sem prefixo — é assim que
+      // saldoConta() e o resto do sistema esperam encontrar o campo "conta".
+      baseLanc.conta = contaVal.replace('conta:','');
+    } else if (contaVal.indexOf('projeto:')===0) {
       var pjId = contaVal.replace('projeto:','');
       baseLanc.conta = 'projeto:'+pjId;
       baseLanc.rendProjetoId = pjId;
@@ -5752,6 +5851,28 @@ function rCli() {
   grid.innerHTML=html;
 }
 
+function togglePrivacidadeGeral() {
+  var user = getUser(CU.id);
+  user.privacidadeGeral = !user.privacidadeGeral;
+  saveUser(user); CU = getUser(user.id);
+  updatePrivacidadeGeralBtn();
+  alert(user.privacidadeGeral
+    ? 'Privacidade ativada. A partir de agora, ninguém (nem o administrador) consegue ver seus dados até você desativar.'
+    : 'Privacidade desativada. O administrador voltou a poder visualizar seus dados normalmente.');
+}
+function updatePrivacidadeGeralBtn() {
+  var btn = document.getElementById('btnPrivacidadeGeral');
+  if (!btn || !CU) return;
+  var user = getUser(CU.id);
+  if (user.privacidadeGeral) {
+    btn.textContent = '🔓 Desativar Privacidade';
+    btn.style.background = 'var(--red-dim)'; btn.style.borderColor = 'var(--red)'; btn.style.color = 'var(--red)';
+  } else {
+    btn.textContent = '🔒 Ativar Privacidade';
+    btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = '';
+  }
+}
+
 function impersonar(id) {
   var u = getDB().users.find(function(x){return x.id===id;});
   if (!u) return;
@@ -7730,7 +7851,12 @@ function calcAportadoProjeto(user, pjId) {
     .filter(function(l){ return l.projetoId === pjId && l.tipo === 'Saída' && isRealizado(l); })
     .reduce(function(s,l){ return s + Math.abs(l.valor); }, 0);
   // From project-specific movements (rendimentos + transfers)
-  var extra = movs.filter(function(m){ return m.projetoId === pjId; })
+  var extra = movs.filter(function(m){
+      if (m.projetoId !== pjId) return false;
+      if (!m.lancId) return true; // registrado direto, sem lançamento — sempre conta
+      var lancVinc = (user.lancamentos||[]).find(function(l){ return l.id===m.lancId; });
+      return !lancVinc || isRealizado(lancVinc); // lançamento desmarcado como OK não conta mais
+    })
     .reduce(function(s,m){
       if (m.tipo === 'rendimento') return s + m.valor;
       if (m.tipo === 'transf_in')  return s + m.valor;
@@ -8015,6 +8141,7 @@ function _getHistItems(user, kind, id) {
   }
   (user.lancamentos||[]).forEach(function(l){
     if (l.tipo==='Transferência') {
+      if (!isRealizado(l)) return; // não confirmada ainda — não conta
       var origemLabelL = _resolveEntityName(user, l.origemTipo, l.origemRef);
       var destLabelL    = _resolveEntityName(user, l.destTipo, l.destRef);
       if (kind==='projeto' && l.destTipo==='projeto' && l.destRef===id)
@@ -8026,9 +8153,11 @@ function _getHistItems(user, kind, id) {
       if (kind==='invest' && l.origemTipo==='invest' && l.origemRef===id)
         items.push({ data:l.data, tipo:'transferencia', saida:true,  valor:l.valor, desc:l.desc, origemLabel:origemLabelL, destLabel:destLabelL, source:'lanc', lancId:l.id });
     } else if (l.tipo==='Rendimento') {
+      if (!isRealizado(l)) return; // não confirmado ainda — não conta no histórico
       if (kind==='projeto' && l.rendProjetoId===id) items.push({ data:l.data, tipo:'rendimento', saida:false, valor:l.valor, desc:l.desc, source:'lanc', lancId:l.id });
       if (kind==='invest'  && l.rendInvestId===id)  items.push({ data:l.data, tipo:'rendimento', saida:false, valor:l.valor, desc:l.desc, source:'lanc', lancId:l.id });
     } else if (l.tipo==='Saída' && kind==='projeto' && l.projetoId===id) {
+      if (!isRealizado(l)) return; // não confirmada ainda — não conta no histórico do projeto
       items.push({ data:l.data, tipo:'despesa', saida:true, valor:l.valor, desc:l.desc, source:'lanc', lancId:l.id });
     }
   });
