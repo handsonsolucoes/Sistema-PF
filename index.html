@@ -1375,6 +1375,13 @@ button:disabled, input:disabled, select:disabled { opacity:.45;cursor:not-allowe
         <div><h1 class="pt">Cadastros</h1><p class="psub">Categorias e contas — refletem em todo o sistema</p></div>
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-size:10px;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;">Período</span>
+          <select id="cfgMesInicial" onchange="saveCfgAnos()" title="Mês em que você começou a usar o sistema — baliza o início dos gráficos e saldos"
+            style="padding:5px 6px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:12px;outline:none;">
+            <option value="0">Jan</option><option value="1">Fev</option><option value="2">Mar</option>
+            <option value="3">Abr</option><option value="4">Mai</option><option value="5">Jun</option>
+            <option value="6">Jul</option><option value="7">Ago</option><option value="8">Set</option>
+            <option value="9">Out</option><option value="10">Nov</option><option value="11">Dez</option>
+          </select>
           <input type="number" id="cfgAnoInicial" min="2020" max="2040"
             onchange="saveCfgAnos()"
             style="width:70px;padding:5px 8px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:12px;outline:none;text-align:center;">
@@ -1766,7 +1773,7 @@ button:disabled, input:disabled, select:disabled { opacity:.45;cursor:not-allowe
     </div>
     <div class="ir c2">
       <div class="ig"><label>Descrição</label><input type="text" id="lDesc" placeholder="Descreva..."></div>
-      <div class="ig"><label>Valor (R$)</label><input type="text" inputmode="decimal" id="lValor" placeholder="R$ 0,00" oninput="maskMoeda(this)"></div>
+      <div class="ig"><label>Valor (R$) <button type="button" id="lValorSignBtn" onclick="toggleSinalValor()" title="Alternar entre positivo e negativo (útil pra rendimento negativo, por exemplo)" style="display:none;background:var(--s2);border:1px solid var(--brd2);border-radius:4px;color:var(--mu);font-size:10px;font-weight:700;padding:1px 6px;cursor:pointer;margin-left:4px;">+/−</button></label><input type="text" inputmode="decimal" id="lValor" placeholder="R$ 0,00" oninput="maskMoeda(this)"></div>
     </div>
     <div id="catContaRow" class="ir c2">
       <div class="ig"><label>Categoria</label><select id="lCat"></select></div>
@@ -1949,6 +1956,21 @@ function fmt(v) { return 'R$ ' + (v||0).toLocaleString('pt-BR',{minimumFractionD
 // Formata em tempo real como "R$ 1.234,56" (dígitos preenchem da direita,
 // como em app bancário). parseMoeda() converte de volta para número puro.
 // ══════════════════════════════════════════════════════
+// Alterna o sinal do valor sem depender do teclado numérico do celular mostrar
+// a tecla de "-" (o inputmode="decimal" costuma escondê-la). Útil pra registrar
+// um rendimento negativo (prejuízo), por exemplo.
+function toggleSinalValor() {
+  var el = document.getElementById('lValor');
+  if (!el) return;
+  var atual = parseMoeda(el.value);
+  if (atual === 0 && el.value.trim().charAt(0) !== '-') {
+    // Campo vazio/zerado: só alterna o estado "negativo" pra já digitar direto com o sinal
+    el.value = el.value.trim().charAt(0) === '-' ? '' : '-';
+    return;
+  }
+  setMoedaValue('lValor', -atual);
+}
+
 function maskMoeda(el) {
   var neg = el.value.trim().charAt(0) === '-';
   var digits = el.value.replace(/\D/g, '');
@@ -2322,8 +2344,10 @@ function saldoConta(user, contaNome, upToMonth, upToYear) {
 function saveCfgAnos() {
   var user = getUser(CU.id);
   if (!user.config) user.config = {};
+  var mesIni = parseInt(document.getElementById('cfgMesInicial').value);
   var ini = parseInt(document.getElementById('cfgAnoInicial').value);
   var fim = parseInt(document.getElementById('cfgAnoFinal').value);
+  if (!isNaN(mesIni)) user.config.mesInicial = mesIni;
   if (ini) user.config.anoInicial = ini;
   if (fim && fim >= (ini||ini)) user.config.anoFinal = fim;
   saveUser(user); CU = getUser(user.id);
@@ -2331,6 +2355,9 @@ function saveCfgAnos() {
   populateAnoSel('orcAnoSel');
   populateAnoSel('gAno');
   populateAnoSel('alocAnoSel');
+  // Recalcula os gráficos/saldos que usam o início do período como baliza
+  try { rGestao(); } catch(e) {}
+  try { rAloc(); } catch(e) {}
 }
 
 function getAnoRange() {
@@ -2365,8 +2392,10 @@ function loadCfgAnos() {
   var user = CU ? getUser(CU.id) : null;
   var cfg  = user && user.config ? user.config : {};
   var now  = new Date().getFullYear();
+  var mesEl = document.getElementById('cfgMesInicial');
   var iniEl = document.getElementById('cfgAnoInicial');
   var fimEl = document.getElementById('cfgAnoFinal');
+  if (mesEl) mesEl.value = cfg.mesInicial || 0;
   if (iniEl) iniEl.value = cfg.anoInicial || now;
   if (fimEl) fimEl.value = cfg.anoFinal   || now;
 }
@@ -3167,6 +3196,13 @@ function onTipoChange() {
   document.getElementById('catContaRow').style.display = isT ? 'none' : 'grid';
   document.getElementById('transfOpts').style.display = isT ? 'block' : 'none';
   document.getElementById('saidaOpts').style.display = t==='Saída' ? 'block' : 'none';
+  var signBtn = document.getElementById('lValorSignBtn');
+  if (signBtn) signBtn.style.display = t==='Rendimento' ? 'inline-block' : 'none';
+  if (t!=='Rendimento' && document.getElementById('lValor').value.trim().charAt(0)==='-') {
+    // Trocou de tipo com valor negativo digitado — normaliza pra positivo, já
+    // que só Rendimento faz sentido ter prejuízo (valor negativo).
+    setMoedaValue('lValor', Math.abs(parseMoeda(document.getElementById('lValor').value)));
+  }
   if (!isT) {
     var cats = t==='Entrada'?(user.catEntrada||[]):t==='Saída'?(user.catSaida||[]):t==='Rendimento'?(user.catRendimento||[]):[];
     var catOpts = cats.length ? cats.map(function(c){ return '<option value="'+c+'">'+getCatIcon(user,c)+' '+c+'</option>'; }).join('') : '<option>— Sem categorias —</option>';
@@ -4491,11 +4527,18 @@ function rGestao() {
   var nowM2 = nowDate.getMonth();
   var nowY2 = nowDate.getFullYear();
 
-  // Meses visíveis: até o mês vigente (não mostra meses futuros vazios)
+  // Meses visíveis: até o mês vigente (não mostra meses futuros vazios) e a
+  // partir do mês/ano configurado em Cadastros como início de uso do sistema.
+  var _cfgInicio = (user.config) || {};
+  var _mesInicioCfg = _cfgInicio.mesInicial || 0;
+  var _anoInicioCfg = _cfgInicio.anoInicial;
   var visibleMonths = MN.map(function(_,i){return i;}).filter(function(m){
-    if (gAnoVal < nowY2) return true;   // ano passado: mostra tudo
-    if (gAnoVal > nowY2) return false;  // ano futuro: nada ainda
-    return m <= nowM2;                  // ano atual: só até o mês corrente
+    if (gAnoVal < nowY2) { /* ano passado: mostra tudo, exceto antes do início configurado */ }
+    else if (gAnoVal > nowY2) return false;  // ano futuro: nada ainda
+    else if (m > nowM2) return false;        // ano atual: só até o mês corrente
+    if (_anoInicioCfg && gAnoVal === _anoInicioCfg && m < _mesInicioCfg) return false;
+    if (_anoInicioCfg && gAnoVal < _anoInicioCfg) return false;
+    return true;
   });
 
   var months = filterM === -1 ? visibleMonths : (visibleMonths.indexOf(filterM) >= 0 ? [filterM] : []);
@@ -5355,6 +5398,9 @@ function rAloc() {
   if (patrimCanvas) {
     var nowM3=new Date().getMonth(), nowY3=new Date().getFullYear();
     var _eM=(ALOC_YEAR<nowY3)?12:(ALOC_YEAR>nowY3?0:nowM3+1);
+    var _cfgIni2 = user.config || {};
+    var _sM = (_cfgIni2.anoInicial && ALOC_YEAR===_cfgIni2.anoInicial) ? (_cfgIni2.mesInicial||0) : 0;
+    if (_cfgIni2.anoInicial && ALOC_YEAR < _cfgIni2.anoInicial) _eM = _sM; // ano antes do início: nada a mostrar
     var isLine=_patrimChartType==='line';
     var _MS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     var _filtAcum = getPatrimFilterContas();
@@ -5363,7 +5409,8 @@ function rAloc() {
 
     function _inc(key) { return !_filtAcum || _filtAcum.indexOf(key) >= 0; }
 
-    var acumData = Array.from({length:_eM}, function(_,m) {
+    var acumData = Array.from({length:Math.max(0,_eM-_sM)}, function(_,idx) {
+      var m = idx + _sM;
       var total = 0;
       if (_patrimMods.contas)  contas.forEach(function(c){ if(_inc(c.nome)) total += Math.max(0,saldoConta(user,c.nome,m,ALOC_YEAR)); });
       // Projetos: historical — sum only transactions up to month m
@@ -5393,7 +5440,7 @@ function rAloc() {
     chartPatrim = new Chart(patrimCanvas.getContext('2d'), {
       type: isLine ? 'line' : 'bar',
       data:{
-        labels: _MS.slice(0,_eM),
+        labels: _MS.slice(_sM,_eM),
         datasets:[{
           label:'Patrimônio Total',
           data: acumData,
@@ -5499,10 +5546,14 @@ function rAloc() {
       alocTb.innerHTML='<tr><td colspan="14"><div class="empty"><div class="ei">🏦</div><p>Nenhuma conta cadastrada — acesse Cadastros</p></div></td></tr>';
     } else {
       var nowM2=new Date().getMonth(), nowY2=new Date().getFullYear();
+      var _cfgIni3 = user.config || {};
       var _visM=Array.from({length:12},function(_,i){return i;}).filter(function(m){
-        if(ALOC_YEAR<nowY2) return true;
-        if(ALOC_YEAR>nowY2) return false;
-        return m<=nowM2;
+        if(ALOC_YEAR<nowY2) { /* segue pra checagem de início abaixo */ }
+        else if(ALOC_YEAR>nowY2) return false;
+        else if(m>nowM2) return false;
+        if (_cfgIni3.anoInicial && ALOC_YEAR===_cfgIni3.anoInicial && m<(_cfgIni3.mesInicial||0)) return false;
+        if (_cfgIni3.anoInicial && ALOC_YEAR<_cfgIni3.anoInicial) return false;
+        return true;
       });
       // Apply same conta filter
       var _tblContas = _filtContas ? contas.filter(function(c){return _filtContas.indexOf(c.nome)>=0 || _filtContas.some(function(k){return k==='conta:'+c.nome;});}) : contas;
