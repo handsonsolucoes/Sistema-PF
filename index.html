@@ -1380,7 +1380,7 @@ button:disabled, input:disabled, select:disabled { opacity:.45;cursor:not-allowe
         <div><h1 class="pt">Cadastros</h1><p class="psub">Categorias e contas — refletem em todo o sistema</p></div>
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-size:10px;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;">Período</span>
-          <select id="cfgMesInicial" onchange="saveCfgAnos()" title="Mês em que você começou a usar o sistema — baliza o início dos gráficos e saldos"
+          <select id="cfgMesInicial" onchange="onCfgMesInicialChange()" title="Mês em que você começou a usar o sistema — baliza o início dos gráficos e saldos"
             style="padding:5px 6px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:12px;outline:none;">
             <option value="0">Jan</option><option value="1">Fev</option><option value="2">Mar</option>
             <option value="3">Abr</option><option value="4">Mai</option><option value="5">Jun</option>
@@ -1396,6 +1396,7 @@ button:disabled, input:disabled, select:disabled { opacity:.45;cursor:not-allowe
             style="width:70px;padding:5px 8px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:12px;outline:none;text-align:center;">
         </div>
       </div>
+      <div style="font-size:11px;color:var(--mu);margin:-16px 0 16px;">O mês e o primeiro ano juntos definem quando o sistema começa a mostrar dados nos gráficos — ex: "Jul" + "2026" = os gráficos só começam em julho de 2026.</div>
       <p class="cad-sl">Categorias e Contas</p>
       <div class="cad-grid" id="cadGridCats">
         <div class="cad-col">
@@ -1590,12 +1591,16 @@ button:disabled, input:disabled, select:disabled { opacity:.45;cursor:not-allowe
       </div>
 
       <!-- Filtros da Visão — ficam fora das colunas, acima de todo o kanban -->
-      <div id="voarVisaoFiltros" class="voar-visao-filtros" style="gap:8px;margin-bottom:14px;max-width:420px;">
+      <div id="voarVisaoFiltros" class="voar-visao-filtros" style="gap:8px;margin-bottom:14px;max-width:660px;align-items:center;">
         <select id="voarVisaoFiltroTipo" onchange="rVoar()" style="flex:1;min-width:0;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:12px;padding:7px 10px;outline:none;">
           <option value="all">Todos os tipos</option>
         </select>
         <select id="voarVisaoFiltroPrazo" onchange="rVoar()" style="flex:1;min-width:0;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:12px;padding:7px 10px;outline:none;">
           <option value="all">Todos os prazos</option>
+        </select>
+        <div style="width:1px;height:22px;background:var(--brd2);flex-shrink:0;"></div>
+        <select id="voarVisaoFiltroEspecifica" onchange="rVoar()" style="flex:1.6;min-width:0;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-size:12px;padding:7px 10px;outline:none;">
+          <option value="all">🎯 Focar em uma visão</option>
         </select>
       </div>
 
@@ -1643,9 +1648,34 @@ button:disabled, input:disabled, select:disabled { opacity:.45;cursor:not-allowe
             <div class="voar-col-name">Realização</div>
             <div class="voar-col-sub">O que você já conquistou</div>
           </div>
-          <button class="bp" style="width:100%;margin-bottom:10px;" onclick="openVoarModal('realiz')">+ Registrar Marco</button>
-          <div id="voar-kpis" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
-          <div id="voar-realizacoes" class="voar-col-list"></div>
+          <div class="voar-col-list" style="gap:12px;">
+            <div id="voar-kpis" style="display:flex;flex-direction:column;gap:6px;"></div>
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                <div style="font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;">Conquistas não planejadas</div>
+                <button onclick="openVoarModal('realiz')" title="Registrar uma conquista que não veio de uma Ação planejada" style="background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:15px;padding:0;line-height:1;">+</button>
+              </div>
+              <div id="voar-realizacoes" style="display:flex;flex-direction:column;gap:6px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal: lista de Ações Atingidas, aberto pelo ícone de olho -->
+        <div id="mAcoesAtingidas" class="mo" style="display:none;">
+          <div class="modal" style="width:440px;position:relative;">
+            <button onclick="closeModal('mAcoesAtingidas')" title="Fechar" style="position:absolute;top:16px;right:16px;background:transparent;border:none;color:var(--mu);font-size:20px;line-height:1;cursor:pointer;padding:4px;">×</button>
+            <div class="mt2" id="mAcoesAtingidasTit">Ações Atingidas</div>
+            <div id="mAcoesAtingidasBody" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;"></div>
+          </div>
+        </div>
+
+        <!-- Modal: texto completo de uma Visão/Estratégia/Ação, pra quando o texto é longo demais pro card -->
+        <div id="mTextoVoar" class="mo" style="display:none;">
+          <div class="modal" style="width:420px;max-height:80vh;display:flex;flex-direction:column;position:relative;">
+            <button onclick="closeModal('mTextoVoar')" title="Fechar" style="position:absolute;top:16px;right:16px;background:transparent;border:none;color:var(--mu);font-size:20px;line-height:1;cursor:pointer;padding:4px;">×</button>
+            <div class="mt2" id="mTextoVoarTit">Texto completo</div>
+            <div id="mTextoVoarBody" style="font-size:13.5px;color:var(--tx);line-height:1.6;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;overflow-y:auto;flex:1;"></div>
+          </div>
         </div>
 
       </div>
@@ -2026,7 +2056,7 @@ function getCatIcon(user, cat) {
 function getDB() {
   var raw = localStorage.getItem('finDB14');
   if (raw) return JSON.parse(raw);
-  var _defaultUser = JSON.parse('{"id": "u1", "login": "admin", "senha": "admin123", "nome": "Administrador", "role": "admin", "birthDate": "1994-05-15", "catEntrada": ["Sal\\u00e1rio", "Freelance", "B\\u00f4nus", "Reembolso"], "catSaida": ["Moradia", "Alimenta\\u00e7\\u00e3o", "Transporte", "Sa\\u00fade", "Lazer", "Educa\\u00e7\\u00e3o", "Assinaturas", "Compras", "Academia", "Pets"], "catRendimento": ["Renda Fixa", "Dividendos", "Bolsa de Valores"], "contas": [{"id": "ca1", "nome": "Nubank", "saldoInicial": 0}, {"id": "ca2", "nome": "Ita\\u00fa", "saldoInicial": 0}, {"id": "ca3", "nome": "Carteira", "saldoInicial": 0}], "transferencias": [], "catIcons": {}, "lancamentos": [], "orcamento": {}, "investimentos": [], "bensImov": [], "bensMov": [], "dividas": [], "projetos": [], "projetoMovs": [], "voar": {"visoes": [], "organizacao": [], "acoes": [], "realizacoes": []}, "futuroMeta": {}, "config": {"anoInicial": 2025, "anoFinal": 2028}}');
+  var _defaultUser = JSON.parse('{"id": "u1", "login": "admin", "senha": "admin123", "nome": "Administrador", "role": "admin", "birthDate": "1994-05-15", "catEntrada": ["Sal\\u00e1rio", "Freelance", "B\\u00f4nus", "Reembolso"], "catSaida": ["Moradia", "Alimenta\\u00e7\\u00e3o", "Transporte", "Sa\\u00fade", "Lazer", "Educa\\u00e7\\u00e3o", "Assinaturas", "Compras", "Academia", "Pets"], "catRendimento": ["Renda Fixa", "Dividendos", "Bolsa de Valores"], "contas": [{"id": "ca1", "nome": "Nubank", "saldoInicial": 0}, {"id": "ca2", "nome": "Ita\\u00fa", "saldoInicial": 0}, {"id": "ca3", "nome": "Carteira", "saldoInicial": 0}], "transferencias": [], "catIcons": {}, "lancamentos": [], "orcamento": {}, "investimentos": [], "bensImov": [], "bensMov": [], "dividas": [], "projetos": [], "projetoMovs": [], "voar": {"visoes": [], "organizacao": [], "acoes": [], "realizacoes": []}, "futuroMeta": {}, "config": {"anoInicial": 2026, "anoFinal": 2028}}');
   // Cliente de exemplo, pra função "Clientes" (visualizar/impersonar/privacidade) ser demonstrável
   function _defaultClientUser() {
     return {
@@ -2038,7 +2068,7 @@ function getDB() {
       orcamento:{},
       investimentos:[], bensImov:[], bensMov:[], dividas:[],
       projetos:[], projetoMovs:[], lancamentosLiberados:false,
-      voar:{visoes:[],organizacao:[],acoes:[],realizacoes:[]}, futuroMeta:{}, config:{anoInicial:2025,anoFinal:2028}
+      voar:{visoes:[],organizacao:[],acoes:[],realizacoes:[]}, futuroMeta:{}, config:{anoInicial:2026,anoFinal:2028}
     };
   }
   var db = { users: [_defaultUser, _defaultClientUser()] };
@@ -2368,6 +2398,18 @@ function saldoConta(user, contaNome, upToMonth, upToYear) {
 // ══════════════════════════════════════════════════════
 
 // ══ CONFIGURAÇÃO TEMPORAL ══
+// Se a pessoa só mexe no mês (esquecendo do ano), e o "Ano Inicial" ainda
+// está num valor passado/desatualizado, ajusta pro ano atual automaticamente —
+// senão a restrição de início nunca bate com o ano que ela realmente está vendo.
+function onCfgMesInicialChange() {
+  var anoEl = document.getElementById('cfgAnoInicial');
+  var anoAtual = new Date().getFullYear();
+  if (anoEl && parseInt(anoEl.value) < anoAtual) {
+    anoEl.value = anoAtual;
+  }
+  saveCfgAnos();
+}
+
 function saveCfgAnos() {
   var user = getUser(CU.id);
   if (!user.config) user.config = {};
@@ -7507,12 +7549,22 @@ function setVoarMobileTab(tab) {
   if (filtros) filtros.classList.toggle('voar-filtros-hidden-mobile', tab !== 'v');
 }
 
-var VOAR_TAGS = ['Familia','Liberdade','Seguranca','Saude','Crescimento','Legado','Conforto'];
-var VOAR_TAG_COLORS = {
-  Familia:'#f472b6', Liberdade:'#60a5fa', Seguranca:'#34d399', Saude:'#fb7185',
-  Crescimento:'#a78bfa', Legado:'#fbbf24', Conforto:'#22d3ee'
+var VOAR_PILARES = ['Saúde','Tempo','Dinheiro','Relacionamentos','Legado'];
+var VOAR_PILAR_COLORS = {
+  Saúde:'#a78bfa', Dinheiro:'#34d399', Tempo:'#60a5fa', Relacionamentos:'#f43f5e', Legado:'#fbbf24'
 };
-var VOAR_ACAOCAT = ['Orçamento','Dívidas','Investimento','Conta bancária','Hábito','Reunião','Outro'];
+var VOAR_PILAR_ICONS = {
+  Saúde:'🩺', Dinheiro:'💰', Tempo:'⏳', Relacionamentos:'🤝', Legado:'🌳'
+};
+// Cada pilar se desdobra em 2 subníveis — é isso que a Ação escolhe (o pilar em
+// si é escolhido lá na Visão; a Ação vai um nível mais fundo).
+var VOAR_SUBNIVEIS = {
+  Saúde: ['Corpo','Mente'],
+  Dinheiro: ['Defesa','Ataque'],
+  Tempo: ['Eficiência','Liberdade'],
+  Relacionamentos: ['Núcleo','Rede'],
+  Legado: ['Sangue','Mundo']
+};
 
 function rVoar() {
   var user = getUser(CU.id);
@@ -7532,11 +7584,10 @@ function rVoar() {
       + 'onmouseenter="this.style.color=\'var(--tx)\'" onmouseleave="this.style.color=\'var(--mu)\'">✎</button>';
   }
 
-  // ── Filtros da coluna Visão: popula as opções (tipo = tags já usadas; prazo = prazos já usados)
+  // ── Filtros da coluna Visão: popula as opções (tipo = pilares; prazo = prazos já usados)
   var tipoSelEl = document.getElementById('voarVisaoFiltroTipo');
   if (tipoSelEl && tipoSelEl.dataset.built !== '1') {
-    var tiposUsados = VOAR_TAGS.slice();
-    tipoSelEl.innerHTML = '<option value="all">Todos os tipos</option>' + tiposUsados.map(function(t){ return '<option value="'+t+'">'+t+'</option>'; }).join('');
+    tipoSelEl.innerHTML = '<option value="all">Todos os pilares</option>' + VOAR_PILARES.map(function(t){ return '<option value="'+t+'">'+(VOAR_PILAR_ICONS[t]||'')+' '+t+'</option>'; }).join('');
     tipoSelEl.dataset.built = '1';
   }
   var prazoSelEl = document.getElementById('voarVisaoFiltroPrazo');
@@ -7546,50 +7597,77 @@ function rVoar() {
     prazoSelEl.innerHTML = '<option value="all">Todos os prazos</option>' + prazosUsados.map(function(p){ return '<option value="'+p+'">'+p+'</option>'; }).join('');
     prazoSelEl.value = prazosUsados.indexOf(valorPrazoAtual) >= 0 ? valorPrazoAtual : 'all';
   }
+  var especSelEl = document.getElementById('voarVisaoFiltroEspecifica');
+  if (especSelEl) {
+    var valorEspecAtual = especSelEl.value || 'all';
+    especSelEl.innerHTML = '<option value="all">🎯 Focar em uma visão</option>' + v.visoes.map(function(vi){ return '<option value="'+vi.id+'">'+vi.texto.slice(0,50)+'</option>'; }).join('');
+    especSelEl.value = v.visoes.some(function(vi){return vi.id===valorEspecAtual;}) ? valorEspecAtual : 'all';
+  }
   var filtroTipo = tipoSelEl ? tipoSelEl.value : 'all';
   var filtroPrazo = prazoSelEl ? prazoSelEl.value : 'all';
+  var filtroEspecifica = especSelEl ? especSelEl.value : 'all';
+
+  // Compatibilidade: visões antigas tinham "tag" (uma só); agora é "tags" (várias)
+  function _tagsDe(vi) { return vi.tags || (vi.tag ? [vi.tag] : []); }
+
+  // Conjunto único de visões filtradas — usado por TODAS as colunas (V, O, A e R),
+  // pra quando a pessoa escolhe uma visão específica (ou pilar/prazo), tudo na tela
+  // passa a mostrar só o que está debaixo daquela visão.
+  var visoesFiltradas = v.visoes.filter(function(vi){
+    if (filtroEspecifica!=='all') return vi.id===filtroEspecifica;
+    var tags = _tagsDe(vi);
+    return (filtroTipo==='all' || tags.indexOf(filtroTipo)>=0) && (filtroPrazo==='all' || vi.prazo===filtroPrazo);
+  });
+  var visoesFiltradasIds = visoesFiltradas.map(function(vi){ return vi.id; });
+  var filtroVisaoAtivo = filtroTipo!=='all' || filtroPrazo!=='all' || filtroEspecifica!=='all';
 
   // ── V: Visões
   var vEl = document.getElementById('voar-visoes');
   if (vEl) {
-    var visoesFiltradas = v.visoes.filter(function(vi){
-      return (filtroTipo==='all' || vi.tag===filtroTipo) && (filtroPrazo==='all' || vi.prazo===filtroPrazo);
-    });
     if (!visoesFiltradas.length) {
       vEl.innerHTML = '<div class="empty"><div class="ei">🎯</div><p>'+(v.visoes.length?'Nenhuma visão bate com esse filtro.':'Nenhuma visão cadastrada ainda.<br>Comece definindo o que você quer para sua vida.')+'</p></div>';
     } else {
       vEl.innerHTML = visoesFiltradas.map(function(vi) {
-        var cor = VOAR_TAG_COLORS[vi.tag] || 'var(--blue)';
-        return '<div style="background:var(--s1);border:1px solid var(--brd);border-left:3px solid '+cor+';border-radius:var(--rs);padding:9px 11px;box-shadow:var(--sh-sm);">'
+        var tags = _tagsDe(vi);
+        var corPrincipal = VOAR_PILAR_COLORS[tags[0]] || 'var(--blue)';
+        var concluidaV = !!vi.concluida;
+        var badges = tags.map(function(t){
+          var c = VOAR_PILAR_COLORS[t]||'var(--blue)';
+          return '<span style="font-size:9px;font-weight:600;background:'+c+'22;color:'+c+';padding:1px 6px;border-radius:4px;margin-right:3px;">'+(VOAR_PILAR_ICONS[t]||'')+' '+t+'</span>';
+        }).join('');
+        return '<div style="background:var(--s1);border:1px solid var(--brd);border-left:3px solid '+(concluidaV?'var(--green)':corPrincipal)+';border-radius:var(--rs);padding:9px 11px;box-shadow:var(--sh-sm);">'
           +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;">'
           +'<div style="flex:1;">'
-          +'<div style="font-size:12px;font-weight:600;color:var(--tx);line-height:1.4;margin-bottom:5px;">'+vi.texto+'</div>'
-          +(vi.tag ? '<span style="font-size:9px;font-weight:600;background:'+cor+'22;color:'+cor+';padding:1px 6px;border-radius:4px;text-transform:uppercase;">'+vi.tag+'</span>' : '')
+          +'<div onclick="mostrarTextoVoar(\'visao\',\''+vi.id+'\')" title="Clique para ler completo" style="font-size:12px;font-weight:600;color:var(--tx);line-height:1.4;margin-bottom:5px;cursor:pointer;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;'+(concluidaV?'text-decoration:line-through;opacity:.65;':'')+'">'+(concluidaV?'🏆 ':'')+vi.texto+'</div>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:3px;">'+badges+'</div>'
           +'</div>'
           +'<div style="display:flex;gap:0;flex-shrink:0;">'+editBtn('visao', vi.id)+delBtn('visao', vi.id)+'</div>'
           +'</div>'
-          +(vi.prazo ? '<div style="margin-top:6px;font-size:10px;color:var(--mu);">📅 '+vi.prazo+'</div>' : '')
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">'
+          +(vi.prazo ? '<div style="font-size:10px;color:var(--mu);">📅 '+vi.prazo+'</div>' : '<div></div>')
+          +'<button onclick="toggleConcluirVisao(\''+vi.id+'\')" title="'+(concluidaV?'Desmarcar como alcançada':'Marcar como alcançada')+'" style="background:'+(concluidaV?'var(--green)':'var(--s2)')+';border:1px solid '+(concluidaV?'var(--green)':'var(--brd2)')+';color:'+(concluidaV?'#fff':'var(--mu)')+';border-radius:var(--rs);font-size:9.5px;padding:3px 7px;cursor:pointer;">'+(concluidaV?'✓ Alcançada':'Concluir')+'</button>'
+          +'</div>'
           +'</div>';
       }).join('');
     }
   }
 
-  // ── O: Organização (cada uma vinculada a uma Visão)
+  // ── O: Organização (cada uma vinculada a uma Visão) — sem prioridade nem % da renda,
+  // já que essas metas são 360° da vida, não só financeiras. Respeita o filtro de Visão.
   var oEl = document.getElementById('voar-orgs');
   if (oEl) {
-    if (!v.organizacao.length) {
-      oEl.innerHTML = '<div class="empty"><div class="ei">📋</div><p>Nenhuma estratégia definida.</p></div>';
+    var orgsFiltradas = v.organizacao.filter(function(o){ return !filtroVisaoAtivo || visoesFiltradasIds.indexOf(o.visaoId)>=0; });
+    if (!orgsFiltradas.length) {
+      oEl.innerHTML = '<div class="empty"><div class="ei">📋</div><p>'+(v.organizacao.length?'Nenhuma estratégia com esse filtro.':'Nenhuma estratégia definida.')+'</p></div>';
     } else {
-      var sorted = v.organizacao.slice().sort(function(a,b){return a.prioridade-b.prioridade;});
-      oEl.innerHTML = sorted.map(function(o,idx) {
+      oEl.innerHTML = orgsFiltradas.map(function(o) {
         var visaoPai = v.visoes.find(function(vi){ return vi.id === o.visaoId; });
-        var corPai = visaoPai ? (VOAR_TAG_COLORS[visaoPai.tag]||'var(--blue)') : 'var(--mu)';
+        var tagsPai = visaoPai ? _tagsDe(visaoPai) : [];
+        var corPai = tagsPai.length ? (VOAR_PILAR_COLORS[tagsPai[0]]||'var(--blue)') : 'var(--mu)';
         return '<div style="background:var(--s1);border:1px solid var(--brd);border-radius:var(--rs);padding:8px 11px;box-shadow:var(--sh-sm);">'
-          +'<div style="display:flex;align-items:center;gap:8px;">'
-          +'<div style="width:18px;height:18px;flex-shrink:0;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--gold);">'+(idx+1)+'</div>'
+          +'<div style="display:flex;align-items:flex-start;gap:8px;">'
           +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:12px;font-weight:600;color:var(--tx);">'+o.descricao+'</div>'
-          +(o.pct ? '<div style="font-size:10px;color:var(--mu);margin-top:1px;">'+o.pct+'% da renda</div>' : '')
+          +'<div onclick="mostrarTextoVoar(\'org\',\''+o.id+'\')" title="Clique para ler completo" style="font-size:12px;font-weight:600;color:var(--tx);cursor:pointer;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;">'+o.descricao+'</div>'
           +(visaoPai ? '<div style="font-size:9.5px;color:'+corPai+';margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">↳ '+visaoPai.texto+'</div>' : '<div style="font-size:9.5px;color:var(--warn);margin-top:2px;">⚠ sem visão vinculada</div>')
           +'</div>'
           +'<div style="display:flex;gap:0;flex-shrink:0;">'+editBtn('org', o.id)+delBtn('org', o.id)+'</div>'
@@ -7599,24 +7677,30 @@ function rVoar() {
     }
   }
 
-  // ── A: Ações (metas), cada uma vinculada a uma Organização
+  // ── A: Ações (metas), cada uma vinculada a uma Organização — respeita o filtro de Visão
+  function _acaoPassaFiltroVisao(a) {
+    if (!filtroVisaoAtivo) return true;
+    var org = v.organizacao.find(function(o){ return o.id===a.organizacaoId; });
+    if (!org) return false;
+    return visoesFiltradasIds.indexOf(org.visaoId) >= 0;
+  }
   var aEl = document.getElementById('voar-acoes');
   if (aEl) {
-    var filtro = (document.getElementById('voarAcaoFiltro')||{}).value || 'all';
-    var acoes = v.acoes.filter(function(a){ return filtro === 'all' || a.status === filtro; });
-    var statusColors = { pendente:'var(--warn)', andamento:'var(--blue)', concluido:'var(--green)' };
-    var statusLabels = { pendente:'Pendente', andamento:'Em andamento', concluido:'Concluída' };
+    var acoes = v.acoes.filter(_acaoPassaFiltroVisao);
     if (!acoes.length) {
-      aEl.innerHTML = '<div class="empty"><div class="ei">✅</div><p>Nenhuma meta'+(filtro!=='all'?' com esse status':'')+'.</p></div>';
+      aEl.innerHTML = '<div class="empty"><div class="ei">✅</div><p>'+(v.acoes.length?'Nenhuma meta com esse filtro.':'Nenhuma meta.')+'</p></div>';
     } else {
       aEl.innerHTML = acoes.map(function(a) {
         var done = a.status === 'concluido';
         var temMeta = (a.meta||0) > 0;
         var pctMeta = temMeta ? Math.min(100, Math.round((a.atual||0)/a.meta*100)) : 0;
         var orgPai = v.organizacao.find(function(o){ return o.id === a.organizacaoId; });
-        var advBtn = !done
-          ? '<button onclick="avancarAcao(\'' + a.id + '\')" title="Avançar status" style="background:var(--s2);border:1px solid var(--brd2);color:var(--tx);border-radius:var(--rs);font-size:10px;padding:3px 6px;cursor:pointer;">→</button>'
-          : '';
+        var pilarDaAcao = null;
+        if (a.categoria) {
+          for (var pk in VOAR_SUBNIVEIS) { if (VOAR_SUBNIVEIS[pk].indexOf(a.categoria) >= 0) { pilarDaAcao = pk; break; } }
+        }
+        var corCategoria = pilarDaAcao ? (VOAR_PILAR_COLORS[pilarDaAcao]||'var(--mu)') : 'var(--mu)';
+        var concluirBtn = '<button onclick="toggleConcluirAcao(\'' + a.id + '\')" title="'+(done?'Desmarcar como concluída':'Marcar como concluída')+'" style="background:'+(done?'var(--green)':'var(--s2)')+';border:1px solid '+(done?'var(--green)':'var(--brd2)')+';color:'+(done?'#fff':'var(--tx)')+';border-radius:var(--rs);font-size:10px;padding:3px 7px;cursor:pointer;">'+(done?'✓ Concluída':'Concluir')+'</button>';
         var progBtn = (temMeta && !done)
           ? '<button onclick="atualizarProgressoAcao(\'' + a.id + '\')" title="Atualizar progresso" style="background:var(--s2);border:1px solid var(--brd2);color:var(--gold);border-radius:var(--rs);font-size:10px;padding:3px 6px;cursor:pointer;">✎ R$</button>'
           : '';
@@ -7626,20 +7710,19 @@ function rVoar() {
             +'<div style="display:flex;justify-content:space-between;margin-top:3px;font-size:9.5px;color:var(--mu);"><span>'+fmt(a.atual||0)+' de '+fmt(a.meta)+'</span><span style="font-weight:600;color:'+(done?'var(--green)':'var(--gold)')+';">'+pctMeta+'%</span></div>'
             +'</div>'
           : '';
-        return '<div style="background:var(--s1);border:1px solid var(--brd);border-left:3px solid '+(statusColors[a.status]||'var(--brd)')+';border-radius:var(--rs);padding:8px 11px;box-shadow:var(--sh-sm);">'
+        return '<div style="background:var(--s1);border:1px solid var(--brd);border-left:3px solid '+(done?'var(--green)':corCategoria)+';border-radius:var(--rs);padding:8px 11px;box-shadow:var(--sh-sm);">'
           +'<div style="display:flex;align-items:flex-start;gap:6px;">'
           +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:12px;font-weight:500;color:var(--tx);'+(done?'text-decoration:line-through;opacity:.6;':'')+'">'+(done?'🏅 ':'')+a.descricao+'</div>'
+          +'<div onclick="mostrarTextoVoar(\'acao\',\''+a.id+'\')" title="Clique para ler completo" style="font-size:12px;font-weight:500;color:var(--tx);cursor:pointer;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;'+(done?'text-decoration:line-through;opacity:.6;':'')+'">'+(done?'🏅 ':'')+a.descricao+'</div>'
           +'<div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap;">'
-          +(a.categoria?'<span style="font-size:9.5px;color:var(--mu);">'+a.categoria+'</span>':'')
+          +(a.categoria?'<span style="font-size:9px;font-weight:600;background:'+corCategoria+'22;color:'+corCategoria+';padding:1px 6px;border-radius:4px;">'+(VOAR_PILAR_ICONS[pilarDaAcao]||'')+' '+a.categoria+'</span>':'')
           +(a.prazo?'<span style="font-size:9.5px;color:var(--mu);">📅 '+a.prazo+'</span>':'')
-          +'<span style="font-size:9.5px;font-weight:600;color:'+(statusColors[a.status]||'var(--mu)')+';">'+(statusLabels[a.status]||a.status)+'</span>'
           +'</div>'
           +(orgPai ? '<div style="font-size:9.5px;color:var(--mu);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">↳ '+orgPai.descricao+'</div>' : '<div style="font-size:9.5px;color:var(--warn);margin-top:2px;">⚠ sem organização vinculada</div>')
           +'</div>'
           +'<div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;align-items:flex-end;">'
           +'<div style="display:flex;gap:0;">'+editBtn('acao',a.id)+delBtn('acao',a.id)+'</div>'
-          +'<div style="display:flex;gap:3px;">'+progBtn+advBtn+'</div>'
+          +'<div style="display:flex;gap:3px;">'+progBtn+concluirBtn+'</div>'
           +'</div>'
           +'</div>'
           +barraHTML
@@ -7648,22 +7731,29 @@ function rVoar() {
     }
   }
 
-  // ── R: Realização
+  // ── R: Realização — respeita o filtro de Visão (pilar/prazo/específica) lá de cima:
+  // conta e lista só as ações cuja Visão (via Organização) passa no filtro.
+  var acoesConsideradas = v.acoes.filter(_acaoPassaFiltroVisao);
+  var acoesConcluidas = acoesConsideradas.filter(function(a){ return a.status==='concluido'; });
+  _voarAcoesAtingidasAtual = acoesConcluidas; // guardado pra o modal do ícone de olho usar
+
   var kpiEl = document.getElementById('voar-kpis');
   if (kpiEl) {
-    var total  = v.acoes.length;
-    var done2  = v.acoes.filter(function(a){return a.status==='concluido';}).length;
-    var marcos = v.realizacoes.length;
+    var total  = acoesConsideradas.length;
+    var done2  = acoesConcluidas.length;
     var pct    = total > 0 ? Math.round(done2/total*100) : 0;
+    var visoesConcluidasLista = visoesFiltradas.filter(function(vi){ return !!vi.concluida; });
+    var visoesConcluidasCount = visoesConcluidasLista.length;
+    _voarVisoesAlcancadasAtual = visoesConcluidasLista;
     kpiEl.innerHTML =
-      '<div class="card" style="padding:8px 11px;"><div class="cl" style="font-size:9px;margin-bottom:2px;">Ações Concluídas</div><div class="cv g" style="font-size:16px;">'+done2+' / '+total+'</div><div class="csub" style="font-size:9.5px;">'+pct+'% do plano</div></div>'
-      +'<div class="card" style="padding:8px 11px;"><div class="cl" style="font-size:9px;margin-bottom:2px;">Marcos Atingidos</div><div class="cv b" style="font-size:16px;">'+marcos+'</div><div class="csub" style="font-size:9.5px;">momentos registrados</div></div>';
+      '<div class="card" style="padding:8px 11px;"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="cl" style="font-size:9px;margin-bottom:2px;">Ações Concluídas</div><button onclick="abrirAcoesAtingidas()" title="Ver as ações atingidas" style="background:var(--s2);border:1px solid var(--brd2);border-radius:6px;color:var(--mu);cursor:pointer;font-size:12px;padding:2px 6px;line-height:1;">👁</button></div><div class="cv g" style="font-size:16px;">'+done2+' / '+total+'</div><div class="csub" style="font-size:9.5px;">'+pct+'% do plano'+(filtroVisaoAtivo?' (filtrado)':'')+'</div></div>'
+      +'<div class="card" style="padding:8px 11px;"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="cl" style="font-size:9px;margin-bottom:2px;">Visões Alcançadas</div><button onclick="abrirVisoesAlcancadas()" title="Ver as visões alcançadas" style="background:var(--s2);border:1px solid var(--brd2);border-radius:6px;color:var(--mu);cursor:pointer;font-size:12px;padding:2px 6px;line-height:1;">👁</button></div><div class="cv b" style="font-size:16px;">'+visoesConcluidasCount+' / '+visoesFiltradas.length+'</div><div class="csub" style="font-size:9.5px;">'+(filtroVisaoAtivo?'nesse filtro':'do total de visões')+'</div></div>';
   }
 
   var rEl = document.getElementById('voar-realizacoes');
   if (rEl) {
     if (!v.realizacoes.length) {
-      rEl.innerHTML = '<div class="empty"><div class="ei">🏆</div><p>Nenhum marco registrado ainda.</p></div>';
+      rEl.innerHTML = '<div class="empty" style="padding:14px 0;"><div class="ei" style="font-size:22px;">🏆</div><p style="font-size:11px;">Nenhuma conquista não planejada registrada.</p></div>';
     } else {
       var sorted2 = v.realizacoes.slice().reverse();
       var tipos = { conquista:'🏆', aprendizado:'💡', superacao:'💪', celebracao:'🎉' };
@@ -7687,49 +7777,62 @@ function openVoarModal(field, editId) {
   var user = getUser(CU.id);
   var voar = user.voar || {visoes:[],organizacao:[],acoes:[],realizacoes:[]};
   var isEdit = !!editId;
-  var titlesNovo = {'visao':'Nova Visão', 'org':'Nova Estratégia', 'acao':'Nova Meta', 'realiz':'Registrar Marco'};
-  var titlesEdit = {'visao':'Editar Visão', 'org':'Editar Estratégia', 'acao':'Editar Meta', 'realiz':'Editar Marco'};
+  var titlesNovo = {'visao':'Nova Visão', 'org':'Nova Estratégia', 'acao':'Nova Meta', 'realiz':'Registrar Conquista Não Planejada'};
+  var titlesEdit = {'visao':'Editar Visão', 'org':'Editar Estratégia', 'acao':'Editar Meta', 'realiz':'Editar Conquista'};
   document.getElementById('mVoarTit').textContent = (isEdit ? titlesEdit[field] : titlesNovo[field]) || 'Adicionar';
 
   var body = '';
   if (field === 'visao') {
     var vi = isEdit ? voar.visoes.find(function(x){return x.id===editId;}) : null;
+    var tagsAtuais = vi ? (vi.tags || (vi.tag ? [vi.tag] : [])) : [];
     body = '<div class="ig"><label>Descrição da visão</label><textarea id="vTxt" rows="3" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;resize:vertical;" placeholder="Ex: Quero me aposentar aos 60 anos sem depender de ninguém">'+(vi?vi.texto:'')+'</textarea></div>'
-      +'<div class="ir c2">'
       +'<div class="ig"><label>Prazo estimado</label><input type="text" id="vPrazo" value="'+(vi?vi.prazo||'':'')+'" placeholder="Ex: 2030 / 5 anos" style="width:100%;"></div>'
-      +'<div class="ig"><label>Categoria</label><select id="vTag" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"><option value="">Selecione</option>'+VOAR_TAGS.map(function(t){return'<option'+(vi&&vi.tag===t?' selected':'')+'>'+t+'</option>';}).join('')+'</select></div>'
-      +'</div>';
+      +'<div class="ig"><label>Quais pilares essa visão preenche? (toque para marcar um ou mais)</label>'
+      +'<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">'
+      +VOAR_PILARES.map(function(p){
+        var cor = VOAR_PILAR_COLORS[p];
+        var marcado = tagsAtuais.indexOf(p) >= 0;
+        return '<button type="button" class="vPilarChip" data-pilar="'+p+'" data-cor="'+cor+'" data-selected="'+(marcado?'1':'0')+'" onclick="toggleVPilarChip(this)" '
+          +'style="display:flex;align-items:center;gap:5px;border-radius:20px;padding:7px 12px;cursor:pointer;font-size:12px;font-weight:600;font-family:var(--f);white-space:nowrap;transition:all .15s;'
+          +(marcado ? 'background:'+cor+';border:1.5px solid '+cor+';color:#0a0f1a;' : 'background:var(--s2);border:1.5px solid var(--brd2);color:var(--mu);')+'">'
+          +'<span style="font-size:13px;">'+VOAR_PILAR_ICONS[p]+'</span>'+p
+          +(marcado ? ' <span class="chk-mark" style="font-size:11px;">✓</span>' : '')
+          +'</button>';
+      }).join('')
+      +'</div></div>';
   } else if (field === 'org') {
     var o = isEdit ? voar.organizacao.find(function(x){return x.id===editId;}) : null;
     if (!voar.visoes.length) {
       body = '<div style="font-size:12.5px;color:var(--warn);background:var(--s2);border-radius:var(--rs);padding:10px 12px;">⚠ Crie uma Visão antes — toda Estratégia precisa estar vinculada a uma.</div>';
     } else {
       body = '<div class="ig"><label>Vinculada à visão</label><select id="oVisaoId" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"><option value="">Selecione a visão</option>'+voar.visoes.map(function(v2){return '<option value="'+v2.id+'"'+(o&&o.visaoId===v2.id?' selected':'')+'>'+v2.texto.slice(0,60)+'</option>';}).join('')+'</select></div>'
-        +'<div class="ig"><label>Descrição da estratégia</label><input type="text" id="oDesc" value="'+(o?o.descricao:'')+'" placeholder="Ex: Quitar cartão de crédito" style="width:100%;"></div>'
-        +'<div class="ir c2">'
-        +'<div class="ig"><label>Ordem de importância (1 = mais importante)</label><input type="number" id="oPrio" min="1" max="20" value="'+(o?o.prioridade:1)+'" style="width:100%;"></div>'
-        +'<div class="ig"><label>% da renda (opcional)</label><input type="number" id="oPct" min="0" max="100" value="'+(o?o.pct||'':'')+'" placeholder="Ex: 30" style="width:100%;"></div>'
-        +'</div>';
+        +'<div class="ig"><label>Descrição da estratégia</label><input type="text" id="oDesc" value="'+(o?o.descricao:'')+'" placeholder="Ex: Quitar cartão de crédito" style="width:100%;"></div>';
     }
   } else if (field === 'acao') {
     var a = isEdit ? voar.acoes.find(function(x){return x.id===editId;}) : null;
     if (!voar.organizacao.length) {
       body = '<div style="font-size:12.5px;color:var(--warn);background:var(--s2);border-radius:var(--rs);padding:10px 12px;">⚠ Crie uma Organização antes — toda Ação precisa estar vinculada a uma Estratégia.</div>';
     } else {
+      var catOptgroups = VOAR_PILARES.map(function(p){
+        return '<optgroup label="'+VOAR_PILAR_ICONS[p]+' '+p+'">'+VOAR_SUBNIVEIS[p].map(function(sub){
+          return '<option'+(a&&a.categoria===sub?' selected':'')+'>'+sub+'</option>';
+        }).join('')+'</optgroup>';
+      }).join('');
+      var ehDinheiro = a && VOAR_SUBNIVEIS.Dinheiro.indexOf(a.categoria) >= 0;
       body = '<div class="ig"><label>Vinculada à organização</label><select id="aOrgId" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"><option value="">Selecione a estratégia</option>'+voar.organizacao.map(function(o2){return '<option value="'+o2.id+'"'+(a&&a.organizacaoId===o2.id?' selected':'')+'>'+o2.descricao.slice(0,60)+'</option>';}).join('')+'</select></div>'
         +'<div class="ig"><label>Descrição da meta</label><input type="text" id="aDesc" value="'+(a?a.descricao:'')+'" placeholder="Ex: Juntar para a reserva de emergência" style="width:100%;"></div>'
         +'<div class="ir c2">'
         +'<div class="ig"><label>Prazo</label><input type="text" id="aPrazo" value="'+(a?a.prazo||'':'')+'" placeholder="Ex: Dez/2026" style="width:100%;"></div>'
-        +'<div class="ig"><label>Categoria</label><select id="aCat" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"><option value="">Selecione</option>'+VOAR_ACAOCAT.map(function(t){return'<option'+(a&&a.categoria===t?' selected':'')+'>'+t+'</option>';}).join('')+'</select></div>'
+        +'<div class="ig"><label>Pilar / subnível</label><select id="aCat" onchange="onAcaoCatChange()" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;"><option value="">Selecione</option>'+catOptgroups+'</select></div>'
         +'</div>'
-        +'<div class="ir c2">'
-        +'<div class="ig"><label>Valor alvo em R$ (opcional)</label><input type="text" inputmode="decimal" id="aMeta" oninput="maskMoeda(this)" value="'+(a&&a.meta?fmt(a.meta):'')+'" placeholder="Deixe em branco se não for numérica" style="width:100%;"></div>'
+        +'<div class="ir c2" id="aValorWrap" style="display:'+(ehDinheiro?'grid':'none')+';">'
+        +'<div class="ig"><label>Valor alvo em R$ (opcional)</label><input type="text" inputmode="decimal" id="aMeta" oninput="maskMoeda(this)" value="'+(a&&a.meta?fmt(a.meta):'')+'" placeholder="R$ 0,00" style="width:100%;"></div>'
         +'<div class="ig"><label>Valor já alcançado (opcional)</label><input type="text" inputmode="decimal" id="aAtual" oninput="maskMoeda(this)" value="'+(a&&a.atual?fmt(a.atual):'')+'" placeholder="R$ 0,00" style="width:100%;"></div>'
         +'</div>';
     }
   } else if (field === 'realiz') {
     var r = isEdit ? voar.realizacoes.find(function(x){return x.id===editId;}) : null;
-    body = '<div class="ig"><label>Descreva o marco alcançado</label><input type="text" id="rDesc" value="'+(r?r.descricao:'')+'" placeholder="Ex: Primeiro mês sem dívida no cartão" style="width:100%;"></div>'
+    body = '<div class="ig"><label>Descreva a conquista</label><input type="text" id="rDesc" value="'+(r?r.descricao:'')+'" placeholder="Ex: Primeiro mês sem dívida no cartão" style="width:100%;"></div>'
       +'<div class="ir c2">'
       +'<div class="ig"><label>Data</label><input type="text" id="rData" value="'+(r?r.data||'':'')+'" placeholder="Ex: Julho 2026" style="width:100%;"></div>'
       +'<div class="ig"><label>Tipo</label><select id="rTipo" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:13px;outline:none;">'
@@ -7760,9 +7863,10 @@ function confirmVoar() {
     if (_voarField === 'visao') {
       var txt = (document.getElementById('vTxt')||{}).value||'';
       if (!txt.trim()) { document.getElementById('vTxt').style.borderColor='var(--red)'; alert('Descreva a visão antes de salvar.'); return; }
+      var tagsMarcadas = Array.from(document.querySelectorAll('.vPilarChip[data-selected="1"]')).map(function(c){return c.dataset.pilar;});
       var dadosVisao = { texto:txt.trim(),
         prazo:(document.getElementById('vPrazo')||{}).value||'',
-        tag:(document.getElementById('vTag')||{}).value||'' };
+        tags: tagsMarcadas };
       if (editId) {
         var viIdx = v.visoes.findIndex(function(x){return x.id===editId;});
         if (viIdx>=0) v.visoes[viIdx] = Object.assign({id:editId}, dadosVisao);
@@ -7774,9 +7878,7 @@ function confirmVoar() {
       if (!visaoIdSel) { var elVis=document.getElementById('oVisaoId'); if(elVis) elVis.style.borderColor='var(--red)'; alert('Toda Estratégia precisa estar vinculada a uma Visão.'); return; }
       var desc = (document.getElementById('oDesc')||{}).value||'';
       if (!desc.trim()) { document.getElementById('oDesc').style.borderColor='var(--red)'; alert('Descreva a estratégia antes de salvar.'); return; }
-      var dadosOrg = { descricao:desc.trim(), visaoId:visaoIdSel,
-        prioridade:parseInt((document.getElementById('oPrio')||{}).value)||99,
-        pct:(document.getElementById('oPct')||{}).value||'' };
+      var dadosOrg = { descricao:desc.trim(), visaoId:visaoIdSel };
       if (editId) {
         var oIdx = v.organizacao.findIndex(function(x){return x.id===editId;});
         if (oIdx>=0) v.organizacao[oIdx] = Object.assign({id:editId}, dadosOrg);
@@ -7788,14 +7890,18 @@ function confirmVoar() {
       if (!orgIdSel) { var elOrg=document.getElementById('aOrgId'); if(elOrg) elOrg.style.borderColor='var(--red)'; alert('Toda meta precisa estar vinculada a uma Organização.'); return; }
       var desc2 = (document.getElementById('aDesc')||{}).value||'';
       if (!desc2.trim()) { document.getElementById('aDesc').style.borderColor='var(--red)'; alert('Descreva a meta antes de salvar.'); return; }
-      var metaVal = parseMoeda((document.getElementById('aMeta')||{}).value||'') || 0;
-      var atualVal = parseMoeda((document.getElementById('aAtual')||{}).value||'') || 0;
-      var statusExistente = editId ? (v.acoes.find(function(x){return x.id===editId;})||{}).status : null;
-      var novoStatus = (metaVal>0 && atualVal>=metaVal) ? 'concluido'
-        : (statusExistente && statusExistente!=='pendente' ? statusExistente : (atualVal>0 ? 'andamento' : 'pendente'));
+      var catAcaoSel = (document.getElementById('aCat')||{}).value||'';
+      var ehDinheiroSel = (VOAR_SUBNIVEIS.Dinheiro||[]).indexOf(catAcaoSel) >= 0;
+      // Valor alvo/alcançado só existe pro pilar Dinheiro — as demais metas não são numéricas
+      var metaVal = ehDinheiroSel ? (parseMoeda((document.getElementById('aMeta')||{}).value||'') || 0) : 0;
+      var atualVal = ehDinheiroSel ? (parseMoeda((document.getElementById('aAtual')||{}).value||'') || 0) : 0;
+      var statusExistente = editId ? (v.acoes.find(function(x){return x.id===editId;})||{}).status : 'pendente';
+      // Preserva o status manual (concluído/pendente) — só força "concluído" se
+      // bateu a meta numérica; do contrário mantém o que já estava.
+      var novoStatus = (metaVal>0 && atualVal>=metaVal) ? 'concluido' : (statusExistente||'pendente');
       var dadosAcao = { descricao:desc2.trim(), organizacaoId:orgIdSel,
         prazo:(document.getElementById('aPrazo')||{}).value||'',
-        categoria:(document.getElementById('aCat')||{}).value||'',
+        categoria:catAcaoSel,
         meta: metaVal, atual: atualVal, status: novoStatus };
       if (editId) {
         var aIdx = v.acoes.findIndex(function(x){return x.id===editId;});
@@ -7805,7 +7911,7 @@ function confirmVoar() {
       }
     } else if (_voarField === 'realiz') {
       var desc3 = (document.getElementById('rDesc')||{}).value||'';
-      if (!desc3.trim()) { document.getElementById('rDesc').style.borderColor='var(--red)'; alert('Descreva o marco alcançado antes de salvar.'); return; }
+      if (!desc3.trim()) { document.getElementById('rDesc').style.borderColor='var(--red)'; alert('Descreva a conquista antes de salvar.'); return; }
       var dadosRealiz = { descricao:desc3.trim(),
         data:(document.getElementById('rData')||{}).value||'',
         tipo:(document.getElementById('rTipo')||{}).value||'conquista' };
@@ -7840,15 +7946,115 @@ function delVoar(field, id) {
   rVoar();
 }
 
-function avancarAcao(id) {
+// Os campos de valor (meta em R$) só fazem sentido pro pilar Dinheiro — as
+// demais metas (saúde, tempo, relacionamentos, legado) não são numéricas.
+// Alterna a seleção de um pilar (chip clicável) no formulário de Visão
+function toggleVPilarChip(btn) {
+  var cor = btn.dataset.cor;
+  var selecionado = btn.dataset.selected === '1';
+  var novoEstado = !selecionado;
+  btn.dataset.selected = novoEstado ? '1' : '0';
+  btn.style.background = novoEstado ? cor : 'var(--s2)';
+  btn.style.border = '1.5px solid ' + (novoEstado ? cor : 'var(--brd2)');
+  btn.style.color = novoEstado ? '#0a0f1a' : 'var(--mu)';
+  var check = btn.querySelector('.chk-mark');
+  if (novoEstado && !check) {
+    var span = document.createElement('span');
+    span.className = 'chk-mark';
+    span.style.fontSize = '11px';
+    span.textContent = ' ✓';
+    btn.appendChild(span);
+  } else if (!novoEstado && check) {
+    check.remove();
+  }
+}
+
+function onAcaoCatChange() {
+  var cat = (document.getElementById('aCat')||{}).value||'';
+  var wrap = document.getElementById('aValorWrap');
+  if (!wrap) return;
+  wrap.style.display = (VOAR_SUBNIVEIS.Dinheiro||[]).indexOf(cat) >= 0 ? 'grid' : 'none';
+}
+
+var _voarAcoesAtingidasAtual = [];
+// Abre um modal simples com o texto completo — usado quando a descrição da
+// Visão/Estratégia/Ação é longa demais pra caber no card (que trunca em 2 linhas).
+function mostrarTextoVoar(tipo, id) {
+  var user = getUser(CU.id);
+  var voar = user.voar || {};
+  var item, titulo;
+  if (tipo==='visao') { item = (voar.visoes||[]).find(function(x){return x.id===id;}); titulo = 'Visão'; }
+  else if (tipo==='org') { item = (voar.organizacao||[]).find(function(x){return x.id===id;}); titulo = 'Estratégia'; }
+  else if (tipo==='acao') { item = (voar.acoes||[]).find(function(x){return x.id===id;}); titulo = 'Meta'; }
+  if (!item) return;
+  var texto = tipo==='visao' ? item.texto : item.descricao;
+  document.getElementById('mTextoVoarTit').textContent = titulo;
+  document.getElementById('mTextoVoarBody').textContent = texto;
+  openModal('mTextoVoar');
+}
+
+function abrirAcoesAtingidas() {
+  var body = document.getElementById('mAcoesAtingidasBody');
+  if (!body) return;
+  var titEl = document.getElementById('mAcoesAtingidasTit');
+  if (titEl) titEl.textContent = 'Ações Atingidas';
+  if (!_voarAcoesAtingidasAtual.length) {
+    body.innerHTML = '<div class="empty"><div class="ei">🏅</div><p>Nenhuma ação atingida ainda.</p></div>';
+  } else {
+    body.innerHTML = _voarAcoesAtingidasAtual.slice().reverse().map(function(a){
+      var pilarDaAcao2 = null;
+      if (a.categoria) { for (var pk2 in VOAR_SUBNIVEIS) { if (VOAR_SUBNIVEIS[pk2].indexOf(a.categoria) >= 0) { pilarDaAcao2 = pk2; break; } } }
+      var cor2 = pilarDaAcao2 ? (VOAR_PILAR_COLORS[pilarDaAcao2]||'var(--mu)') : 'var(--mu)';
+      return '<div style="background:var(--s2);border:1px solid var(--brd);border-left:3px solid var(--green);border-radius:var(--rs);padding:9px 12px;">'
+        +'<div style="font-size:12.5px;font-weight:600;color:var(--tx);">🏅 '+a.descricao+'</div>'
+        +(a.categoria?'<span style="font-size:9.5px;font-weight:600;background:'+cor2+'22;color:'+cor2+';padding:2px 7px;border-radius:4px;margin-top:5px;display:inline-block;">'+(VOAR_PILAR_ICONS[pilarDaAcao2]||'')+' '+a.categoria+'</span>':'')
+        +'</div>';
+    }).join('');
+  }
+  openModal('mAcoesAtingidas');
+}
+
+var _voarVisoesAlcancadasAtual = [];
+function abrirVisoesAlcancadas() {
+  var body = document.getElementById('mAcoesAtingidasBody');
+  if (!body) return;
+  var titEl = document.getElementById('mAcoesAtingidasTit');
+  if (titEl) titEl.textContent = 'Visões Alcançadas';
+  if (!_voarVisoesAlcancadasAtual.length) {
+    body.innerHTML = '<div class="empty"><div class="ei">🏆</div><p>Nenhuma visão alcançada ainda.</p></div>';
+  } else {
+    body.innerHTML = _voarVisoesAlcancadasAtual.slice().reverse().map(function(vi){
+      var tags = vi.tags || (vi.tag ? [vi.tag] : []);
+      var badges = tags.map(function(t){
+        var c = VOAR_PILAR_COLORS[t]||'var(--mu)';
+        return '<span style="font-size:9.5px;font-weight:600;background:'+c+'22;color:'+c+';padding:2px 7px;border-radius:4px;margin-top:5px;margin-right:3px;display:inline-block;">'+(VOAR_PILAR_ICONS[t]||'')+' '+t+'</span>';
+      }).join('');
+      return '<div style="background:var(--s2);border:1px solid var(--brd);border-left:3px solid var(--green);border-radius:var(--rs);padding:9px 12px;word-break:break-word;overflow-wrap:anywhere;">'
+        +'<div style="font-size:12.5px;font-weight:600;color:var(--tx);">🏆 '+vi.texto+'</div>'
+        +badges
+        +'</div>';
+    }).join('');
+  }
+  openModal('mAcoesAtingidas');
+}
+
+// Marca/desmarca uma Visão como alcançada — conta no card "Visões Alcançadas"
+function toggleConcluirVisao(id) {
   var user = getUser(CU.id);
   if (!user.voar) return;
-  var flow = ['pendente','andamento','concluido'];
+  user.voar.visoes = user.voar.visoes.map(function(vi) {
+    if (vi.id === id) vi.concluida = !vi.concluida;
+    return vi;
+  });
+  saveUser(user); CU = getUser(user.id);
+  rVoar();
+}
+
+function toggleConcluirAcao(id) {
+  var user = getUser(CU.id);
+  if (!user.voar) return;
   user.voar.acoes = user.voar.acoes.map(function(a) {
-    if (a.id === id) {
-      var idx = flow.indexOf(a.status);
-      a.status = flow[Math.min(idx+1, flow.length-1)];
-    }
+    if (a.id === id) a.status = a.status==='concluido' ? 'pendente' : 'concluido';
     return a;
   });
   saveUser(user); CU = getUser(user.id);
