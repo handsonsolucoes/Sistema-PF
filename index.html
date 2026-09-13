@@ -705,6 +705,9 @@ button:disabled, input:disabled, select:disabled { opacity:.45;cursor:not-allowe
         </div>
       </div>
 
+      <!-- Alerta: retirada da reserva de emergência no mês -->
+      <div id="orcReservaBanner" style="display:none;align-items:flex-start;gap:12px;background:var(--red-dim);border:1px solid var(--red);border-radius:var(--r);padding:12px 16px;margin-bottom:14px;"></div>
+
       <!-- Cartões do mês -->
       <div class="cg" id="orcCards"></div>
 
@@ -797,7 +800,7 @@ button:disabled, input:disabled, select:disabled { opacity:.45;cursor:not-allowe
                   <span id="lblPrivacidadeLanc" style="font-size:11px;color:var(--mu);white-space:nowrap;"></span>
                 </div>
               </div>
-              <div style="display:flex;gap:6px;align-items:center;">
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                 <div class="toggle-pill" id="filtroTipoPill">
                   <button class="active" onclick="setFiltroTipo(this,'')">Todos</button>
                   <button onclick="setFiltroTipo(this,'Entrada')">Entradas</button>
@@ -806,9 +809,11 @@ button:disabled, input:disabled, select:disabled { opacity:.45;cursor:not-allowe
                   <button onclick="setFiltroTipo(this,'Transferência')">Transferências</button>
                 </div>
                 <input type="hidden" id="filtroTipo" value="">
+                <input type="text" id="lancBusca" oninput="rLanc()" placeholder="🔍 Buscar..." style="width:120px;padding:6px 10px;background:var(--s2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--tx);font-family:var(--f);font-size:11.5px;outline:none;">
                 <button class="btn bp bsm" onclick="_lancOrigemCtx=null;openLancModal()">+ Lançamento</button>
               </div>
             </div>
+            <div id="lancTotalResumo" style="font-size:11.5px;color:var(--mu);padding:0 2px 8px;"></div>
             <table class="tbl"><thead><tr>
               <th onclick="sortLanc('data')" style="cursor:pointer;user-select:none;" id="thData">Data <span id="shData"></span></th>
               <th onclick="sortLanc('desc')" style="cursor:pointer;user-select:none;" id="thDesc">Descrição <span id="shDesc"></span></th>
@@ -2302,6 +2307,28 @@ function calcInvestidoMes(user, m, y) {
   return byMonth(user, m, y).filter(isRealizado).reduce(function(s,l){ return s + _investFlow(l, investNames); }, 0);
 }
 
+// Total BRUTO que entrou em investimentos no mês, sem descontar o que saiu —
+// usado ao lado de "quanto veio da reserva" pra explicar a composição do
+// valor líquido mostrado no card "Investido no Mês".
+function calcAlocadoMes(user, m, y) {
+  var investNames = (user.investimentos||[]).map(function(i){return i.nome;});
+  return byMonth(user, m, y).filter(isRealizado).reduce(function(s,l){
+    var flow = _investFlow(l, investNames);
+    return flow > 0 ? s + flow : s;
+  }, 0);
+}
+
+// Quanto saiu especificamente de investimentos marcados como "reserva de
+// emergência" no mês — não importa se foi pra uma conta ou pra fora do sistema,
+// o que importa aqui é "quanto da rede de segurança foi consumido".
+function calcRetiradaReservaMes(user, m, y) {
+  var reservaIds = (user.investimentos||[]).filter(function(i){ return i.reserva; }).map(function(i){ return i.id; });
+  if (!reservaIds.length) return 0;
+  return byMonth(user, m, y).filter(isRealizado).filter(function(l){
+    return l.tipo==='Transferência' && l.origemTipo==='invest' && reservaIds.indexOf(l.origemRef) >= 0;
+  }).reduce(function(s,l){ return s + l.valor; }, 0);
+}
+
 // ══════════════════════════════════════════════════════
 // SALDO CONTA
 // ══════════════════════════════════════════════════════
@@ -2473,6 +2500,7 @@ function rOrcCards(user) {
   var orc = user.orcamento[OM] || {};
   var invPlanejado = orc.invMode==='pct' ? (orc.renda||0)*(orc.invPct||0)/100 : (orc.invVal||0);
   var investido = calcInvestidoMes(user, OM, OY);
+  var retiradaReserva = calcRetiradaReservaMes(user, OM, OY);
 
   // Saldo do Mês usa a MESMA fórmula configurável do gráfico "Saldo do Mês" (Visão Anual)
   var f = _gSaldoFormula;
@@ -2489,6 +2517,26 @@ function rOrcCards(user) {
     return qtd + ' lançamento' + (qtd===1?'':'s');
   }
 
+  // Banner de alerta: se tirou da reserva esse mês, deixa isso bem claro — principal
+  // pra quem está no vermelho enxergar que a "sobrevivência" do mês veio da reserva.
+  var bannerEl = document.getElementById('orcReservaBanner');
+  if (bannerEl) {
+    if (retiradaReserva > 0) {
+      var noVermelho = saldoFormula < 0;
+      bannerEl.style.display = 'flex';
+      bannerEl.innerHTML =
+        '<div style="font-size:20px;">'+(noVermelho?'🆘':'⚠️')+'</div>'
+        +'<div style="flex:1;">'
+        +'<div style="font-weight:700;color:var(--red);font-size:13px;">'+fmt(retiradaReserva)+' saíram da sua reserva de emergência este mês</div>'
+        +'<div style="font-size:12px;color:var(--mu);margin-top:2px;">'+(noVermelho
+          ? 'Suas despesas ficaram maiores que sua receita — a reserva cobriu a diferença.'
+          : 'Mesmo com o mês positivo, parte dele veio da reserva, não de receita nova.')
+        +'</div></div>';
+    } else {
+      bannerEl.style.display = 'none';
+    }
+  }
+
   var el = document.getElementById('orcCards');
   if (!el) return;
   el.innerHTML =
@@ -2496,9 +2544,10 @@ function rOrcCards(user) {
    +'<div class="card"><div class="cl">Despesas</div><div class="cv r">'+fmt(desp)+'</div><div class="csub">'+sub(real.filter(function(l){return l.tipo==='Saída';}).length, despPrev)+'</div></div>'
    +(function(){
       var pctGuardado = invPlanejado > 0 ? (investido / invPlanejado * 100) : 0;
+      var subtitulo = investido!==0 ? pctGuardado.toFixed(1)+'% do planejado' : 'nenhuma transferência ainda';
       return '<div class="card"><div class="cl">Investido no Mês</div>'
         +'<div class="cv" style="color:'+(investido<0?'var(--red)':'var(--gold)')+'">'+fmt(investido)+'</div>'
-        +'<div class="csub">'+(investido!==0?pctGuardado.toFixed(1)+'% do planejado':'nenhuma transferência ainda')+'</div></div>';
+        +'<div class="csub">'+subtitulo+'</div></div>';
     })()
    +'<div class="card"><div class="cl">Rendimentos</div><div class="cv" style="color:var(--blue)">'+fmt(rend)+'</div><div class="csub">'+sub(real.filter(function(l){return l.tipo==='Rendimento';}).length, rendPrev)+'</div></div>'
    +'<div class="card" id="gSaldoFormulaWrapCardOrc" style="position:relative;">'
@@ -3136,10 +3185,44 @@ function rLanc(user) {
   var filtroEl = document.getElementById('filtroTipo');
   var f = filtroEl ? filtroEl.value : '';
   var fl = f ? lancs.filter(function(l){ return l.tipo===f; }) : lancs;
+
+  // Busca por texto — procura em descrição, categoria, conta e tipo
+  var buscaEl = document.getElementById('lancBusca');
+  var busca = buscaEl ? buscaEl.value.trim().toLowerCase() : '';
+  if (busca) {
+    fl = fl.filter(function(l){
+      var contaTxt = l.tipo==='Transferência'
+        ? (_resolveEntityName(user, l.origemTipo, l.origemRef)+' '+_resolveEntityName(user, l.destTipo, l.destRef))
+        : _resolveContaDisplay(user, l);
+      var texto = ((l.desc||'')+' '+(l.cat||'')+' '+contaTxt+' '+(l.tipo||'')+' '+(l.obs||'')).toLowerCase();
+      return texto.indexOf(busca) >= 0;
+    });
+  }
+
+  // Total: respeita o filtro de tipo + a busca. Com um tipo específico selecionado,
+  // soma tudo (mesma direção). Em "Todos", mostra o líquido (Entradas + Rendimentos
+  // − Saídas), já que Transferência é só dinheiro mudando de lugar dentro do sistema.
+  var resumoEl = document.getElementById('lancTotalResumo');
+  if (resumoEl) {
+    if (!fl.length) {
+      resumoEl.textContent = '';
+    } else if (f) {
+      var totalTipo = fl.reduce(function(s,l){ return s+l.valor; }, 0);
+      resumoEl.textContent = fl.length+' lançamento'+(fl.length===1?'':'s')+' · Total: '+fmt(totalTipo);
+    } else {
+      var totalLiquido = fl.reduce(function(s,l){
+        if (l.tipo==='Saída') return s - l.valor;
+        if (l.tipo==='Transferência') return s;
+        return s + l.valor;
+      }, 0);
+      resumoEl.textContent = fl.length+' lançamento'+(fl.length===1?'':'s')+' · Líquido: '+fmt(totalLiquido);
+    }
+  }
+
   var tb = document.getElementById('lancTb');
   if (!tb) return;
   if (!fl.length) {
-    tb.innerHTML = '<tr><td colspan="8"><div class="empty" style="padding:20px 0"><div class="ei">📂</div><p>Nenhum lançamento em '+MN[OM]+'</p></div></td></tr>';
+    tb.innerHTML = '<tr><td colspan="8"><div class="empty" style="padding:20px 0"><div class="ei">📂</div><p>'+(busca?'Nenhum lançamento encontrado para "'+busca+'"':'Nenhum lançamento em '+MN[OM])+'</p></div></td></tr>';
     return;
   }
   fl.sort(function(a,b) {
