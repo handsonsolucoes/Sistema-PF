@@ -5514,7 +5514,7 @@ function rAloc() {
       '<div class="card"><div class="cl">Contas</div><div class="cv" style="color:var(--green)">'+fmt(totalContas)+'</div><div class="csub">'+contas.length+' conta'+(contas.length===1?'':'s')+'</div></div>'
      +'<div class="card"><div class="cl">Projetos</div><div class="cv" style="color:var(--blue)">'+fmt(totalProjetos)+'</div><div class="csub">'+(user.projetos||[]).length+' projeto'+(((user.projetos||[]).length)===1?'':'s')+'</div></div>'
      +'<div class="card"><div class="cl">Investimentos</div><div class="cv" style="color:var(--gold)">'+fmt(totalInvest)+'</div><div class="csub">carteira de investimentos</div></div>'
-     +'<div class="card"><div class="cl">Bens Líquidos</div><div class="cv '+(totalImob>=0?'g':'r')+'">'+fmt(totalImob)+'</div><div class="csub">Bens − Dívidas</div></div>';
+     +'<div class="card"><div class="cl">Bens Líquidos</div><div class="cv" style="color:var(--purp);">'+fmt(totalImob)+'</div><div class="csub">Bens − Dívidas</div></div>';
   }
 
 
@@ -6413,22 +6413,22 @@ function rFuturo() {
     +'<div style="height:1px;flex:1;background:var(--brd2);"></div>'
     +'</div>'
     +'<div class="kpi-card '+(metaOk?'saldo-pos':'saldo-neg')+'">'
-    +'<div class="kpi-label">🎯 Patrimônio Ideal</div>'
+    +'<div class="kpi-label">Patrimônio Ideal</div>'
     +'<div class="kpi-val '+(metaOk?'b':'r')+'">R$ '+Math.round(C).toLocaleString('pt-BR')+'</div>'
     +'<div class="kpi-sub">Capital para aposentar aos '+retAge+'a e viver até os '+vidaAge+'a</div>'
     +'</div>'
     +'<div class="kpi-card rec">'
-    +'<div class="kpi-label">💸 Renda Desejada</div>'
+    +'<div class="kpi-label">Renda Desejada</div>'
     +'<div class="kpi-val g">'+fmt(rendaLiq)+'<span style="font-size:9px;opacity:.6;">/mês</span></div>'
     +'<div class="kpi-sub">'+(outras>0?'Renda bruta '+fmt(renda)+' — outras fontes '+fmt(outras):'Renda líquida mensal na aposentadoria')+'</div>'
     +'</div>'
     +'<div class="kpi-card inv">'
-    +'<div class="kpi-label">🗓 Aposentadoria Planejada</div>'
+    +'<div class="kpi-label">Aposentadoria Planejada</div>'
     +'<div class="kpi-val b">'+retAge+' anos</div>'
     +'<div class="kpi-sub">Em '+anosAteRet+' anos · em '+anoRet+' · '+( vidaAge-retAge)+' anos de aposentadoria</div>'
     +'</div>'
     +'<div class="kpi-card '+(invMensal>=invNecessario?'rec':'saldo-neg')+'">'
-    +'<div class="kpi-label">💰 Aporte Necessário</div>'
+    +'<div class="kpi-label">Aporte Necessário</div>'
     +'<div class="kpi-val '+(invMensal>=invNecessario?'g':'r')+'">R$ '+Math.round(invNecessario).toLocaleString('pt-BR')+'<span style="font-size:9px;opacity:.6;">/mês</span></div>'
     +'<div class="kpi-sub">'+(invMensal>=invNecessario?'✓ Aporte atual R$ '+Math.round(invMensal).toLocaleString('pt-BR')+' já é suficiente':'Você investe R$ '+Math.round(invMensal).toLocaleString('pt-BR')+' — falta R$ '+Math.round(invNecessario-invMensal).toLocaleString('pt-BR'))+'</div>'
     +'</div>'
@@ -6438,22 +6438,22 @@ function rFuturo() {
     +'<div style="height:1px;flex:1;background:var(--brd2);"></div>'
     +'</div>'
     +'<div class="kpi-card '+(patrimonioNaRet>=C?'rec':'desp')+'">'
-    +'<div class="kpi-label">📈 Patrimônio Projetado</div>'
+    +'<div class="kpi-label">Patrimônio Projetado</div>'
     +'<div class="kpi-val '+(patrimonioNaRet>=C?'g':'r')+'">R$ '+Math.round(patrimonioNaRet).toLocaleString('pt-BR')+'</div>'
     +'<div class="kpi-sub">Estimado aos '+retAge+'a — '+(gap>0?'falta R$ '+Math.round(gap).toLocaleString('pt-BR')+' para o ideal':'✓ supera o patrimônio ideal')+'</div>'
     +'</div>'
     +'<div class="kpi-card '+(rendaPossivel>=rendaLiq?'rec':'desp')+'">'
-    +'<div class="kpi-label">💸 Renda Possível</div>'
+    +'<div class="kpi-label">Renda Possível</div>'
     +'<div class="kpi-val '+(rendaPossivel>=rendaLiq?'g':'r')+'">'+fmt(Math.round(rendaPossivel))+'<span style="font-size:9px;opacity:.6;">/mês</span></div>'
     +'<div class="kpi-sub">'+(rendaPossivel>=rendaLiq?'✓ supera a renda desejada':'Renda desejada '+fmt(rendaLiq)+' — falta '+fmt(Math.round(Math.max(0,rendaLiq-rendaPossivel))))+'</div>'
     +'</div>'
     +'<div class="kpi-card '+(idadePossivel!==null&&idadePossivel<=retAge?'rec':'inv')+'">'
-    +'<div class="kpi-label">🗓 Aposentadoria Possível</div>'
+    +'<div class="kpi-label">Aposentadoria Possível</div>'
     +'<div class="kpi-val '+(idadePossivel!==null&&idadePossivel<=retAge?'g':'b')+'">'+(idadePossivel!==null?idadePossivel+' anos':'Inviável')+'</div>'
     +'<div class="kpi-sub">'+(idadePossivel!==null?(idadePossivel<=retAge?'✓ dentro do planejado':(idadePossivel-retAge)+' anos além do planejado'):'Aumente o aporte para viabilizar')+'</div>'
     +'</div>'
     +'<div class="kpi-card '+(sustentaParaSempre?'rec':acabaAge?'saldo-neg':'inv')+'">'
-    +'<div class="kpi-label">⏳ Patrimônio Sustenta</div>'
+    +'<div class="kpi-label">Patrimônio Sustenta</div>'
     +'<div class="kpi-val '+(sustentaParaSempre?'g':acabaAge?'r':'b')+'">'+(sustentaParaSempre?'Para sempre ∞':acabaAge?'até os '+acabaAge+' anos':'além dos '+vidaAge+' anos')+'</div>'
     +'<div class="kpi-sub">'+(sustentaParaSempre?'Rendimento mensal cobre o saque':acabaAge?'⚠ Esgota '+(acabaAge-retAge)+' anos após aposentar':'✓ Dura além da expectativa configurada')+'</div>'
     +'</div>';
@@ -9006,67 +9006,66 @@ function populateLancProjeto(tipo) {
   .telos-sicon-enhanced {
     display:flex !important;
     align-items:center;
-    gap:7px;
+    gap:6px;
   }
+  /* Sem caixa/fundo colorido — só o traço do ícone, no mesmo estilo
+     enxuto usado nos ícones do menu lateral do sistema. */
   .telos-sicon {
-    width:22px;
-    height:22px;
-    min-width:22px;
-    border-radius:6px;
+    width:15px;
+    height:15px;
+    min-width:15px;
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    flex:0 0 22px;
-    border:1px solid var(--brd);
-    background:var(--s3);
-    color:var(--gold);
+    flex:0 0 15px;
+    color:var(--mu);
     vertical-align:middle;
+    opacity:.85;
   }
   .telos-sicon svg {
-    width:13px;
-    height:13px;
+    width:15px;
+    height:15px;
     display:block;
     fill:none;
     stroke:currentColor;
-    stroke-width:1.9;
+    stroke-width:2;
     stroke-linecap:round;
     stroke-linejoin:round;
   }
-  .telos-sicon-income { color:var(--green); background:var(--green-dim); border-color:rgba(52,211,153,.14); }
-  .telos-sicon-expense { color:var(--red); background:var(--red-dim); border-color:rgba(251,113,133,.14); }
-  .telos-sicon-invest { color:var(--warn); background:var(--warn-dim); border-color:rgba(251,191,36,.14); }
-  .telos-sicon-yield { color:var(--blue); background:var(--blue-dim); border-color:rgba(96,165,250,.14); }
-  .telos-sicon-balance { color:var(--gold); background:var(--gold-lt); border-color:rgba(212,160,60,.16); }
-  .telos-sicon-chart { color:var(--gold); background:var(--gold-lt); border-color:rgba(212,160,60,.16); }
-  .telos-sicon-pie { color:var(--purp); background:var(--purp-dim); border-color:rgba(167,139,250,.14); }
-  .telos-sicon-bank { color:var(--blue); background:var(--blue-dim); border-color:rgba(96,165,250,.14); }
-  .telos-sicon-list { color:var(--gold); background:var(--gold-lt); border-color:rgba(212,160,60,.16); }
-  .telos-sicon-target { color:var(--green); background:var(--green-dim); border-color:rgba(52,211,153,.14); }
-  .telos-sicon-folder { color:var(--warn); background:var(--warn-dim); border-color:rgba(251,191,36,.14); }
-  .telos-sicon-home { color:var(--purp); background:var(--purp-dim); border-color:rgba(167,139,250,.14); }
-  .telos-sicon-detail { color:var(--tx2); background:var(--s3); border-color:var(--brd2); }
+  .telos-sicon-income { color:var(--green); }
+  .telos-sicon-expense { color:var(--red); }
+  .telos-sicon-invest { color:var(--warn); }
+  .telos-sicon-yield { color:var(--blue); }
+  .telos-sicon-balance { color:var(--gold); }
+  .telos-sicon-balance-neg { color:var(--red); }
+  .telos-sicon-chart { color:var(--gold); }
+  .telos-sicon-pie { color:var(--purp); }
+  .telos-sicon-bank { color:var(--blue); }
+  .telos-sicon-list { color:var(--gold); }
+  .telos-sicon-target { color:var(--green); }
+  .telos-sicon-folder { color:var(--warn); }
+  .telos-sicon-home { color:var(--purp); }
+  .telos-sicon-detail { color:var(--tx2); }
+  /* Cores específicas dos 4 títulos de Meu Patrimônio, alinhadas com a
+     cor do card-resumo correspondente (Contas/Projetos/Investimentos). */
+  .telos-sicon-patrim-contas { color:var(--green); }
+  .telos-sicon-patrim-projetos { color:var(--blue); }
+  .telos-sicon-patrim-invest { color:var(--gold); }
+  .telos-sicon-patrim-bens { color:var(--purp); }
 
-  /* Títulos de seção ficam discretos; cards mantêm mais presença visual. */
   .st > .telos-sicon,
   .chart-title > .telos-sicon,
   .dash-chart-title > .telos-sicon {
-    width:24px;
-    height:24px;
-    min-width:24px;
-    flex-basis:24px;
-    border-radius:7px;
+    width:16px;
+    height:16px;
+    min-width:16px;
+    flex-basis:16px;
   }
   .st > .telos-sicon svg,
   .chart-title > .telos-sicon svg,
   .dash-chart-title > .telos-sicon svg {
-    width:14px;
-    height:14px;
-  }
-
-  /* Preserva o comportamento visual original no responsivo. */
-  @media (max-width:480px) {
-    .telos-sicon { width:20px;height:20px;min-width:20px;flex-basis:20px;border-radius:6px; }
-    .telos-sicon svg { width:12px;height:12px; }
+    width:16px;
+    height:16px;
   }
 </style>
 <script id="telosStrategicIconsScript">
@@ -9086,7 +9085,15 @@ function populateLancProjeto(tipo) {
     target: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M15 9l6-6"/><path d="M17 3h4v4"/></svg>',
     folder: '<svg viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></svg>',
     home: '<svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>',
-    detail: '<svg viewBox="0 0 24 24"><path d="M8 6h12"/><path d="M8 12h12"/><path d="M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>'
+    detail: '<svg viewBox="0 0 24 24"><path d="M8 6h12"/><path d="M8 12h12"/><path d="M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    'balance-neg': '<svg viewBox="0 0 24 24"><path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M3 7V5a2 2 0 0 1 2-2h12"/><path d="M16 12h5"/><circle cx="16" cy="12" r="1"/></svg>',
+    'patrim-contas': '<svg viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>',
+    'patrim-projetos': '<svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
+    'patrim-invest': '<svg viewBox="0 0 24 24"><path d="M4 18V10"/><path d="M10 18V6"/><path d="M16 18V3"/><path d="M3 21h18"/></svg>',
+    'patrim-bens': '<svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
+    contribution: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
+    endurance: '<svg viewBox="0 0 24 24"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>'
   };
 
   function cleanText(value){
@@ -9098,22 +9105,61 @@ function populateLancProjeto(tipo) {
       .trim();
   }
 
-  function iconTypeFor(text){
+  function iconTypeFor(text, el){
     var t = cleanText(text);
     if (!t) return null;
+
+    // Títulos "Contas / Projetos / Investimentos / Bens" de Meu Patrimônio e
+    // os cards-resumo do topo da mesma tela (#alocCards): ícone e cor
+    // dedicados, alinhados ao card correspondente.
+    if (el && ((el.classList && el.classList.contains('patrim-sec-title')) || (el.closest && el.closest('#alocCards')))) {
+      if (t === 'contas') return 'patrim-contas';
+      if (t.indexOf('projeto') !== -1) return 'patrim-projetos';
+      if (t.indexOf('invest') !== -1) return 'patrim-invest';
+      if (t.indexOf('bens') !== -1) return 'patrim-bens';
+    }
 
     if (t.indexOf('receita') !== -1 || t.indexOf('entrada') !== -1) return 'income';
     if (t.indexOf('despesa') !== -1 || t.indexOf('gasto') !== -1 || t.indexOf('saida') !== -1) return 'expense';
     if (t.indexOf('rendimento') !== -1) return 'yield';
     if (t.indexOf('invest') !== -1 || t.indexOf('guardado') !== -1 || t.indexOf('poupanca') !== -1) return 'invest';
-    if (t.indexOf('saldo') !== -1 && t.indexOf('conta') === -1) return 'balance';
+    if (t.indexOf('saldo') !== -1 && t.indexOf('conta') === -1) {
+      // Acompanha a cor do próprio card (dourado quando positivo, vermelho
+      // quando negativo) em vez de ficar sempre dourado.
+      var kc = el && el.closest ? el.closest('.kpi-card') : null;
+      if (kc && kc.classList.contains('saldo-neg')) return 'balance-neg';
+      return 'balance';
+    }
     if (t.indexOf('conta bancaria') !== -1 || t.indexOf('saldo das contas') !== -1 || t === 'contas') return 'bank';
     if (t.indexOf('cockpit') !== -1 || t.indexOf('categoria') !== -1 || t.indexOf('composicao') !== -1) return 'pie';
     if (t.indexOf('lancamento') !== -1 || t.indexOf('detalhamento') !== -1) return 'list';
     if (t.indexOf('independencia') !== -1 || t.indexOf('meta') !== -1) return 'target';
+    if (t.indexOf('sustenta') !== -1) return 'endurance';
+    if (t.indexOf('patrimonio ideal') !== -1) return 'target';
     if (t.indexOf('patrimonio') !== -1 || t.indexOf('evolucao') !== -1 || t.indexOf('visao') !== -1 || t.indexOf('mensais') !== -1 || t.indexOf('mes a mes') !== -1) return 'chart';
-    if (t.indexOf('projeto') !== -1) return 'folder';
+    if (t.indexOf('projeto') !== -1) return 'patrim-projetos';
     if (t.indexOf('bens') !== -1 || t.indexOf('imovel') !== -1) return 'home';
+    if (t.indexOf('aposentadoria') !== -1) return 'calendar';
+    if (t.indexOf('aporte') !== -1) return 'contribution';
+    if (t.indexOf('renda') !== -1) return 'yield';
+    return null;
+  }
+
+  // Lê a cor real do valor do card (.cv/.kpi-val) pra garantir que o ícone
+  // NUNCA fique de cor diferente do próprio card, não importa a página.
+  function colorOverrideFor(el){
+    var cardEl = el.closest ? el.closest('.card, .kpi-card') : null;
+    if (!cardEl) return null;
+    var valEl = cardEl.querySelector('.cv, .kpi-val');
+    if (!valEl) return null;
+    if (valEl.style && valEl.style.color) return valEl.style.color;
+    var cl = valEl.classList;
+    if (cl.contains('g')) return 'var(--green)';
+    if (cl.contains('r')) return 'var(--red)';
+    if (cl.contains('bl')) return 'var(--blue)';
+    if (cl.contains('p')) return 'var(--purp)';
+    if (cl.contains('y')) return 'var(--warn)';
+    if (cl.contains('b')) return 'var(--gold)';
     return null;
   }
 
@@ -9128,9 +9174,9 @@ function populateLancProjeto(tipo) {
       }
     }
 
-    // Áreas sem ícone: página Independência Financeira, cards de
-    // "Evolução do Valor Guardado" (Visão Anual) e cards de "Bens" (Meu Patrimônio).
-    if (el.closest && el.closest('#page-futuro, #gGuardadoCards, #patrimKpis')) {
+    // Áreas sem ícone: cards de "Evolução do Valor Guardado" (Visão Anual)
+    // e cards de "Bens" (Meu Patrimônio).
+    if (el.closest && el.closest('#gGuardadoCards, #patrimKpis')) {
       if (ownIcon) ownIcon.remove();
       el.classList.remove('telos-sicon-enhanced');
       delete el.dataset.telosIconType;
@@ -9138,7 +9184,7 @@ function populateLancProjeto(tipo) {
     }
 
     var text = el.textContent || '';
-    var type = iconTypeFor(text);
+    var type = iconTypeFor(text, el);
 
     if (!type) {
       if (ownIcon) ownIcon.remove();
@@ -9147,13 +9193,18 @@ function populateLancProjeto(tipo) {
       return;
     }
 
-    if (ownIcon && el.dataset.telosIconType === type) return;
+    if (ownIcon && el.dataset.telosIconType === type) {
+      ownIcon.style.color = colorOverrideFor(el) || '';
+      return;
+    }
     if (ownIcon) ownIcon.remove();
 
     var wrap = document.createElement('span');
     wrap.className = 'telos-sicon telos-sicon-' + type;
     wrap.setAttribute('aria-hidden','true');
     wrap.innerHTML = ICONS[type] || ICONS.detail;
+    var override = colorOverrideFor(el);
+    if (override) wrap.style.color = override;
     el.insertBefore(wrap, el.firstChild);
     el.classList.add('telos-sicon-enhanced');
     el.dataset.telosIconType = type;
